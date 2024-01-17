@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func reader(conn net.Conn) {
+func reader(conn net.Conn) {	
 	for {
 		buffer := make([]byte, 1024)
 		_, err := conn.Read(buffer)
