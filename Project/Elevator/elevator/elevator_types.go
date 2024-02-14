@@ -9,25 +9,28 @@ type ElevatorBehaviour int
 
 // Declare states using iota
 const (
-	EB_Idle ElevatorBehaviour = iota
-	EB_DoorOpen
-	EB_Moving
+	EBIdle ElevatorBehaviour = iota
+	EBDoorOpen
+	EBMoving
 )
 
+// Define ClearRequestVarient as a custom type
 type ClearRequestVarient int
 
+// Declare states using iota
 const (
-	CRV_All ClearRequestVarient = iota
-	CRV_InDirn
+	CRVAll ClearRequestVarient = iota
+	CRVInDirn
 )
 
 // Elevator struct to represent the state machine
 type Elevator struct {
-	CurrentFloor     int
-	RequestedFloor   int
+	CurrentFloor int
+	Requests [N_FLOORS][N_BUTTONS]int
 	CurrentBehaviour ElevatorBehaviour
-}
 
-func main {
-
+	Config struct {
+        ClearRequestVariant ClearRequestVariant
+        DoorOpenDurationS   float64
+    }
 }
