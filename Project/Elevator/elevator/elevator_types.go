@@ -1,7 +1,7 @@
-package main
+package elevator
 
 import (
-
+	"heislab/Elevator/elevator_io"
 )
 
 // Define ElevatorBehaviour as a custom type
@@ -25,12 +25,12 @@ const (
 
 // Elevator struct to represent the state machine
 type Elevator struct {
-	CurrentFloor int
-	Requests [N_FLOORS][N_BUTTONS]int
+	CurrentFloor     int
+	Requests         [elevator_io.NFloors][elevator_io.NButtons]int
 	CurrentBehaviour ElevatorBehaviour
 
 	Config struct {
-        ClearRequestVariant ClearRequestVariant
-        DoorOpenDurationS   float64
-    }
+		ClearRequestVariant ClearRequestVariant
+		DoorOpenDurationS   float64
+	}
 }

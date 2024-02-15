@@ -1,8 +1,8 @@
-package main
+package elevator
 
 // Constants for the configuration
 const (
-    ClearRequestVariantConfig = CV_InDirn
-    DoorOpenDurationS         = 3.0  // Seconds
-    InputPollRateMs           = 25   // Milliseconds
+	ClearRequestVariantConfig = CRVInDirn
+	DoorOpenDurationSConfig   = 3.0 // Seconds
+	InputPollRateMsConfig     = 25  // Milliseconds
 )
