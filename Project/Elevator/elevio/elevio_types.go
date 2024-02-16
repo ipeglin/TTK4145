@@ -1,14 +1,16 @@
 package elevio
 
 const (
-	NFloors  = 4
-	NButtons = 3
+	NFloors  int = 4
+	NButtons int = 3
 )
 
-type Dirn int
+const Addr string = "localhost:15657"
+
+type ElevDir int
 
 const (
-	DirDown Dirn = iota - 1
+	DirDown ElevDir = iota - 1
 	DirStop
 	DirUp
 )
@@ -24,9 +26,9 @@ const (
 // ElevInputDevice defines the interface for elevator input devices.
 type ElevInputDevice struct {
 	FloorSensor   func() int
-	RequestButton func(floor int, b Button) int
-	StopButton    func() int
-	Obstruction   func() int
+	RequestButton func(floor int, b Button) bool
+	StopButton    func() bool
+	Obstruction   func() bool
 }
 
 // ElevOutputDevice defines the interface for elevator output devices.
@@ -35,5 +37,5 @@ type ElevOutputDevice struct {
 	RequestButtonLight func(floor int, b Button, on int)
 	DoorLight          func(on int)
 	StopButtonLight    func(on int)
-	MotorDirection     func(d Dirn)
+	MotorDirection     func(d ElevDir)
 }

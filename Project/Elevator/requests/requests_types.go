@@ -2,10 +2,10 @@ package requests
 
 import (
 	"heislab/Elevator/elevator"
-	"heislab/Elevator/elevator_io"
+	"heislab/Elevator/elevio"
 )
 
 type DirnBehaviourPair struct {
-	dirn      elevator_io.Dirn
+	dirn      elevio.ElevDir
 	behaviour elevator.ElevatorBehaviour
 }

@@ -26,11 +26,12 @@ const (
 // Elevator struct to represent the state machine
 type Elevator struct {
 	CurrentFloor     int
-	Requests         [elevio.NFloors][elevio.NButtons]int
+	Dirn             elevio.ElevDir
+	Requests         [elevio.NFloors][elevio.NButtons]bool
 	CurrentBehaviour ElevatorBehaviour
 
 	Config struct {
-		ClearRequestVariant ClearRequestVariant
+		ClearRequestVariant ClearRequestVarient
 		DoorOpenDurationS   float64
 	}
 }
