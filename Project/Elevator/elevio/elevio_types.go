@@ -26,16 +26,16 @@ const (
 // ElevInputDevice defines the interface for elevator input devices.
 type ElevInputDevice struct {
 	FloorSensor   func() int
-	RequestButton func(floor int, b Button) bool
+	RequestButton func(f int, b Button) bool
 	StopButton    func() bool
 	Obstruction   func() bool
 }
 
 // ElevOutputDevice defines the interface for elevator output devices.
 type ElevOutputDevice struct {
-	FloorIndicator     func(floor int)
-	RequestButtonLight func(floor int, b Button, on int)
-	DoorLight          func(on int)
-	StopButtonLight    func(on int)
+	FloorIndicator     func(f int)
+	RequestButtonLight func(f int, b Button, v bool)
+	DoorLight          func(v bool)
+	StopButtonLight    func(v bool)
 	MotorDirection     func(d ElevDir)
 }

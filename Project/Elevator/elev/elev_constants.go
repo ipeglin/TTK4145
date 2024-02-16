@@ -1,4 +1,4 @@
-package elevator
+package elev
 
 // Constants for the configuration
 const (

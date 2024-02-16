@@ -1,4 +1,4 @@
-package elevator
+package elev
 
 func ElevatorInit() Elevator {
 	return Elevator{

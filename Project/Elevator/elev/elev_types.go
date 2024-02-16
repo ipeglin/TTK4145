@@ -1,4 +1,4 @@
-package elevator
+package elev
 
 import (
 	"heislab/Elevator/elevio"
