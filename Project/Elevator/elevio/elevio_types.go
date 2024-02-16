@@ -1,4 +1,4 @@
-package elevator_io
+package elevio
 
 const (
 	NFloors  = 4
