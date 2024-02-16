@@ -1,6 +1,6 @@
 package elevator
 
-func elevator_init() Elevator {
+func ElevatorInit() Elevator {
 	return Elevator{
 		CurrentFloor:     -1,
 		CurrentBehaviour: EBIdle,
