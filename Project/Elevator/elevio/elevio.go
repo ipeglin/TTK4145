@@ -24,35 +24,20 @@ func castElevDirToMotorDirection(d ElevDir) hwelevio.MotorDirection {
 	}
 }
 
-// Trenger nok ne bedre løsning her
-func castIntToBtnType(btn_int int) hwelevio.ButtonType {
-	switch btn_int {
-	case 0:
-		return hwelevio.BT_HallDown
-	case 1:
-		return hwelevio.BT_HallUp
-	case 2:
-		return hwelevio.BT_Cab
-	default:
-		//IDK
-		fmt.Printf("Noe har gått feil i CastBtnType")
-		return hwelevio.BT_Cab //Dette er ikke pent
-	}
-}
-
 // New name?
-func RequestButton(f int, btn_int int) bool {
+func RequestButton(f int, btn hwelevio.Button) bool {
 	// Implementation using the actual hardware library.
-	return hwelevio.GetButton(castIntToBtnType(btn_int), f)
+	return hwelevio.GetButton(btn, f)
 }
 
-func RequestButtonLight(f int, btn_int int, v bool) {
+func RequestButtonLight(f int, btn hwelevio.Button, v bool) {
 	// Implementation using the actual hardware library.
-	hwelevio.SetButtonLamp(castIntToBtnType(btn_int), f, v)
+	hwelevio.SetButtonLamp(btn, f, v)
 }
 
 func MotorDirection(d ElevDir) {
 	// Implementation using the actual hardware library.
+	fmt.Println("Motordirection to be sat: ", ElevDirToString(d))
 	hwelevio.SetMotorDirection(castElevDirToMotorDirection(d))
 }
 
@@ -72,5 +57,18 @@ func ElevioGetOutputDevice() ElevOutputDevice {
 		DoorLight:          hwelevio.SetDoorOpenLamp,
 		StopButtonLight:    hwelevio.SetStopLamp,
 		MotorDirection:     MotorDirection,
+	}
+}
+
+func ElevDirToString(d ElevDir) string {
+	switch d {
+	case DirDown:
+		return "DirDown"
+	case DirStop:
+		return "DirStop"
+	case DirUp:
+		return "DirUp"
+	default:
+		return "DirUnknown"
 	}
 }

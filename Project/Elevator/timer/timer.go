@@ -1,6 +1,7 @@
 package timer
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -17,6 +18,7 @@ var timerActive bool
 func TimerStart(duration float64) {
 	timerEndTime = getWallTime() + duration
 	timerActive = true
+	fmt.Println("DoorTimer started")
 }
 
 func TimerStop() {

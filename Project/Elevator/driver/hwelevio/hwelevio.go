@@ -22,17 +22,18 @@ const (
 	MD_Stop
 )
 
-type ButtonType int
+type Button int
 
 const (
-	BT_HallUp ButtonType = iota
-	BT_HallDown
-	BT_Cab
+	BHallUp Button = iota
+	BHallDown
+	BCab
+	Last = BCab
 )
 
 type ButtonEvent struct {
 	Floor  int
-	Button ButtonType
+	Button Button
 }
 
 func Init(addr string, numFloors int) {
@@ -51,10 +52,11 @@ func Init(addr string, numFloors int) {
 }
 
 func SetMotorDirection(dir MotorDirection) {
+	fmt.Println("Setting motordirection")
 	write([4]byte{1, byte(dir), 0, 0})
 }
 
-func SetButtonLamp(button ButtonType, floor int, value bool) {
+func SetButtonLamp(button Button, floor int, value bool) {
 	write([4]byte{2, byte(button), byte(floor), toByte(value)})
 }
 
@@ -75,10 +77,10 @@ func PollButtons(receiver chan<- ButtonEvent) {
 	for {
 		time.Sleep(_pollRate)
 		for f := 0; f < _numFloors; f++ {
-			for b := ButtonType(0); b < 3; b++ {
+			for b := Button(0); b < 3; b++ {
 				v := GetButton(b, f)
 				if v != prev[f][b] && v != false {
-					receiver <- ButtonEvent{f, ButtonType(b)}
+					receiver <- ButtonEvent{f, Button(b)}
 				}
 				prev[f][b] = v
 			}
@@ -122,7 +124,7 @@ func PollObstructionSwitch(receiver chan<- bool) {
 	}
 }
 
-func GetButton(button ButtonType, floor int) bool {
+func GetButton(button Button, floor int) bool {
 	a := read([4]byte{6, byte(button), byte(floor), 0})
 	return toBool(a[1])
 }
@@ -188,4 +190,17 @@ func toBool(a byte) bool {
 		b = true
 	}
 	return b
+}
+
+func ButtonToString(b Button) string {
+	switch b {
+	case BHallUp:
+		return "BHallUp"
+	case BHallDown:
+		return "BHallDown"
+	case BCab:
+		return "DiBCabrUp"
+	default:
+		return "DirUnknown"
+	}
 }

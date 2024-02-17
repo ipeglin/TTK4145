@@ -1,11 +1,11 @@
-package main
+package driver
 
 import (
 	"fmt"
 	"heislab/Elevator/driver/hwelevio"
 )
 
-func main() {
+func Driver() {
 
 	numFloors := 4
 
@@ -50,7 +50,7 @@ func main() {
 		case a := <-drv_stop:
 			fmt.Printf("%+v\n", a)
 			for f := 0; f < numFloors; f++ {
-				for b := hwelevio.ButtonType(0); b < 3; b++ {
+				for b := hwelevio.Button(0); b < 3; b++ {
 					hwelevio.SetButtonLamp(b, f, false)
 				}
 			}
