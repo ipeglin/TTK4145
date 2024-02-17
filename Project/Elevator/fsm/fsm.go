@@ -1,22 +1,20 @@
 package fsm
 
 import (
+	"fmt"
 	"heislab/Elevator/elev"
 	"heislab/Elevator/elevio"
 	"heislab/Elevator/requests"
 	"heislab/Elevator/timer"
+	"time"
 )
-
-/* "heislab/Elevator/elevio"
-"heislab/Elevator/timer"
-
-"heislab/Elevator/requests" */
 
 var elevator elev.Elevator
 var outputDevice elevio.ElevOutputDevice
 
 func init() {
 	elevator = elev.ElevatorInit()
+	fmt.Println("fsm_init has happend")
 	//TODO
 	outputDevice = elevio.ElevioGetOutputDevice()
 }
@@ -24,20 +22,20 @@ func init() {
 func setAllLights(e elev.Elevator) {
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		for btn := 0; btn < elevio.NButtons; btn++ {
-			outputDevice.RequestButtonLight(floor, elevio.Button(btn), e.Requests[floor][btn])
+			outputDevice.RequestButtonLight(floor, btn, e.Requests[floor][btn])
 		}
 	}
 }
 
-func fsmInitBetweenFloors() {
+func FsmInitBetweenFloors() {
 	dirn := elevio.DirDown
 	outputDevice.MotorDirection(dirn)
 	elevator.Dirn = dirn
 	elevator.CurrentBehaviour = elev.EBMoving
 }
 
-func fsmRequestButtonPress(btn_floor int, btn_type elevio.Button) {
-	//BUrde være tekst her mulgiens
+func FsmRequestButtonPress(btn_floor int, btn_type elevio.Button) {
+	//Burde være tekst her mulgiens
 	switch elevator.CurrentBehaviour {
 	case elev.EBDoorOpen:
 		if requests.RequestsShouldClearImmediately(elevator, btn_floor, btn_type) {
@@ -68,15 +66,20 @@ func fsmRequestButtonPress(btn_floor int, btn_type elevio.Button) {
 	//Mer tekst?
 }
 
-func fsmFloorArrival(newFloor int) {
+func FsmFloorArrival(newFloor int) {
 	//print?
+	fmt.Println("Arrived at floor: ", newFloor)
 	elevator.CurrentFloor = newFloor
-
+	time.Sleep(1 * time.Second)
 	outputDevice.FloorIndicator(elevator.CurrentFloor)
+	fmt.Println("Turned on FloorIndicator")
+	time.Sleep(1 * time.Second)
 	//Helt unødvendig med switch her?
 	switch elevator.CurrentBehaviour {
 	case elev.EBMoving:
+		fmt.Println("Elev is moving")
 		if requests.RequestsShouldStop(elevator) {
+			fmt.Println("Elevator should stop")
 			outputDevice.MotorDirection(elevio.DirStop)
 			outputDevice.DoorLight(true)
 			elevator = requests.RequestsClearAtCurrentFloor(elevator)
@@ -88,7 +91,7 @@ func fsmFloorArrival(newFloor int) {
 	//Mer print?
 }
 
-func fsmDoorTimeout() {
+func FsmDoorTimeout() {
 	//print?
 	//Hvorfor switch
 	switch elevator.CurrentBehaviour {

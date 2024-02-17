@@ -23,15 +23,16 @@ const (
 	CRVInDirn
 )
 
+type ElevatorConfig struct {
+	ClearRequestVariant ClearRequestVarient
+	DoorOpenDurationS   float64
+}
+
 // Elevator struct to represent the state machine
 type Elevator struct {
 	CurrentFloor     int
 	Dirn             elevio.ElevDir
 	Requests         [elevio.NFloors][elevio.NButtons]bool
 	CurrentBehaviour ElevatorBehaviour
-
-	Config struct {
-		ClearRequestVariant ClearRequestVarient
-		DoorOpenDurationS   float64
-	}
+	Config           ElevatorConfig
 }
