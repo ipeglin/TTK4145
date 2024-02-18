@@ -15,6 +15,7 @@ type Message struct {
 	Iterations int
 }
 
+
 func main() {
 	// fetching process flags
 	var id, numNodes, basePort int
@@ -80,14 +81,22 @@ func main() {
 	fmt.Println("Network module starting...")
 	for {
 		select {
-		case p := <-nodeRegistryChannel:
+		case reg := <-nodeRegistryChannel:
 			fmt.Printf("Peer update:\n")
-			fmt.Printf("  Peers:    %q\n", p.Nodes)
-			fmt.Printf("  New:      %q\n", p.New)
-			fmt.Printf("  Lost:     %q\n", p.Lost)
+			fmt.Printf("  Peers:    %q\n", reg.Nodes)
+			fmt.Printf("  New:      %q\n", reg.New)
+			fmt.Printf("  Lost:     %q\n", reg.Lost)
 
-		case a := <-messageReceiver:
-			fmt.Printf("Received: %#v\n", a)
+		case msg := <-messageReceiver:
+			fmt.Printf("Received: %#v\n", msg)
 		}
 	}
+}
+
+func BoardcastMessage(message string, messageChannel chan Message) {
+	go func() {
+		message := Message{message, 0}
+			message.Iterations++
+			messageChannel <- message
+	}()
 }
