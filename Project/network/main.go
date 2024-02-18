@@ -16,7 +16,7 @@ type Message struct {
 func main() {
 	// fetching process flags
 	var id, numNodes, basePort int
-	flag.IntVar(&id, "nodeID", 0, "ID of the node")
+	flag.IntVar(&id, "id", 0, "ID of the node")
 	flag.Parse()
 
 	// id flag required
