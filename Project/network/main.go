@@ -3,18 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	"network/broadcast"
 	"network/local"
 	"network/nodes"
 	"os"
-	"time"
 )
 
 type Message struct {
 	Content    string
 	Iterations int
 }
-
 
 func main() {
 	// fetching process flags
@@ -59,24 +56,24 @@ func main() {
 	go nodes.Client(lifelinePort, nodeUid, TransmissionEnableChannel)
 	go nodes.Server(lifelinePort, nodeRegistryChannel)
 
-	// broadcast message sender and receiver
-	messageSender := make(chan Message)
-	messageReceiver := make(chan Message)
+	// // broadcast message sender and receiver
+	// messageSender := make(chan Message)
+	// messageReceiver := make(chan Message)
 
-	var broadcastPort int = lifelinePort + 1
-	go broadcast.Client(broadcastPort, messageSender)
-	go broadcast.Server(broadcastPort, messageReceiver)
+	// var broadcastPort int = lifelinePort + 1
+	// go broadcast.Client(broadcastPort, messageSender)
+	// go broadcast.Server(broadcastPort, messageReceiver)
 
-	// Taken from https://github.com/TTK4145/Network-go/blob/master/main.go
-	// The example message. We just send one of these every second.
-	go func() {
-		message := Message{"Hello from " + nodeUid, 0}
-		for {
-			message.Iterations++
-			messageSender <- message
-			time.Sleep(1 * time.Second)
-		}
-	}()
+	// // Taken from https://github.com/TTK4145/Network-go/blob/master/main.go
+	// // The example message. We just send one of these every second.
+	// go func() {
+	// 	message := Message{"Hello from " + nodeUid, 0}
+	// 	for {
+	// 		message.Iterations++
+	// 		messageSender <- message
+	// 		time.Sleep(1 * time.Second)
+	// 	}
+	// }()
 
 	fmt.Println("Network module starting...")
 	for {
@@ -87,16 +84,8 @@ func main() {
 			fmt.Printf("  New:      %q\n", reg.New)
 			fmt.Printf("  Lost:     %q\n", reg.Lost)
 
-		case msg := <-messageReceiver:
-			fmt.Printf("Received: %#v\n", msg)
+			// case msg := <-messageReceiver:
+			// 	fmt.Printf("Received: %#v\n", msg)
 		}
 	}
-}
-
-func BoardcastMessage(message string, messageChannel chan Message) {
-	go func() {
-		message := Message{message, 0}
-			message.Iterations++
-			messageChannel <- message
-	}()
 }
