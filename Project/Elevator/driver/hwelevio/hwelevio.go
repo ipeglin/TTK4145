@@ -18,8 +18,8 @@ type MotorDirection int
 
 const (
 	MD_Down MotorDirection = iota - 1
-	MD_Up
 	MD_Stop
+	MD_Up
 )
 
 type Button int

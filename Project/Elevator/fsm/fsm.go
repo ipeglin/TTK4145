@@ -30,6 +30,7 @@ func setAllLights(e elev.Elevator) {
 
 func FsmInitBetweenFloors() {
 	dirn := elevio.DirDown
+	fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(dirn), " in FsmInitBetweenFloors")
 	outputDevice.MotorDirection(dirn)
 	elevator.Dirn = dirn
 	elevator.CurrentBehaviour = elev.EBMoving
@@ -63,6 +64,7 @@ func FsmRequestButtonPress(btnFloor int, btnType hwelevio.Button) {
 			elevator = requests.RequestsClearAtCurrentFloor(elevator)
 
 		case elev.EBMoving:
+			fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevator.Dirn), " in FsmRequestButtonPress")
 			outputDevice.MotorDirection(elevator.Dirn)
 		}
 	}
@@ -84,7 +86,7 @@ func FsmFloorArrival(newFloor int) {
 	case elev.EBMoving:
 		fmt.Println("Elev is moving")
 		if requests.RequestsShouldStop(elevator) {
-			fmt.Println("Elevator should stop")
+			fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevio.DirStop), " in FsmFloorArrival")
 			outputDevice.MotorDirection(elevio.DirStop)
 			elevator.Dirn = elevio.DirStop
 			outputDevice.DoorLight(true)
@@ -99,7 +101,7 @@ func FsmFloorArrival(newFloor int) {
 }
 
 func FsmDoorTimeout() {
-	fmt.Printf("\n\n%s()\n", "FsmFloorArrival")
+	fmt.Printf("\n\n%s()\n", "FsmDoorTimeout")
 	elev.ElevatorPrint(elevator)
 	//Hvorfor switch
 	switch elevator.CurrentBehaviour {
@@ -114,8 +116,9 @@ func FsmDoorTimeout() {
 			elevator = requests.RequestsClearAtCurrentFloor(elevator)
 			setAllLights(elevator)
 
-		case elev.EBIdle:
+		case elev.EBMoving:
 			outputDevice.DoorLight(false)
+			fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevio.DirStop), " in FsmDoorTimeout")
 			outputDevice.MotorDirection(elevator.Dirn)
 		}
 	}
