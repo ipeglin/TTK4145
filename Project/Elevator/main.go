@@ -31,6 +31,10 @@ func main() {
 
 	for {
 		select {
+		//TODO
+		case stop := <-drv_stop:
+			fsm.FsmStop(stop)
+
 		case btnEvent := <-drv_buttons:
 			fsm.FsmRequestButtonPress(btnEvent.Floor, btnEvent.Button)
 
@@ -38,12 +42,9 @@ func main() {
 			fsm.FsmFloorArrival(floor)
 
 		//TODO
-		//case obstr:= <- drv_obstr.
-		//	fsm.FsmObstruction()
-
-		//TODO
-		//case stop:= <- drv_stop:
-		//	fsm.FsmStop()
+		case <-drv_obstr:
+			fmt.Println("Obstruction")
+			fsm.FsmObstruction()
 
 		default:
 			if timer.TimerTimedOut() {
@@ -53,37 +54,3 @@ func main() {
 		}
 	}
 }
-
-/*	for {
-		{ //Request Button
-			for f := 0; f < elevio.NFloors; f++ {
-				for btn := hwelevio.BHallUp; btn < hwelevio.Last; btn++ {
-					v := input.RequestButton(f, btn)
-					if v && v != prev[f][btn] {
-						fmt.Printf("Button has been requested")
-						fsm.FsmRequestButtonPress(f, btn)
-					}
-					prev[f][btn] = v
-				}
-			}
-		}
-
-		{ //Floor sensor
-			f := input.FloorSensor()
-			fmt.Println("Floor: ", f)
-			if f != -1 && f != prevFloor {
-				fsm.FsmFloorArrival(f)
-			}
-			prevFloor = f
-		}
-
-		{ // Timer
-			if timer.TimerTimedOut() {
-				timer.TimerStop()
-				fsm.FsmDoorTimeout()
-			}
-		}
-
-		time.Sleep(time.Duration(elev.InputPollRateMsConfig) * time.Millisecond)
-	}
-}*/

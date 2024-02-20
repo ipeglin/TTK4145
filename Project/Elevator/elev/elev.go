@@ -31,7 +31,7 @@ func ElevatorPrint(e Elevator) {
 	fmt.Println("  |  | up  | dn  | cab |")
 	for f := elevio.NFloors - 1; f >= 0; f-- {
 		fmt.Printf("  | %d", f)
-		for btn := hwelevio.BHallUp; btn <= hwelevio.Last; btn++ {
+		for btn := hwelevio.BHallUp; btn <= hwelevio.BCab; btn++ {
 			if (f == elevio.NFloors-1 && btn == hwelevio.BHallUp) ||
 				(f == 0 && btn == hwelevio.BHallDown) {
 				fmt.Print("|     ")

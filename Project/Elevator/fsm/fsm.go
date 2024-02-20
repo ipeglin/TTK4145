@@ -18,12 +18,14 @@ func init() {
 	//TODO
 	outputDevice = elevio.ElevioGetOutputDevice()
 	setAllLights(elevator)
+	hwelevio.SetDoorOpenLamp(false)
 }
 
 func setAllLights(e elev.Elevator) {
 	for floor := 0; floor < elevio.NFloors; floor++ {
-		for btn := hwelevio.BHallUp; btn < hwelevio.Last; btn++ {
+		for btn := hwelevio.BHallUp; btn <= hwelevio.BCab; btn++ {
 			outputDevice.RequestButtonLight(floor, btn, e.Requests[floor][btn])
+			fmt.Println("Iteration", hwelevio.ButtonToString(btn))
 		}
 	}
 }
@@ -124,4 +126,14 @@ func FsmDoorTimeout() {
 	}
 	fmt.Println("New State: \n")
 	elev.ElevatorPrint(elevator)
+}
+
+// TODO
+func FsmObstruction() {
+	timer.TimerStart(elevator.Config.DoorOpenDurationS)
+}
+
+// TODO
+func FsmStop(stop bool) {
+	hwelevio.SetStopLamp(stop)
 }

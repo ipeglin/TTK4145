@@ -28,7 +28,6 @@ const (
 	BHallUp Button = iota
 	BHallDown
 	BCab
-	Last = BCab
 )
 
 type ButtonEvent struct {
