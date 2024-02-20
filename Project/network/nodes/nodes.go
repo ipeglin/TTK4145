@@ -17,17 +17,19 @@ type NetworkNodeRegistry struct {
 const interval = 15 * time.Millisecond
 const timeout = 500 * time.Millisecond
 
-func Client(port int, id string, enable <-chan bool) {
+func Client(port int, id string, enableTransmit <-chan bool) {
 	conn := conn.DialBroadcastUDP(port)
-	addr, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("255.255.255.255%d", port))
+	addr, _ := net.ResolveUDPAddr("udp", fmt.Sprintf("255.255.255.255:%d", port))
 
+	enable := true
 	for {
 		select {
-		case transmitData := <-enable:
-			if transmitData {
-				conn.WriteTo([]byte(id), addr)
-			}
+		case enable = <-enableTransmit:
 		case <-time.After(interval):
+		}
+		if enable {
+			conn.WriteTo([]byte(id), addr)
+			fmt.Println("Writing", id, "to", addr)
 		}
 	}
 }
