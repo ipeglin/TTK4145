@@ -28,7 +28,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel chan<- M
 	}
 
 	// set node unique ID
-	nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP)
+	nodeUid := fmt.Sprintf("peer-%s", nodeIP)
 
 	fmt.Printf("Module initialised with:\n")
 	fmt.Printf("  IPv4:     %v\n", nodeIP)
