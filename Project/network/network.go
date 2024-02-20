@@ -5,7 +5,6 @@ import (
 	"network/broadcast"
 	"network/local"
 	"network/nodes"
-	"os"
 )
 
 const basePort int = 1337
@@ -29,7 +28,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel chan<- M
 	}
 
 	// set node unique ID
-	nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP, os.Getpid())
+	nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP)
 
 	fmt.Printf("Module initialised with:\n")
 	fmt.Printf("  IPv4:     %v\n", nodeIP)

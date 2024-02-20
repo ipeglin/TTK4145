@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"network"
 	"network/nodes"
+	"os"
 )
 
 // fetching process flags
@@ -34,6 +35,9 @@ func main() {
 	fmt.Printf("Node initialised with:\n")
 	fmt.Printf("  ID:          %d\n", id)
 	fmt.Printf("  #Nodes:      %d\n", numNodes)
+	fmt.Printf("  PID:         %d\n", os.Getpid())
+
+	// TODO: Launch new process watching current process in case of crash
 
 	nodeOverviewChannel := make(chan nodes.NetworkNodeRegistry)
 	messageReceiveChannel := make(chan network.Message)
