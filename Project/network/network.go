@@ -18,7 +18,7 @@ type Message struct {
 	Iterations int
 }
 
-func Init(nodeId int, nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel chan<- Message, responseChannel <-chan Message) {
+func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel chan<- Message, responseChannel <-chan Message) {
 	fmt.Println("Initialising Network Module...")
 
 	// fetching host IP and PORT

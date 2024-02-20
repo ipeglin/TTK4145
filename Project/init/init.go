@@ -39,7 +39,7 @@ func main() {
 	messageReceiveChannel := make(chan network.Message)
 	messageTransmitterChannel := make(chan network.Message)
 
-	go network.Init(id, nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel)
+	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel)
 
 	for {
 		select {
