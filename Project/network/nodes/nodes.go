@@ -14,7 +14,7 @@ type NetworkNodeRegistry struct {
 	Lost  []string
 }
 
-const interval = 15 * time.Millisecond
+const interval = 200 * time.Millisecond
 const timeout = 500 * time.Millisecond
 
 func Client(port int, id string, enableTransmit <-chan bool) {
@@ -29,7 +29,6 @@ func Client(port int, id string, enableTransmit <-chan bool) {
 		}
 		if enable {
 			conn.WriteTo([]byte(id), addr)
-			fmt.Println("Writing", id, "to", addr)
 		}
 	}
 }
