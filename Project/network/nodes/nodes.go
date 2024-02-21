@@ -2,6 +2,7 @@ package nodes
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"net"
 	"network/conn"
 	"sort"
@@ -40,12 +41,13 @@ func Server(port int, updateChannel chan<- NetworkNodeRegistry) {
 
 	conn := conn.DialBroadcastUDP(port)
 
-	go func() {
-		for {
-			fmt.Println("Known nodes:", reg)
-			time.Sleep(1 * time.Second)
-		}
-	}()
+	// diplay known nodes
+	// go func() {
+	// 	for {
+	// 		logrus.Debug("Known nodes:", reg)
+	// 		time.Sleep(5 * time.Second)
+	// 	}
+	// }()
 
 	for {
 		updated := false
