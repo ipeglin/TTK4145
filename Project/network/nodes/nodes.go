@@ -2,7 +2,7 @@ package nodes
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
+	// "github.com/sirupsen/logrus"
 	"net"
 	"network/conn"
 	"sort"
