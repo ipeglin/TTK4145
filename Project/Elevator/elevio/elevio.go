@@ -7,7 +7,6 @@ import (
 
 func init() {
 	hwelevio.Init(Addr, NFloors)
-	
 }
 
 // Liker ikke dene løsningen

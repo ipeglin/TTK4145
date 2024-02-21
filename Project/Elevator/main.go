@@ -28,12 +28,17 @@ func main() {
 	go hwelevio.PollFloorSensor(drv_floors)
 	go hwelevio.PollObstructionSwitch(drv_obstr)
 	go hwelevio.PollStopButton(drv_stop)
-
+	var obst bool = false
+	var stop bool = false
 	for {
 		select {
 		//TODO
-		case stop := <-drv_stop:
-			fsm.FsmStop(stop)
+		case drv_obst := <-drv_obstr:
+			obst = drv_obst
+
+		//TODO
+		case drv_stp := <-drv_stop:
+			stop = drv_stp
 
 		case btnEvent := <-drv_buttons:
 			fsm.FsmRequestButtonPress(btnEvent.Floor, btnEvent.Button)
@@ -41,12 +46,15 @@ func main() {
 		case floor := <-drv_floors:
 			fsm.FsmFloorArrival(floor)
 
-		//TODO
-		case <-drv_obstr:
-			fmt.Println("Obstruction")
-			fsm.FsmObstruction()
-
 		default:
+			if stop {
+				fsm.FsmStop(stop)
+			} else {
+				fsm.FsmStop(false)
+			}
+			if obst {
+				fsm.FsmObstruction()
+			}
 			if timer.TimerTimedOut() {
 				timer.TimerStop()
 				fsm.FsmDoorTimeout()

@@ -198,7 +198,7 @@ func ButtonToString(b Button) string {
 	case BHallDown:
 		return "BHallDown"
 	case BCab:
-		return "DiBCabrUp"
+		return "BCab"
 	default:
 		return "DirUnknown"
 	}

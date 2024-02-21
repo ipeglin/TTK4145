@@ -17,15 +17,16 @@ func init() {
 	fmt.Println("fsm_init has happend")
 	//TODO
 	outputDevice = elevio.ElevioGetOutputDevice()
+	//Burde dette gå et annet sted?
 	setAllLights(elevator)
 	hwelevio.SetDoorOpenLamp(false)
+	hwelevio.SetStopLamp(false)
 }
 
 func setAllLights(e elev.Elevator) {
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		for btn := hwelevio.BHallUp; btn <= hwelevio.BCab; btn++ {
 			outputDevice.RequestButtonLight(floor, btn, e.Requests[floor][btn])
-			fmt.Println("Iteration", hwelevio.ButtonToString(btn))
 		}
 	}
 }
@@ -78,17 +79,12 @@ func FsmRequestButtonPress(btnFloor int, btnType hwelevio.Button) {
 func FsmFloorArrival(newFloor int) {
 	fmt.Printf("\n\n%s(%d)\n", "FsmFloorArrival", newFloor)
 	elev.ElevatorPrint(elevator)
-
-	fmt.Println("Arrived at floor: ", newFloor)
 	elevator.CurrentFloor = newFloor
 	outputDevice.FloorIndicator(elevator.CurrentFloor)
-	fmt.Println("Turned on FloorIndicator")
 	//Helt unødvendig med switch her?
 	switch elevator.CurrentBehaviour {
 	case elev.EBMoving:
-		fmt.Println("Elev is moving")
 		if requests.RequestsShouldStop(elevator) {
-			fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevio.DirStop), " in FsmFloorArrival")
 			outputDevice.MotorDirection(elevio.DirStop)
 			elevator.Dirn = elevio.DirStop
 			outputDevice.DoorLight(true)
@@ -122,7 +118,10 @@ func FsmDoorTimeout() {
 			outputDevice.DoorLight(false)
 			fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevio.DirStop), " in FsmDoorTimeout")
 			outputDevice.MotorDirection(elevator.Dirn)
+		case elev.EBIdle:
+			outputDevice.DoorLight(false)
 		}
+
 	}
 	fmt.Println("New State: \n")
 	elev.ElevatorPrint(elevator)
@@ -130,7 +129,10 @@ func FsmDoorTimeout() {
 
 // TODO
 func FsmObstruction() {
-	timer.TimerStart(elevator.Config.DoorOpenDurationS)
+	if elevator.CurrentBehaviour == elev.EBDoorOpen {
+		timer.TimerStart(elevator.Config.DoorOpenDurationS)
+	}
+
 }
 
 // TODO
