@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"network"
 	"network/nodes"
 	"os"
+
+	"github.com/sirupsen/logrus"
 )
 
 // fetching process flags

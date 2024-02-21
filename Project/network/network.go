@@ -2,11 +2,12 @@ package network
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"network/broadcast"
 	"network/local"
 	"network/nodes"
 	"os"
+
+	"github.com/sirupsen/logrus"
 )
 
 const basePort int = 1337
@@ -31,7 +32,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 
 	// set node unique ID
 	nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP, os.Getpid())
-	logrus.Debug(fmt.Sprintf("Network module initialised with UID=%s on PORT=%d", nodeUid, basePort))
+	logrus.Info(fmt.Sprintf("Network module initialised with UID=%s on PORT=%d", nodeUid, basePort))
 
 	// channel for network node updates
 	nodeRegistryChannel := make(chan nodes.NetworkNodeRegistry)
@@ -49,9 +50,11 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 	for {
 		select {
 		case reg := <-nodeRegistryChannel:
+			logrus.Info("Node registry updated")
 			nodesChannel <- reg
 
 		case msg := <-broadcastReceiverChannel:
+			logrus.Info("Broadcast received")
 			responseChannel <- msg
 
 		case msg := <-messageChannel:
