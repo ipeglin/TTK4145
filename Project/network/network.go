@@ -2,9 +2,11 @@ package network
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"network/broadcast"
 	"network/local"
 	"network/nodes"
+	"os"
 )
 
 const basePort int = 1337
@@ -18,22 +20,18 @@ type Message struct {
 }
 
 func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan Message, responseChannel chan<- Message) {
-	fmt.Println("Initialising Network Module...")
+	logrus.Trace("Initialising Network Module...")
 
 	// fetching host IP and PORT
 	nodeIP, err := local.GetIP()
 	if err != nil {
-		fmt.Println("ERROR: Unable to get the IP address")
+		logrus.Warn("ERROR: Unable to get the IP address")
 		nodeIP = "Disconnected"
 	}
 
 	// set node unique ID
-	nodeUid := fmt.Sprintf("peer-%s", nodeIP)
-
-	fmt.Printf("Module initialised with:\n")
-	fmt.Printf("  IPv4:     %v\n", nodeIP)
-	fmt.Printf("  PORT:     %d\n", basePort)
-	fmt.Printf("  UID:      %s\n", nodeUid)
+	nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP, os.Getpid())
+	logrus.Debug(fmt.Sprintf("Network module initialised with UID=%s on PORT=%d", nodeUid, basePort))
 
 	// channel for network node updates
 	nodeRegistryChannel := make(chan nodes.NetworkNodeRegistry)
@@ -48,7 +46,6 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 	go broadcast.Client(transmissionPort, broadcastTransmissionChannel)
 	go broadcast.Server(receiverPort, broadcastReceiverChannel)
 
-	fmt.Println("Network module starting...")
 	for {
 		select {
 		case reg := <-nodeRegistryChannel:
@@ -58,7 +55,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 			responseChannel <- msg
 
 		case msg := <-messageChannel:
-			fmt.Println("Network module intercepted message:", msg.Content)
+			logrus.Debug("Network module intercepted message:", msg.Content)
 			broadcastTransmissionChannel <- msg
 		}
 	}
