@@ -9,13 +9,10 @@ import (
 )
 
 func main() {
-	//print?
 	fmt.Println("Started!")
-	//constants
 	hwelevio.Init(elevio.Addr, elevio.NFloors)
-	input := elevio.ElevioGetInputDevice()
 
-	if input.FloorSensor() == -1 {
+	if elevio.InputDevice.FloorSensor() == -1 {
 		fsm.FsmInitBetweenFloors()
 	}
 
@@ -28,34 +25,36 @@ func main() {
 	go hwelevio.PollFloorSensor(drv_floors)
 	go hwelevio.PollObstructionSwitch(drv_obstr)
 	go hwelevio.PollStopButton(drv_stop)
+
 	var obst bool = false
 	var stop bool = false
 	for {
 		select {
-		//TODO
 		case drv_obst := <-drv_obstr:
+			fmt.Print(("obst"))
+			if drv_obst == !obst { // If obstruction detected and it's a new obstruction
+				fsm.FsmObstruction()
+			}
 			obst = drv_obst
 
-		//TODO
 		case drv_stp := <-drv_stop:
-			stop = drv_stp
+			fmt.Print("Stopp")
+			if drv_stp != stop { // If there's a change in the stop signal
+				stop = drv_stp
+				fsm.FsmStop(stop)
+			}
 
 		case btnEvent := <-drv_buttons:
-			fsm.FsmRequestButtonPress(btnEvent.Floor, btnEvent.Button)
+			if !stop { // Process button presses only if not stopped
+				fsm.FsmRequestButtonPress(btnEvent.Floor, btnEvent.Button)
+			}
 
 		case floor := <-drv_floors:
+			fmt.Print("Arrived")
 			fsm.FsmFloorArrival(floor)
 
 		default:
-			if stop {
-				fsm.FsmStop(stop)
-			} else {
-				fsm.FsmStop(false)
-			}
-			if obst {
-				fsm.FsmObstruction()
-			}
-			if timer.TimerTimedOut() {
+			if timer.TimerTimedOut() && !obst { // Check for timeout only if no obstruction
 				timer.TimerStop()
 				fsm.FsmDoorTimeout()
 			}

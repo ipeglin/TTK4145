@@ -18,22 +18,22 @@ func init() {
 	//TODO
 	outputDevice = elevio.ElevioGetOutputDevice()
 	//Burde dette gå et annet sted?
-	setAllLights(elevator)
+	setAllLights()
 	hwelevio.SetDoorOpenLamp(false)
 	hwelevio.SetStopLamp(false)
 }
 
-func setAllLights(e elev.Elevator) {
+func setAllLights() {
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		for btn := hwelevio.BHallUp; btn <= hwelevio.BCab; btn++ {
-			outputDevice.RequestButtonLight(floor, btn, e.Requests[floor][btn])
+			outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
+			fmt.Println(floor, " ", hwelevio.ButtonToString(btn), " ", elevator.Requests[floor][btn])
 		}
 	}
 }
 
 func FsmInitBetweenFloors() {
 	dirn := elevio.DirDown
-	fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(dirn), " in FsmInitBetweenFloors")
 	outputDevice.MotorDirection(dirn)
 	elevator.Dirn = dirn
 	elevator.CurrentBehaviour = elev.EBMoving
@@ -71,7 +71,7 @@ func FsmRequestButtonPress(btnFloor int, btnType hwelevio.Button) {
 			outputDevice.MotorDirection(elevator.Dirn)
 		}
 	}
-	setAllLights(elevator)
+	setAllLights()
 	fmt.Printf("New state: \n")
 	elev.ElevatorPrint(elevator)
 }
@@ -90,7 +90,7 @@ func FsmFloorArrival(newFloor int) {
 			outputDevice.DoorLight(true)
 			elevator = requests.RequestsClearAtCurrentFloor(elevator)
 			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-			setAllLights(elevator)
+			setAllLights()
 			elevator.CurrentBehaviour = elev.EBDoorOpen
 		}
 	}
@@ -112,7 +112,7 @@ func FsmDoorTimeout() {
 		case elev.EBDoorOpen:
 			timer.TimerStart(elevator.Config.DoorOpenDurationS)
 			elevator = requests.RequestsClearAtCurrentFloor(elevator)
-			setAllLights(elevator)
+			setAllLights()
 
 		case elev.EBMoving:
 			outputDevice.DoorLight(false)
@@ -130,12 +130,48 @@ func FsmDoorTimeout() {
 // TODO
 func FsmObstruction() {
 	if elevator.CurrentBehaviour == elev.EBDoorOpen {
+		timer.TimerStop()
 		timer.TimerStart(elevator.Config.DoorOpenDurationS)
+		fmt.Print("timer started")
 	}
 
 }
 
 // TODO
+// Huske state før stop, så resume den?
 func FsmStop(stop bool) {
-	hwelevio.SetStopLamp(stop)
+	outputDevice.StopButtonLight(stop)
+	if stop {
+		elevator.Dirn = elevio.ElevDir(hwelevio.MD_Stop)
+		if elevio.InputDevice.FloorSensor() != -1 {
+			elevator.CurrentBehaviour = elev.EBDoorOpen
+			timer.TimerStart(elevator.Config.DoorOpenDurationS)
+			hwelevio.SetDoorOpenLamp(true)
+		}
+	}
 }
+
+/*
+func FsmStop(stop bool) {
+	fmt.Println("FsmStop(): ", stop)
+	elev.ElevatorPrint(elevator)
+	hwelevio.SetStopLamp(stop)
+	if stop {
+		requests.RequestsClearAll(&elevator)
+		setAllLights()
+		outputDevice.MotorDirection(elevio.ElevDir(hwelevio.MD_Stop))
+		elevator.Dirn = elevio.DirStop
+		if elevio.InputDevice.FloorSensor() != -1 {
+			elevator.CurrentBehaviour = elev.EBDoorOpen
+			timer.TimerStart(elevator.Config.DoorOpenDurationS)
+			hwelevio.SetDoorOpenLamp(true)
+		}
+	} else {
+		if elevator.CurrentBehaviour == elev.EBDoorOpen {
+			elevator.CurrentBehaviour = elev.EBIdle
+		} else if elevio.InputDevice.FloorSensor() != -1 {
+			FsmInitBetweenFloors()
+		}
+	}
+	elev.ElevatorPrint(elevator)
+}*/

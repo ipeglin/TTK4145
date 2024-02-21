@@ -148,3 +148,11 @@ func RequestsClearAtCurrentFloor(e elev.Elevator) elev.Elevator {
 	}
 	return e
 }
+
+func RequestsClearAll(e *elev.Elevator) {
+	for f := 0; f < elevio.NFloors; f++ {
+		for btn := 0; btn < elevio.NButtons; btn++ {
+			e.Requests[f][btn] = false
+		}
+	}
+}

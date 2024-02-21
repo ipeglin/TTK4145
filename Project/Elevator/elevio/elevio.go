@@ -5,8 +5,11 @@ import (
 	"heislab/Elevator/driver/hwelevio"
 )
 
+var InputDevice ElevInputDevice
+
 func init() {
 	hwelevio.Init(Addr, NFloors)
+	InputDevice = ElevioGetInputDevice()
 }
 
 // Liker ikke dene løsningen
