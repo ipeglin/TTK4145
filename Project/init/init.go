@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"network"
 	"network/nodes"
 	"os"
@@ -28,14 +29,11 @@ func getFlags() (int, int, error) {
 func main() {
 	id, numNodes, err := getFlags()
 	if err != nil {
-		fmt.Println(err)
+		logrus.Fatal(err)
 		return
 	}
 
-	fmt.Printf("Node initialised with:\n")
-	fmt.Printf("  ID:          %d\n", id)
-	fmt.Printf("  #Nodes:      %d\n", numNodes)
-	fmt.Printf("  PID:         %d\n", os.Getpid())
+	logrus.Debug(fmt.Sprintf("Node initialised with ID=%d, #Nodes=%d, PID=%d", id, numNodes, os.Getpid()))
 
 	// TODO: Launch new process watching current process in case of crash
 
@@ -48,10 +46,7 @@ func main() {
 	for {
 		select {
 		case reg := <-nodeOverviewChannel:
-			fmt.Printf("Peer update:\n")
-			fmt.Printf("  Peers:    %q\n", reg.Nodes)
-			fmt.Printf("  New:      %q\n", reg.New)
-			fmt.Printf("  Lost:     %q\n", reg.Lost)
+			logrus.Info(fmt.Sprintf("Node update:\n  Nodes:    %q\n  New:      %q\n  Lost:     %q", reg.Nodes, reg.New, reg.Lost))
 
 		case msg := <-messageReceiveChannel:
 			fmt.Printf("Network module says:%v\n", msg)
