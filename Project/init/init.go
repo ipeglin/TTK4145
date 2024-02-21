@@ -6,6 +6,7 @@ import (
 	"network"
 	"network/nodes"
 	"os"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -43,14 +44,19 @@ func main() {
 	messageTransmitterChannel := make(chan network.Message)
 
 	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel)
+	go func(){
+		for {
+			messageTransmitterChannel <- network.Message{Content: "Hello World", Iterations: 0}
+			time.Sleep(5 * time.Second)
+		}
+	}()
 
 	for {
 		select {
 		case reg := <-nodeOverviewChannel:
-			logrus.Info(fmt.Sprintf("Node update:\n  Nodes:    %q\n  New:      %q\n  Lost:     %q", reg.Nodes, reg.New, reg.Lost))
-
+			fmt.Println("Nodes:", reg.Nodes)
 		case msg := <-messageReceiveChannel:
-			fmt.Printf("Network module says:%v\n", msg)
+			fmt.Printf("Network module intercepted: %v\n", msg)
 		}
 	}
 }

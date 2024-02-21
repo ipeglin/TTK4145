@@ -50,7 +50,8 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 	for {
 		select {
 		case reg := <-nodeRegistryChannel:
-			logrus.Info("Node registry updated")
+			logrus.Info(fmt.Sprintf("Node registry update:\n  Nodes:    %q\n  New:      %q\n  Lost:     %q", reg.Nodes, reg.New, reg.Lost))
+
 			nodesChannel <- reg
 
 		case msg := <-broadcastReceiverChannel:
@@ -58,7 +59,6 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 			responseChannel <- msg
 
 		case msg := <-messageChannel:
-			logrus.Debug("Network module intercepted message:", msg.Content)
 			broadcastTransmissionChannel <- msg
 		}
 	}
