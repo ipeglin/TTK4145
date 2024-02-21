@@ -17,7 +17,7 @@ type Message struct {
 	Iterations int
 }
 
-func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel chan<- Message, responseChannel <-chan Message) {
+func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan Message, responseChannel chan<- Message) {
 	fmt.Println("Initialising Network Module...")
 
 	// fetching host IP and PORT
@@ -55,9 +55,10 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel chan<- M
 			nodesChannel <- reg
 
 		case msg := <-broadcastReceiverChannel:
-			messageChannel <- msg
+			responseChannel <- msg
 
-		case msg := <-responseChannel:
+		case msg := <-messageChannel:
+			fmt.Println("Network module intercepted message:", msg.Content)
 			broadcastTransmissionChannel <- msg
 		}
 	}
