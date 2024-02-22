@@ -138,15 +138,21 @@ func FsmObstruction() {
 }
 
 // TODO
-// Huske state før stop, så resume den?
+// Huske state før stop, så resume den? Tror det vil være en god løsning, midlertidig løsning for nå
 func FsmStop(stop bool) {
+	fmt.Print("kallet stopp: ", stop)
 	outputDevice.StopButtonLight(stop)
 	if stop {
-		elevator.Dirn = elevio.ElevDir(hwelevio.MD_Stop)
+		elevator.Dirn = elevio.DirStop
+		outputDevice.MotorDirection(elevator.Dirn)
 		if elevio.InputDevice.FloorSensor() != -1 {
 			elevator.CurrentBehaviour = elev.EBDoorOpen
 			timer.TimerStart(elevator.Config.DoorOpenDurationS)
 			hwelevio.SetDoorOpenLamp(true)
+		}
+	} else {
+		if elevio.InputDevice.FloorSensor() == -1 {
+			FsmInitBetweenFloors()
 		}
 	}
 }
