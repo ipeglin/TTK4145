@@ -2,6 +2,7 @@ package fsm
 
 import (
 	"fmt"
+	"heislab/Elevator/checkpoint"
 	"heislab/Elevator/driver/hwelevio"
 	"heislab/Elevator/elev"
 	"heislab/Elevator/elevio"
@@ -21,6 +22,15 @@ func init() {
 	setAllLights()
 	hwelevio.SetDoorOpenLamp(false)
 	hwelevio.SetStopLamp(false)
+}
+
+// init og denne vil kræsje ved process pair må finnes ut av
+func SetElevator(f int, cb elev.ElevatorBehaviour, dirn elevio.ElevDir, r [elevio.NFloors][elevio.NButtons]bool, c elev.ElevatorConfig) {
+	elevator.CurrentFloor = f
+	elevator.CurrentBehaviour = cb
+	elevator.Dirn = dirn
+	elevator.Requests = r
+	elevator.Config = c
 }
 
 func setAllLights() {
@@ -123,7 +133,7 @@ func FsmDoorTimeout() {
 		}
 
 	}
-	fmt.Println("New State: \n")
+	fmt.Println("New State: ")
 	elev.ElevatorPrint(elevator)
 }
 
@@ -140,6 +150,7 @@ func FsmObstruction() {
 // TODO
 // Huske state før stop, så resume den? Tror det vil være en god løsning, midlertidig løsning for nå
 func FsmStop(stop bool) {
+	FsmMakeCheckpoint()
 	fmt.Print("kallet stopp: ", stop)
 	outputDevice.StopButtonLight(stop)
 	if stop {
@@ -151,9 +162,7 @@ func FsmStop(stop bool) {
 			hwelevio.SetDoorOpenLamp(true)
 		}
 	} else {
-		if elevio.InputDevice.FloorSensor() == -1 {
-			FsmInitBetweenFloors()
-		}
+		FsmResumeAtLatestCheckpoint()
 	}
 }
 
@@ -181,3 +190,15 @@ func FsmStop(stop bool) {
 	}
 	elev.ElevatorPrint(elevator)
 }*/
+
+func FsmMakeCheckpoint() {
+	checkpoint.SaveElevCheckpoint(elevator)
+	fmt.Print("The elevator which were saved: \n")
+	elev.ElevatorPrint(elevator)
+}
+
+func FsmResumeAtLatestCheckpoint() {
+	elevator, _, _ = checkpoint.LoadElevCheckpoint()
+	fmt.Print(elevator.Dirn)
+	outputDevice.MotorDirection(elevator.Dirn)
+}
