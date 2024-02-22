@@ -5,17 +5,12 @@ import (
 	"heislab/Elevator/driver/hwelevio"
 	"heislab/Elevator/elevio"
 	"heislab/Elevator/fsm"
+	"heislab/Elevator/processpair"
 	"heislab/Elevator/timer"
 )
 
 func mainLogic() {
-	fmt.Println("Started!")
-	hwelevio.Init(elevio.Addr, elevio.NFloors)
-
-	if elevio.InputDevice.FloorSensor() == -1 {
-		fsm.FsmInitBetweenFloors()
-	}
-
+	fsm.FsmResumeAtLatestCheckpoint()
 	drv_buttons := make(chan hwelevio.ButtonEvent)
 	drv_floors := make(chan int)
 	drv_obstr := make(chan bool)
@@ -47,11 +42,13 @@ func mainLogic() {
 		case btnEvent := <-drv_buttons:
 			if !stop { // Process button presses only if not stopped
 				fsm.FsmRequestButtonPress(btnEvent.Floor, btnEvent.Button)
+				fsm.FsmMakeCheckpoint()
 			}
 
 		case floor := <-drv_floors:
 			fmt.Print("Arrived")
 			fsm.FsmFloorArrival(floor)
+			fsm.FsmMakeCheckpoint()
 
 		default:
 			if timer.TimerTimedOut() && !obst { // Check for timeout only if no obstruction
@@ -62,6 +59,7 @@ func mainLogic() {
 	}
 }
 
+/*
 func main() {
 	fmt.Println("Started!")
 	hwelevio.Init(elevio.Addr, elevio.NFloors)
@@ -117,4 +115,23 @@ func main() {
 	}
 	//var mainFuncObject processpair.MainFuncType = mainLogic
 	//processpair.ProcessPairHandler(mainFuncObject)
+}*/
+
+func main() {
+	//hwelevio.Init(elevio.Addr, elevio.NFloors)
+	//var mainFuncObject processpair.MainFuncType = fsm.FsmTestProcessPair
+
+	fmt.Println("Started!")
+	hwelevio.Init(elevio.Addr, elevio.NFloors)
+
+	if elevio.InputDevice.FloorSensor() == -1 {
+		fsm.FsmInitBetweenFloors()
+	}
+
+	var mainFuncObject processpair.MainFuncType = mainLogic
+	processpair.ProcessPairHandler(mainFuncObject)
+
+	// Block the main goroutine indefinitely
+	done := make(chan struct{})
+	<-done
 }

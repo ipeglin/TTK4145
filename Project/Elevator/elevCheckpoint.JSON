@@ -1,7 +1,7 @@
 {
   "State": {
-    "CurrentFloor": 1,
-    "Dirn": 1,
+    "CurrentFloor": 2,
+    "Dirn": 0,
     "Requests": [
       [
         false,
@@ -16,7 +16,7 @@
       [
         false,
         false,
-        true
+        false
       ],
       [
         false,
@@ -24,11 +24,11 @@
         false
       ]
     ],
-    "CurrentBehaviour": 2,
+    "CurrentBehaviour": 0,
     "Config": {
-      "ClearRequestVariant": 1,
-      "DoorOpenDurationS": 3
+      "ClearRequestVariant": 0,
+      "DoorOpenDurationS": 0
     }
   },
-  "Timestamp": "2024-02-22T18:15:56.840577504+01:00"
+  "Timestamp": "2024-02-22T19:42:11.391501866+01:00"
 }

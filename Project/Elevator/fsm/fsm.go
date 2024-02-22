@@ -8,6 +8,7 @@ import (
 	"heislab/Elevator/elevio"
 	"heislab/Elevator/requests"
 	"heislab/Elevator/timer"
+	"time"
 )
 
 var elevator elev.Elevator
@@ -37,7 +38,7 @@ func setAllLights() {
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		for btn := hwelevio.BHallUp; btn <= hwelevio.BCab; btn++ {
 			outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
-			fmt.Println(floor, " ", hwelevio.ButtonToString(btn), " ", elevator.Requests[floor][btn])
+			//fmt.Println(floor, " ", hwelevio.ButtonToString(btn), " ", elevator.Requests[floor][btn])
 		}
 	}
 }
@@ -193,12 +194,27 @@ func FsmStop(stop bool) {
 
 func FsmMakeCheckpoint() {
 	checkpoint.SaveElevCheckpoint(elevator)
-	fmt.Print("The elevator which were saved: \n")
-	elev.ElevatorPrint(elevator)
+	//fmt.Print("The elevator which were saved: \n")
+	//elev.ElevatorPrint(elevator)
 }
 
 func FsmResumeAtLatestCheckpoint() {
 	elevator, _, _ = checkpoint.LoadElevCheckpoint()
-	fmt.Print(elevator.Dirn)
+	//fmt.Print(elevator.Dirn)
 	outputDevice.MotorDirection(elevator.Dirn)
+}
+
+func FsmLoadLatestCheckpoint() {
+	elevator, _, _ = checkpoint.LoadElevCheckpoint()
+}
+
+func FsmTestProcessPair() {
+	for {
+		FsmLoadLatestCheckpoint()
+		elevator.CurrentFloor += 1
+		fmt.Print(elevator.CurrentFloor)
+		FsmMakeCheckpoint()
+		time.Sleep(1000 * time.Millisecond)
+	}
+
 }
