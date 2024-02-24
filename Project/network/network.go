@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/sirupsen/logrus"
+	"golang.org/x/exp/slices"
 )
 
 const basePort int = 1337
@@ -20,7 +21,7 @@ type Message struct {
 	Iterations int
 }
 
-func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan Message, responseChannel chan<- Message) {
+func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan Message, responseChannel chan<- Message, onlineStatusChannel chan<- bool) {
 	logrus.Trace("Initialising Network Module...")
 
 	// fetching host IP and PORT
@@ -52,13 +53,23 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 		case reg := <-nodeRegistryChannel:
 			logrus.Info(fmt.Sprintf("Node registry update:\n  Nodes:    %q\n  New:      %q\n  Lost:     %q", reg.Nodes, reg.New, reg.Lost))
 
+			// pass node online status to the main process
+			if slices.Contains(reg.Lost,  nodeUid) {
+				logrus.Warn("Node lost connection: ", nodeUid)
+				onlineStatusChannel <- false
+			} else if reg.New == nodeUid {
+				logrus.Info("Node connected: ", nodeUid)
+				onlineStatusChannel <- true
+			} 
+
 			nodesChannel <- reg
 
 		case msg := <-broadcastReceiverChannel:
-			logrus.Info("Broadcast received")
+			logrus.Debug("Broadcast received")
 			responseChannel <- msg
 
 		case msg := <-messageChannel:
+			logrus.Debug("Network intercepted message")
 			broadcastTransmissionChannel <- msg
 		}
 	}
