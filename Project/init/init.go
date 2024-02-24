@@ -42,8 +42,9 @@ func main() {
 	nodeOverviewChannel := make(chan nodes.NetworkNodeRegistry)
 	messageReceiveChannel := make(chan network.Message)
 	messageTransmitterChannel := make(chan network.Message)
+	onlineStatusChannel := make(chan bool)
 
-	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel)
+	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel)
 	go func(){
 		for {
 			messageTransmitterChannel <- network.Message{Content: "Hello World", Iterations: 0}
@@ -57,6 +58,8 @@ func main() {
 			fmt.Println("Nodes:", reg.Nodes)
 		case msg := <-messageReceiveChannel:
 			fmt.Printf("Network module intercepted: %v\n", msg)
+		case online:= <-onlineStatusChannel:
+			fmt.Printf("Online status: %v\n", online)
 		}
 	}
 }
