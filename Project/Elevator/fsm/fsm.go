@@ -36,7 +36,7 @@ func SetElevator(f int, cb elev.ElevatorBehaviour, dirn elevio.ElevDir, r [elevi
 
 func setAllLights() {
 	for floor := 0; floor < elevio.NFloors; floor++ {
-		for btn := hwelevio.BHallUp; btn <= hwelevio.BCab; btn++ {
+		for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
 			outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
 			//fmt.Println(floor, " ", hwelevio.ButtonToString(btn), " ", elevator.Requests[floor][btn])
 		}
@@ -50,24 +50,24 @@ func FsmInitBetweenFloors() {
 	elevator.CurrentBehaviour = elev.EBMoving
 }
 
-func FsmRequestButtonPress(btnFloor int, btnType hwelevio.Button) {
+func FsmRequestButtonPress(btnFloor int, btn elevio.Button) {
 
-	fmt.Printf("\n\n%s(%d, %s)\n", "FsmRequestButtonPress", btnFloor, hwelevio.ButtonToString(btnType))
+	fmt.Printf("\n\n%s(%d, %s)\n", "FsmRequestButtonPress", btnFloor, elevio.ButtonToString(btn))
 	elev.ElevatorPrint(elevator)
 
 	switch elevator.CurrentBehaviour {
 	case elev.EBDoorOpen:
-		if requests.RequestsShouldClearImmediately(elevator, btnFloor, btnType) {
+		if requests.RequestsShouldClearImmediately(elevator, btnFloor, btn) {
 			timer.TimerStart(elevator.Config.DoorOpenDurationS)
 		} else {
-			elevator.Requests[btnFloor][btnType] = true
+			elevator.Requests[btnFloor][btn] = true
 		}
 
 	case elev.EBMoving:
-		elevator.Requests[btnFloor][btnType] = true
+		elevator.Requests[btnFloor][btn] = true
 
 	case elev.EBIdle:
-		elevator.Requests[btnFloor][btnType] = true
+		elevator.Requests[btnFloor][btn] = true
 		pair := requests.RequestsChooseDirection(elevator)
 		elevator.Dirn = pair.Dirn
 		elevator.CurrentBehaviour = pair.Behaviour
@@ -193,19 +193,19 @@ func FsmStop(stop bool) {
 }*/
 
 func FsmMakeCheckpoint() {
-	checkpoint.SaveElevCheckpoint(elevator)
+	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 	//fmt.Print("The elevator which were saved: \n")
 	//elev.ElevatorPrint(elevator)
 }
 
 func FsmResumeAtLatestCheckpoint() {
-	elevator, _, _ = checkpoint.LoadElevCheckpoint()
+	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
 	//fmt.Print(elevator.Dirn)
 	outputDevice.MotorDirection(elevator.Dirn)
 }
 
 func FsmLoadLatestCheckpoint() {
-	elevator, _, _ = checkpoint.LoadElevCheckpoint()
+	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
 }
 
 func FsmTestProcessPair() {

@@ -9,56 +9,72 @@ import (
 	"time"
 )
 
+const FilenameCheckpoint = "elevCheckpoint.JSON" // Filepath is kinda a stupid way to do this
+
 type ElevCheckpoint struct {
 	State     elev.Elevator
 	Timestamp time.Time
 }
 
-const filenameCheckpoint = "elevCheckpoint.JSON" // Må finne ut av hvordan filepath burde være
+func toJSON(checkpoint ElevCheckpoint) ([]byte, error) {
+	return json.MarshalIndent(checkpoint, "", "  ")
+}
 
-func SaveElevCheckpoint(e elev.Elevator) error {
+func fromJSON(data []byte) ElevCheckpoint {
+	var checkpoint ElevCheckpoint
+	json.Unmarshal(data, &checkpoint)
+	return checkpoint
+}
 
-	checkpoint := ElevCheckpoint{
-		State:     e,
-		Timestamp: time.Now(),
-	}
+func saveCheckpoint(data []byte, fileName string) error {
 
-	// Marshal the checkpoint data to JSON
-	data, err := json.MarshalIndent(checkpoint, "", "  ")
-	if err != nil {
-		return fmt.Errorf("failed to marshal checkpoint data: %v", err)
-	}
-
-	osFile, err := filehandeling.LockFile(filenameCheckpoint)
+	osFile, err := filehandeling.LockFile(fileName)
 	if err != nil {
 		return err
 
 	}
 	defer filehandeling.UnlockFile(osFile) // Ensure file is unlocked after reading
 
-	err = os.WriteFile(filenameCheckpoint, data, 0644)
+	err = os.WriteFile(fileName, data, 0644)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func LoadElevCheckpoint() (elev.Elevator, time.Time, error) {
-	osFile, err := filehandeling.LockFile(filenameCheckpoint) // Lock the file for reading
+func loadCheckpoint(fileName string) ([]byte, error) {
+	osFile, err := filehandeling.LockFile(fileName) // Lock the file for reading
 	if err != nil {
-		return elev.Elevator{}, time.Time{}, err
+		return nil, err
 	}
 	defer filehandeling.UnlockFile(osFile) // Ensure file is unlocked after reading
 
-	data, err := os.ReadFile(filenameCheckpoint)
+	data, err := os.ReadFile(fileName)
 	if err != nil {
-		return elev.Elevator{}, time.Time{}, fmt.Errorf("failed to read checkpoint file: %v", err)
+		return nil, fmt.Errorf("failed to read checkpoint file: %v", err)
 	}
+	return data, nil
+}
 
-	var checkpoint ElevCheckpoint
-	if err := json.Unmarshal(data, &checkpoint); err != nil {
-		return elev.Elevator{}, time.Time{}, fmt.Errorf("failed to unmarshal checkpoint data: %v", err)
+func SaveElevCheckpoint(e elev.Elevator, fileName string) error {
+	checkpoint :=
+		ElevCheckpoint{
+			e,
+			time.Now(),
+		}
+	jsonCP, err := toJSON(checkpoint)
+	if err != nil {
+		return err
 	}
+	saveCheckpoint(jsonCP, fileName)
+	return nil
+}
 
+func LoadElevCheckpoint(fileName string) (elev.Elevator, time.Time, error) {
+	jsonCp, err := loadCheckpoint(fileName)
+	if err != nil {
+		return elev.Elevator{}, time.Time{}, err
+	}
+	checkpoint := fromJSON(jsonCp)
 	return checkpoint.State, checkpoint.Timestamp, nil
 }

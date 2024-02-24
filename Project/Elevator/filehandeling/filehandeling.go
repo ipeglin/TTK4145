@@ -19,8 +19,9 @@ func LockFile(filePath string) (*os.File, error) {
 
 func UnlockFile(file *os.File) error {
 	err := syscall.Flock(int(file.Fd()), syscall.LOCK_UN)
+	closeErr := file.Close()
 	if err != nil {
 		return err
 	}
-	return file.Close()
+	return closeErr
 }

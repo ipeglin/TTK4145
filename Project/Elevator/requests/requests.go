@@ -1,7 +1,7 @@
 package requests
 
 import (
-	"heislab/Elevator/driver/hwelevio"
+	"fmt"
 	"heislab/Elevator/elev"
 	"heislab/Elevator/elevio"
 )
@@ -90,28 +90,30 @@ func RequestsChooseDirection(e elev.Elevator) DirnBehaviourPair {
 func RequestsShouldStop(e elev.Elevator) bool {
 	switch e.Dirn {
 	case elevio.DirDown:
-		return e.Requests[e.CurrentFloor][hwelevio.BHallDown] ||
-			e.Requests[e.CurrentFloor][hwelevio.BCab] ||
+		return e.Requests[e.CurrentFloor][elevio.BHallDown] ||
+			e.Requests[e.CurrentFloor][elevio.BCab] ||
 			!requestsBelow(e)
 	case elevio.DirUp:
-		return e.Requests[e.CurrentFloor][hwelevio.BHallUp] ||
-			e.Requests[e.CurrentFloor][hwelevio.BCab] ||
+		return e.Requests[e.CurrentFloor][elevio.BHallUp] ||
+			e.Requests[e.CurrentFloor][elevio.BCab] ||
 			!requestsAbove(e)
 	default:
 		return true
 	}
 }
 
-func RequestsShouldClearImmediately(e elev.Elevator, btn_floor int, btn_type hwelevio.Button) bool {
+func RequestsShouldClearImmediately(e elev.Elevator, btn_floor int, btn_type elevio.Button) bool {
 	switch e.Config.ClearRequestVariant {
 	case elev.CRVAll:
+		fmt.Print("CRVAll, RequestsShouldClearImmediately")
 		return e.CurrentFloor == btn_floor
 	case elev.CRVInDirn:
+		fmt.Print("CRVInDirn, RequestsShouldClearImmediately")
 		return e.CurrentFloor == btn_floor &&
-			((e.Dirn == elevio.DirUp && btn_type == hwelevio.BHallUp) ||
-				(e.Dirn == elevio.DirDown && btn_type == hwelevio.BHallDown) ||
+			((e.Dirn == elevio.DirUp && btn_type == elevio.BHallUp) ||
+				(e.Dirn == elevio.DirDown && btn_type == elevio.BHallDown) ||
 				e.Dirn == elevio.DirStop ||
-				btn_type == hwelevio.BCab)
+				btn_type == elevio.BCab)
 	default:
 		return false
 	}
@@ -120,28 +122,30 @@ func RequestsShouldClearImmediately(e elev.Elevator, btn_floor int, btn_type hwe
 func RequestsClearAtCurrentFloor(e elev.Elevator) elev.Elevator {
 	switch e.Config.ClearRequestVariant {
 	case elev.CRVAll:
+		fmt.Print("CRVAll, RequestsClearAtCurrentFloor")
 		for btn := 0; btn < elevio.NButtons; btn++ {
 			e.Requests[e.CurrentFloor][btn] = false
 		}
 
 	case elev.CRVInDirn:
-		e.Requests[e.CurrentFloor][hwelevio.BCab] = false
+		fmt.Print("CRVInDirn, RequestsClearAtCurrentFloor")
+		e.Requests[e.CurrentFloor][elevio.BCab] = false
 		switch e.Dirn {
 		case elevio.DirUp:
-			if !requestsAbove(e) && !e.Requests[e.CurrentFloor][hwelevio.BHallUp] {
-				e.Requests[e.CurrentFloor][hwelevio.BHallDown] = false
+			if !requestsAbove(e) && !e.Requests[e.CurrentFloor][elevio.BHallUp] {
+				e.Requests[e.CurrentFloor][elevio.BHallDown] = false
 			}
-			e.Requests[e.CurrentFloor][hwelevio.BHallUp] = false
+			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
 
 		case elevio.DirDown:
-			if !requestsBelow(e) && !e.Requests[e.CurrentFloor][hwelevio.BHallDown] {
-				e.Requests[e.CurrentFloor][hwelevio.BHallUp] = false
+			if !requestsBelow(e) && !e.Requests[e.CurrentFloor][elevio.BHallDown] {
+				e.Requests[e.CurrentFloor][elevio.BHallUp] = false
 			}
-			e.Requests[e.CurrentFloor][hwelevio.BHallUp] = false
+			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
 
 		default:
-			e.Requests[e.CurrentFloor][hwelevio.BHallUp] = false
-			e.Requests[e.CurrentFloor][hwelevio.BHallDown] = false
+			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
+			e.Requests[e.CurrentFloor][elevio.BHallDown] = false
 		}
 	default:
 

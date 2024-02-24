@@ -7,33 +7,28 @@ import (
 	"time"
 )
 
-const _pollRate = 20 * time.Millisecond
+const PollRate = 20 * time.Millisecond
 
 var _initialized bool = false
 var _numFloors int = 4
 var _mtx sync.Mutex
 var _conn net.Conn
 
-type MotorDirection int
+type HWMotorDirection int
 
 const (
-	MD_Down MotorDirection = iota - 1
+	MD_Down HWMotorDirection = iota - 1
 	MD_Stop
 	MD_Up
 )
 
-type Button int
+type HWButtonType int
 
 const (
-	BHallUp Button = iota
+	BHallUp HWButtonType = iota
 	BHallDown
 	BCab
 )
-
-type ButtonEvent struct {
-	Floor  int
-	Button Button
-}
 
 func Init(addr string, numFloors int) {
 	if _initialized {
@@ -50,12 +45,12 @@ func Init(addr string, numFloors int) {
 	_initialized = true
 }
 
-func SetMotorDirection(dir MotorDirection) {
+func SetMotorDirection(dir HWMotorDirection) {
 	fmt.Println("Setting motordirection")
 	write([4]byte{1, byte(dir), 0, 0})
 }
 
-func SetButtonLamp(button Button, floor int, value bool) {
+func SetButtonLamp(button HWButtonType, floor int, value bool) {
 	write([4]byte{2, byte(button), byte(floor), toByte(value)})
 }
 
@@ -71,59 +66,7 @@ func SetStopLamp(value bool) {
 	write([4]byte{5, toByte(value), 0, 0})
 }
 
-func PollButtons(receiver chan<- ButtonEvent) {
-	prev := make([][3]bool, _numFloors)
-	for {
-		time.Sleep(_pollRate)
-		for f := 0; f < _numFloors; f++ {
-			for b := Button(0); b < 3; b++ {
-				v := GetButton(b, f)
-				if v != prev[f][b] && v != false {
-					receiver <- ButtonEvent{f, Button(b)}
-				}
-				prev[f][b] = v
-			}
-		}
-	}
-}
-
-func PollFloorSensor(receiver chan<- int) {
-	prev := -1
-	for {
-		time.Sleep(_pollRate)
-		v := GetFloor()
-		if v != prev && v != -1 {
-			receiver <- v
-		}
-		prev = v
-	}
-}
-
-func PollStopButton(receiver chan<- bool) {
-	prev := false
-	for {
-		time.Sleep(_pollRate)
-		v := GetStop()
-		if v != prev {
-			receiver <- v
-		}
-		prev = v
-	}
-}
-
-func PollObstructionSwitch(receiver chan<- bool) {
-	prev := false
-	for {
-		time.Sleep(_pollRate)
-		v := GetObstruction()
-		if v != prev {
-			receiver <- v
-		}
-		prev = v
-	}
-}
-
-func GetButton(button Button, floor int) bool {
+func GetButton(button HWButtonType, floor int) bool {
 	a := read([4]byte{6, byte(button), byte(floor), 0})
 	return toBool(a[1])
 }
@@ -189,17 +132,4 @@ func toBool(a byte) bool {
 		b = true
 	}
 	return b
-}
-
-func ButtonToString(b Button) string {
-	switch b {
-	case BHallUp:
-		return "BHallUp"
-	case BHallDown:
-		return "BHallDown"
-	case BCab:
-		return "DiBCabrUp"
-	default:
-		return "DirUnknown"
-	}
 }
