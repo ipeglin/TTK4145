@@ -7,7 +7,6 @@ import (
 	"heislab/Elevator/fsm"
 	"heislab/Elevator/processpair"
 	"heislab/Elevator/timer"
-	"time"
 )
 
 func mainLogic() {
@@ -70,7 +69,7 @@ func main() {
 		fsm.FsmInitBetweenFloors()
 		fsm.FsmMakeCheckpoint()
 	}
-	time.Sleep(1 * time.Second)
+
 	var mainFuncObject processpair.MainFuncType = mainLogic
 	processpair.ProcessPairHandler(mainFuncObject)
 

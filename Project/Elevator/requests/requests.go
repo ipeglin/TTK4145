@@ -120,6 +120,7 @@ func RequestsShouldClearImmediately(e elev.Elevator, btn_floor int, btn_type ele
 }
 
 func RequestsClearAtCurrentFloor(e elev.Elevator) elev.Elevator {
+	fmt.Print("RequestsClearAtCurrentFloor: ")
 	switch e.Config.ClearRequestVariant {
 	case elev.CRVAll:
 		fmt.Print("CRVAll, RequestsClearAtCurrentFloor")

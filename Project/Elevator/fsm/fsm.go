@@ -97,7 +97,6 @@ func FsmFloorArrival(newFloor int) {
 	case elev.EBMoving:
 		if requests.RequestsShouldStop(elevator) {
 			outputDevice.MotorDirection(elevio.DirStop)
-			elevator.Dirn = elevio.DirStop
 			outputDevice.DoorLight(true)
 			elevator = requests.RequestsClearAtCurrentFloor(elevator)
 			timer.TimerStart(elevator.Config.DoorOpenDurationS)
