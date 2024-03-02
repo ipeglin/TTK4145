@@ -3,6 +3,7 @@ package network
 import (
 	"fmt"
 	"network/broadcast"
+	"network/checksum"
 	"network/local"
 	"network/nodes"
 	"os"
@@ -70,6 +71,13 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 
 		case msg := <-messageChannel:
 			logrus.Debug("Broadcast transmitted to network")
+			checksum, err := checksum.GenerateJSONChecksum(msg.Payload)
+			if err != nil {
+				logrus.Error("Checksum generation failed: ", err)
+				continue
+			}
+			msg.Checksum = checksum
+
 			broadcastTransmissionChannel <- msg
 		}
 	}
