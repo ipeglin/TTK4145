@@ -5,7 +5,6 @@ import (
 	"elevator/elevio"
 	"elevator/fsm"
 	"elevator/timer"
-	"fmt"
 
 	"github.com/sirupsen/logrus"
 )
@@ -69,7 +68,7 @@ func Init() {
 			}
 
 		case floor := <-drv_floors:
-			fmt.Info("Elevator arrived on floor", floor)
+			logrus.Info("Elevator arrived on floor", floor)
 			fsm.FsmFloorArrival(floor)
 			fsm.FsmUpdateLocalElevatorToJSON()
 			fsm.FsmUpdateCylickCounterNewFloor()
