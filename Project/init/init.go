@@ -59,7 +59,7 @@ func main() {
 		case msg := <-messageReceiveChannel:
 			logrus.Warn("Broadcast received:", msg)
 		case online:= <-onlineStatusChannel:
-			logrus.Warn("Updated online status: %v\n", online)
+			logrus.Warn("Updated online status:", online)
 		}
 	}
 }
