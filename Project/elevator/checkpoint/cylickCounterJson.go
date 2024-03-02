@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+
+	"github.com/sirupsen/logrus"
 )
 type CyclicCounterState struct {
 	Behavior    int   `json:"behaviour"`
