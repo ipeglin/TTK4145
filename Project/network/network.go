@@ -23,8 +23,6 @@ type Message struct {
 }
 
 func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan Message, responseChannel chan<- Message, onlineStatusChannel chan<- bool) {
-	logrus.Trace("Initialising Network Module...")
-
 	// fetching host IP and PORT
 	nodeIP, err := local.GetIP()
 	if err != nil {
@@ -34,7 +32,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 
 	// set node unique ID
 	nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP, os.Getpid())
-	logrus.Info(fmt.Sprintf("Network module initialised with UID=%s on PORT=%d", nodeUid, basePort))
+	logrus.Debug(fmt.Sprintf("Network module initialised with UID=%s on PORT=%d", nodeUid, basePort))
 
 	// channel for network node updates
 	nodeRegistryChannel := make(chan nodes.NetworkNodeRegistry)
@@ -52,14 +50,14 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 	for {
 		select {
 		case reg := <-nodeRegistryChannel:
-			logrus.Info(fmt.Sprintf("Node registry update:\n  Nodes:    %q\n  New:      %q\n  Lost:     %q", reg.Nodes, reg.New, reg.Lost))
+			logrus.Debug(fmt.Sprintf("Node registry update:\n  Nodes:    %q\n  New:      %q\n  Lost:     %q", reg.Nodes, reg.New, reg.Lost))
 
 			// pass node online status to the main process
 			if slices.Contains(reg.Lost,  nodeUid) {
 				logrus.Warn("Node lost connection:", nodeUid)
 				onlineStatusChannel <- false
 			} else if reg.New == nodeUid {
-				logrus.Info("Node connected:", nodeUid)
+				logrus.Warn("Node connected:", nodeUid)
 				onlineStatusChannel <- true
 			} 
 
@@ -74,7 +72,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 			}
 
 			if msg.Checksum != checksum {
-				logrus.Error("Checksum mismatch, payload corrupted")
+				logrus.Error("Checksum mismatch, payload corrupted. Abort forwarding")
 				continue
 			}
 

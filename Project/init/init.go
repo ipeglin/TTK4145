@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"network"
 	"network/nodes"
@@ -11,31 +10,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// fetching process flags
-func getFlags() (int, int, error) {
-	var id, numNodes *int
-	id = flag.Int("id", 0, "ID of the node")
-	numNodes = flag.Int("numNodes", 3, "total number of the nodes")
-	flag.Parse()
-
-	// require id
-	if *id == 0 {
-		return 0, 0, fmt.Errorf("ERROR: Node ID is required")
-	} else if *id > *numNodes {
-		return 0, 0, fmt.Errorf("ERROR: Node ID cannot be greater than number of nodes")
-	}
-
-	return *id, *numNodes, nil
-}
-
 func main() {
-	id, numNodes, err := getFlags()
-	if err != nil {
-		logrus.Fatal(err)
-		return
-	}
-
-	logrus.Debug(fmt.Sprintf("Node initialised with ID=%d, #Nodes=%d, PID=%d", id, numNodes, os.Getpid()))
+	logrus.Info("Node initialised with PID:", os.Getpid())
 
 	// TODO: Launch new process watching current process in case of crash
 
@@ -55,9 +31,9 @@ func main() {
 	for {
 		select {
 		case reg := <-nodeOverviewChannel:
-			logrus.Warn("Updated nodes:", reg.Nodes)
+			logrus.Info("Known nodes:", reg.Nodes)
 		case msg := <-messageReceiveChannel:
-			logrus.Warn("Broadcast received:", msg)
+			fmt.Print("Must do something with the message:", msg)
 		case online:= <-onlineStatusChannel:
 			logrus.Warn("Updated online status:", online)
 		}
