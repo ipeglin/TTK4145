@@ -67,6 +67,17 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 
 		case msg := <-broadcastReceiverChannel:
 			logrus.Debug("Broadcast received from network")
+			checksum, err := checksum.GenerateJSONChecksum(msg.Payload)
+			if err != nil {
+				logrus.Error("Checksum generation failed: ", err)
+				continue
+			}
+
+			if msg.Checksum != checksum {
+				logrus.Error("Checksum mismatch, payload corrupted")
+				continue
+			}
+
 			responseChannel <- msg
 
 		case msg := <-messageChannel:
