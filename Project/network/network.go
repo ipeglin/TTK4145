@@ -46,7 +46,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 	broadcastReceiverChannel := make(chan Message)
 
 	go broadcast.Sender(messagePort, broadcastTransmissionChannel)
-	go broadcast.Receiver(messagePort, broadcastReceiverChannel)
+	go broadcast.Receiver(nodeIP, messagePort, broadcastReceiverChannel)
 
 	for {
 		select {

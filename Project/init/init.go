@@ -47,7 +47,7 @@ func main() {
 	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel)
 	go func(){
 		for {
-			messageTransmitterChannel <- network.Message{Payload: "Hello World", MessageId: 0}
+			messageTransmitterChannel <- network.Message{Payload: fmt.Sprintf("Hello World from %s", "This unit"), MessageId: 0}
 			time.Sleep(5 * time.Second)
 		}
 	}()
@@ -57,7 +57,7 @@ func main() {
 		case reg := <-nodeOverviewChannel:
 			logrus.Warn("Updated nodes:", reg.Nodes)
 		case msg := <-messageReceiveChannel:
-			logrus.Warn("Broadcast received: %v\n", msg)
+			logrus.Warn("Broadcast received:", msg)
 		case online:= <-onlineStatusChannel:
 			logrus.Warn("Updated online status: %v\n", online)
 		}
