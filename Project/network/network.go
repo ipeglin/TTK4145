@@ -40,14 +40,14 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 	nodeRegistryChannel := make(chan nodes.NetworkNodeRegistry)
 	TransmissionEnableChannel := make(chan bool)
 
-	go nodes.Client(lifelinePort, nodeUid, TransmissionEnableChannel)
-	go nodes.Server(lifelinePort, nodeRegistryChannel)
+	go nodes.Sender(lifelinePort, nodeUid, TransmissionEnableChannel)
+	go nodes.Receiver(lifelinePort, nodeRegistryChannel)
 
 	broadcastTransmissionChannel := make(chan Message)
 	broadcastReceiverChannel := make(chan Message)
 
-	go broadcast.Client(transmissionPort, broadcastTransmissionChannel)
-	go broadcast.Server(receiverPort, broadcastReceiverChannel)
+	go broadcast.Sender(transmissionPort, broadcastTransmissionChannel)
+	go broadcast.Receiver(receiverPort, broadcastReceiverChannel)
 
 	for {
 		select {

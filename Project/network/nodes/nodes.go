@@ -18,7 +18,7 @@ type NetworkNodeRegistry struct {
 const interval = 150 * time.Millisecond
 const timeout = 500 * time.Millisecond
 
-func Client(port int, id string, enableTransmit <-chan bool) {
+func Sender(port int, id string, enableTransmit <-chan bool) {
 	conn := conn.DialBroadcastUDP(port)
 	addr, _ := net.ResolveUDPAddr("udp", fmt.Sprintf("255.255.255.255:%d", port))
 
@@ -34,7 +34,7 @@ func Client(port int, id string, enableTransmit <-chan bool) {
 	}
 }
 
-func Server(port int, updateChannel chan<- NetworkNodeRegistry) {
+func Receiver(port int, updateChannel chan<- NetworkNodeRegistry) {
 	var buffer [1024]byte
 	var reg NetworkNodeRegistry
 	lastSeen := make(map[string]time.Time)
