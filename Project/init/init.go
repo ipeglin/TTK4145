@@ -47,7 +47,7 @@ func main() {
 	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel)
 	go func(){
 		for {
-			messageTransmitterChannel <- network.Message{Content: "Hello World", Iterations: 0}
+			messageTransmitterChannel <- network.Message{Payload: "Hello World", MessageId: 0}
 			time.Sleep(5 * time.Second)
 		}
 	}()

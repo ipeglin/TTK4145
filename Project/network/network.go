@@ -17,8 +17,9 @@ const transmissionPort int = basePort + 2
 const receiverPort int = basePort + 3
 
 type Message struct {
-	Content    string
-	Iterations int
+	MessageId int
+	Payload    interface{}
+	Checksum string
 }
 
 func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan Message, responseChannel chan<- Message, onlineStatusChannel chan<- bool) {
