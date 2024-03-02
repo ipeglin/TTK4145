@@ -13,8 +13,7 @@ import (
 
 const basePort int = 1337
 const lifelinePort int = basePort + 1
-const transmissionPort int = basePort + 2
-const receiverPort int = basePort + 3
+const messagePort int = basePort + 2
 
 type Message struct {
 	MessageId int
@@ -46,8 +45,8 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 	broadcastTransmissionChannel := make(chan Message)
 	broadcastReceiverChannel := make(chan Message)
 
-	go broadcast.Sender(transmissionPort, broadcastTransmissionChannel)
-	go broadcast.Receiver(receiverPort, broadcastReceiverChannel)
+	go broadcast.Sender(messagePort, broadcastTransmissionChannel)
+	go broadcast.Receiver(messagePort, broadcastReceiverChannel)
 
 	for {
 		select {
