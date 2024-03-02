@@ -56,10 +56,10 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 
 			// pass node online status to the main process
 			if slices.Contains(reg.Lost,  nodeUid) {
-				logrus.Warn("Node lost connection: ", nodeUid)
+				logrus.Warn("Node lost connection:", nodeUid)
 				onlineStatusChannel <- false
 			} else if reg.New == nodeUid {
-				logrus.Info("Node connected: ", nodeUid)
+				logrus.Info("Node connected:", nodeUid)
 				onlineStatusChannel <- true
 			} 
 
@@ -69,7 +69,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 			logrus.Debug("Broadcast received from network")
 			checksum, err := checksum.GenerateJSONChecksum(msg.Payload)
 			if err != nil {
-				logrus.Error("Checksum generation failed: ", err)
+				logrus.Error("Checksum generation failed:", err)
 				continue
 			}
 
@@ -84,7 +84,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 			logrus.Debug("Broadcast transmitted to network")
 			checksum, err := checksum.GenerateJSONChecksum(msg.Payload)
 			if err != nil {
-				logrus.Error("Checksum generation failed: ", err)
+				logrus.Error("Checksum generation failed:", err)
 				continue
 			}
 			msg.Checksum = checksum
