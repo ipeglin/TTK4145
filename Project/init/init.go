@@ -1,7 +1,7 @@
 package main
 
 import (
-	"elevator"
+	// "elevator"
 	"fmt"
 	"network"
 	"network/nodes"
@@ -21,7 +21,8 @@ func main() {
 	messageTransmitterChannel := make(chan network.Message)
 	onlineStatusChannel := make(chan bool)
 
-	go elevator.Init()
+	// must be commented outside of lab
+	// go elevator.Init()
 
 	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel)
 	go func(){
