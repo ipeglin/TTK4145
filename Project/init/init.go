@@ -1,6 +1,7 @@
 package main
 
 import (
+	"elevator"
 	"fmt"
 	"network"
 	"network/nodes"
@@ -19,6 +20,8 @@ func main() {
 	messageReceiveChannel := make(chan network.Message)
 	messageTransmitterChannel := make(chan network.Message)
 	onlineStatusChannel := make(chan bool)
+
+	go elevator.Init()
 
 	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel)
 	go func(){
