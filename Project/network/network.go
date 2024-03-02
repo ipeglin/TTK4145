@@ -65,11 +65,11 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 			nodesChannel <- reg
 
 		case msg := <-broadcastReceiverChannel:
-			logrus.Debug("Broadcast received")
+			logrus.Debug("Broadcast received from network")
 			responseChannel <- msg
 
 		case msg := <-messageChannel:
-			logrus.Debug("Network intercepted message")
+			logrus.Debug("Broadcast transmitted to network")
 			broadcastTransmissionChannel <- msg
 		}
 	}

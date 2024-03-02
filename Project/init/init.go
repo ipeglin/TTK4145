@@ -55,11 +55,11 @@ func main() {
 	for {
 		select {
 		case reg := <-nodeOverviewChannel:
-			fmt.Println("Nodes:", reg.Nodes)
+			logrus.Warn("Updated nodes:", reg.Nodes)
 		case msg := <-messageReceiveChannel:
-			fmt.Printf("Network module intercepted: %v\n", msg)
+			logrus.Warn("Broadcast received: %v\n", msg)
 		case online:= <-onlineStatusChannel:
-			fmt.Printf("Online status: %v\n", online)
+			logrus.Warn("Updated online status: %v\n", online)
 		}
 	}
 }
