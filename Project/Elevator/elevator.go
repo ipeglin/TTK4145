@@ -1,14 +1,14 @@
-package main
+package elevator
 
 import (
+	"elevator/driver/hwelevio"
+	"elevator/elevio"
+	"elevator/fsm"
+	"elevator/timer"
 	"fmt"
-	"heislab/Elevator/driver/hwelevio"
-	"heislab/Elevator/elevio"
-	"heislab/Elevator/fsm"
-	"heislab/Elevator/timer"
 )
 
-func main() {
+func Init() {
 
 	fmt.Println("Started!")
 	hwelevio.Init(elevio.Addr, elevio.NFloors)
