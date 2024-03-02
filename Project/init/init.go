@@ -23,7 +23,7 @@ func main() {
 	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel)
 	go func(){
 		for {
-			messageTransmitterChannel <- network.Message{Payload: fmt.Sprintf("Hello World from %s", "This unit"), MessageId: 0}
+			messageTransmitterChannel <- network.Message{Payload: fmt.Sprintf("Hello World from process %v", os.Getpid()), MessageId: 0}
 			time.Sleep(5 * time.Second)
 		}
 	}()
