@@ -41,14 +41,6 @@ func Receiver(port int, updateChannel chan<- NetworkNodeRegistry) {
 
 	conn := conn.DialBroadcastUDP(port)
 
-	// diplay known nodes
-	// go func() {
-	// 	for {
-	// 		logrus.Debug("Known nodes:", reg)
-	// 		time.Sleep(5 * time.Second)
-	// 	}
-	// }()
-
 	for {
 		updated := false
 
