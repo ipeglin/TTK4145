@@ -1,9 +1,9 @@
 package requests
 
 import (
+	//"fmt"
 	"elevator/elev"
 	"elevator/elevio"
-	"fmt"
 )
 
 func requestsAbove(e elev.Elevator) bool {
@@ -105,10 +105,10 @@ func RequestsShouldStop(e elev.Elevator) bool {
 func RequestsShouldClearImmediately(e elev.Elevator, btn_floor int, btn_type elevio.Button) bool {
 	switch e.Config.ClearRequestVariant {
 	case elev.CRVAll:
-		fmt.Print("CRVAll, RequestsShouldClearImmediately")
+		//fmt.Print("CRVAll, RequestsShouldClearImmediately")
 		return e.CurrentFloor == btn_floor
 	case elev.CRVInDirn:
-		fmt.Print("CRVInDirn, RequestsShouldClearImmediately")
+		//fmt.Print("CRVInDirn, RequestsShouldClearImmediately")
 		return e.CurrentFloor == btn_floor &&
 			((e.Dirn == elevio.DirUp && btn_type == elevio.BHallUp) ||
 				(e.Dirn == elevio.DirDown && btn_type == elevio.BHallDown) ||
@@ -120,16 +120,16 @@ func RequestsShouldClearImmediately(e elev.Elevator, btn_floor int, btn_type ele
 }
 
 func RequestsClearAtCurrentFloor(e elev.Elevator) elev.Elevator {
-	fmt.Print("RequestsClearAtCurrentFloor: ")
+	//fmt.Print("RequestsClearAtCurrentFloor: ")
 	switch e.Config.ClearRequestVariant {
 	case elev.CRVAll:
-		fmt.Print("CRVAll, RequestsClearAtCurrentFloor")
+		//fmt.Print("CRVAll, RequestsClearAtCurrentFloor")
 		for btn := 0; btn < elevio.NButtons; btn++ {
 			e.Requests[e.CurrentFloor][btn] = false
 		}
 
 	case elev.CRVInDirn:
-		fmt.Print("CRVInDirn, RequestsClearAtCurrentFloor")
+		//fmt.Print("CRVInDirn, RequestsClearAtCurrentFloor")
 		e.Requests[e.CurrentFloor][elevio.BCab] = false
 		switch e.Dirn {
 		case elevio.DirUp:

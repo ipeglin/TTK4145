@@ -1,9 +1,9 @@
 package elev
 
 import (
-	"fmt"
 	"elevator/driver/hwelevio"
 	"elevator/elevio"
+	"fmt"
 )
 
 func ElevatorInit() Elevator {

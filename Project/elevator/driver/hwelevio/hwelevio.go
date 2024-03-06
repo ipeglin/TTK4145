@@ -46,7 +46,7 @@ func Init(addr string, numFloors int) {
 }
 
 func SetMotorDirection(dir HWMotorDirection) {
-	fmt.Println("Setting motordirection")
+	//fmt.Println("Setting motordirection")
 	write([4]byte{1, byte(dir), 0, 0})
 }
 

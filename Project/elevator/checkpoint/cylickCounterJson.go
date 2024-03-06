@@ -2,10 +2,6 @@ package checkpoint
 
 import (
 	"elevator/elevio"
-	"elevator/filehandeling"
-	"encoding/json"
-	"fmt"
-	"os"
 )
 type CyclicCounterState struct {
 	Behavior    int   `json:"behaviour"`
@@ -15,14 +11,67 @@ type CyclicCounterState struct {
 }
 
 type CyclicCounterInput struct {
-	HallRequests [][2]int                      `json:"hallRequests"`
-	States       map[string]CyclicCounterState `json:"states"`
+	HallRequests [][2]int                            `json:"hallRequests"`
+	States       map[string]CyclicCounterState       `json:"states"`
+}
+
+func InitializeCyclicCounterInput(ElevatorName string) CyclicCounterInput {
+	cyclicCounter := CyclicCounterInput{
+		HallRequests: make([][2]int, elevio.NFloors),
+		States:       make(map[string]CyclicCounterState), // Initialiserer map her
+	}
+
+	// Nå som States er initialisert, kan du legge til oppføringer i den
+	cyclicCounter.States[ElevatorName] = CyclicCounterState{
+		Behavior:    0,
+		Floor:       0,
+		Direction:   0,
+		CabRequests: make([]int, elevio.NFloors),
+	}
+
+	return cyclicCounter
+}
+
+func updateLocalElevatorsCyclicCounterInput(cyclicCounter CyclicCounterInput, elevatorName string) CyclicCounterInput {
+    state := cyclicCounter.States[elevatorName]
+    state.Behavior += 1
+    state.Floor += 1
+    state.Direction += 1
+    for i := range state.CabRequests {
+        state.CabRequests[i] += 1
+    }
+    cyclicCounter.States[elevatorName] = state
+    return cyclicCounter
+}
+
+func updateCyclicCounterWhenHallOrderIsComplete(cyclicCounter CyclicCounterInput, orderCompleteFloor int, elevatorName string) CyclicCounterInput{
+	//dette er feil. må finne god logikk som finner ut hvilken av dem som skal oppdateres. 
+	//trenger simen sin framgangsmåte da.
+	//ser for meg det er et enkelt funksjonskall som henter knappen som skal klareres
+	cyclicCounter.HallRequests[orderCompleteFloor][0] += 1
+	cyclicCounter.HallRequests[orderCompleteFloor][1] += 1
+	cyclicCounter = updateLocalElevatorsCyclicCounterInput(cyclicCounter, elevatorName)
+	return cyclicCounter
+}
+
+func updateCyclicCounterWhenNewOrderOccurs(cyclicCounter CyclicCounterInput, hraInput HRAInput, elevatorName string,btnFloor int, btn elevio.Button)CyclicCounterInput{
+    switch btn {
+    case elevio.BHallUp:
+		if !hraInput.HallRequests[btnFloor][0]{
+        	cyclicCounter.HallRequests[btnFloor][0] += 1
+		}
+    case elevio.BHallDown:
+		if !hraInput.HallRequests[btnFloor][1]{
+			cyclicCounter.HallRequests[btnFloor][1] += 1
+		}
+    case elevio.BCab:
+		cyclicCounter.States[elevatorName].CabRequests[btnFloor] +=1
+	}
+	return cyclicCounter
 }
 
 
-const FilenameCylickCounter = "cylickCounter.JSON"
-
-
+/*
 func SaveCyclicCounterInput(cyclicCounter CyclicCounterInput, filename string) error {
 	data, err := json.MarshalIndent(cyclicCounter, "", "  ")
 	if err != nil {
@@ -63,49 +112,6 @@ func LoadCyclicCounterInput(filename string) (CyclicCounterInput, error)  {
 	return cyclicCounter, nil
 }
 
-func InitCyclicCounter(filename string) error { // La til returtypen error
-    cyclicCounter, err := LoadCyclicCounterInput(filename) // Anta at denne funksjonen er definert et sted
-    if err != nil {
-        // If loading fails, try to initialize the CyclicCounter file.
-        initErr := createCyclicJSON(filename) // Anta at denne funksjonen er definert et sted
-        if initErr != nil {
-            // If initialization also fails, return this new error.
-            return fmt.Errorf("failed to initialize cyclicCounter JSON: %v", initErr)
-        }
-        // After initialization, attempt to load the newly created file again.
-        cyclicCounter, err = LoadCyclicCounterInput(filename)
-        if err != nil {
-            // If loading still fails, return this error.
-            return fmt.Errorf("failed to load cyclicCounter from JSON after initialization: %v", err)
-        }
-    }
-
-	// Initialiser HallRequests med nuller
-	for i := range cyclicCounter.HallRequests {
-		cyclicCounter.HallRequests[i] = [2]int{0, 0} // Null for både opp- og ned-knapper
-	}
-
-	// Anta at du vil initialisere 'States' med en eller flere starttilstander.
-	// For eksempel, for en enkelt heis med navn "one":
-	cyclicCounter.States["one"] = CyclicCounterState{
-		Behavior:    0,
-		Floor:       0,
-		Direction:   0,
-		CabRequests: make([]int, elevio.NFloors),
-	}
-
-	// For å initialisere CabRequests med nuller
-	for i := range cyclicCounter.States["one"].CabRequests {
-		cyclicCounter.States["one"].CabRequests[i] = 0
-	}
-
-    err = SaveCyclicCounterInput(cyclicCounter, filename) // Pass på at denne funksjonen er definert et sted
-    if err != nil {
-        fmt.Println("Feil ved lagring av CyclicCounterInput:", err)
-        return err // Endret til å returnere err direkte
-    }
-    return nil // Sørger for å returnere nil hvis det ikke er noen feil
-}
 
 
 func createCyclicJSON(filename string) error {
@@ -118,3 +124,4 @@ func createCyclicJSON(filename string) error {
 
 	return SaveCyclicCounterInput(defaultCyclikCounter, filename)
 }
+*/

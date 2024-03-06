@@ -79,7 +79,7 @@ func RequestStop() bool {
 
 func MotorDirection(d ElevDir) {
 	// Implementation using the actual hardware library.
-	fmt.Println("Motordirection to be sat: ", ElevDirToString(d))
+	//fmt.Println("Motordirection to be sat: ", ElevDirToString(d))
 	hwelevio.SetMotorDirection(castElevDirToMotorDirection(d))
 }
 
