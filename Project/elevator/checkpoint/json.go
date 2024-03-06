@@ -108,9 +108,9 @@ func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) 
 	}
 }
 
-func UpdateLocalJSON(localFilname string, otherFilnameString string) {
+func UpdateLocalJSON(localFilname string, incommigFilname string) {
 	localCombinedInput, _ := LoadCombinedInput(localFilname)
-	otherCombinedInput, _ := LoadCombinedInput(otherFilnameString)
+	otherCombinedInput, _ := LoadCombinedInput(incommigFilname)
 
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
@@ -162,4 +162,10 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
     }
 
     return nil
+}
+
+func InncommingJSONHandeling(localFilname string, incommigFilname string, inncommingCombinedInput CombinedInput, inactiveElevatorIDs []string){
+	SaveCombinedInput(inncommingCombinedInput, incommigFilname) 
+	UpdateLocalJSON(localFilname, incommigFilname)
+	DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs, localFilname) 
 }
