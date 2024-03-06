@@ -18,9 +18,9 @@ const messagePort int = basePort + 2
 
 type Message struct {
 	MessageId int
-	SenderId string // IPv4
-	Payload    interface{}
-	Checksum string
+	SenderId  string // IPv4
+	Payload   interface{}
+	Checksum  string
 }
 
 func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan Message, responseChannel chan<- Message, onlineStatusChannel chan<- bool) {
@@ -54,13 +54,13 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 			logrus.Debug(fmt.Sprintf("Node registry update:\n  Nodes:    %q\n  New:      %q\n  Lost:     %q", reg.Nodes, reg.New, reg.Lost))
 
 			// pass node online status to the main process
-			if slices.Contains(reg.Lost,  nodeUid) {
+			if slices.Contains(reg.Lost, nodeUid) {
 				logrus.Warn("Node lost connection:", nodeUid)
 				onlineStatusChannel <- false
 			} else if reg.New == nodeUid {
 				logrus.Warn("Node connected:", nodeUid)
 				onlineStatusChannel <- true
-			} 
+			}
 
 			nodesChannel <- reg
 

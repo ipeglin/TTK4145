@@ -1,32 +1,32 @@
 {
   "hallRequests": [
     [
-      3,
+      0,
       0
     ],
     [
-      1,
-      1
-    ],
-    [
-      2,
-      1
+      0,
+      0
     ],
     [
       0,
-      1
+      0
+    ],
+    [
+      0,
+      0
     ]
   ],
   "states": {
     "one": {
       "behaviour": 0,
-      "floor": 19,
+      "floor": 0,
       "direction": 0,
       "cabRequests": [
-        2,
-        2,
-        41,
-        3
+        0,
+        0,
+        0,
+        0
       ]
     }
   }

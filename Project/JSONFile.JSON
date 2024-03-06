@@ -1,0 +1,68 @@
+{
+  "HRAInput": {
+    "hallRequests": [
+      [
+        false,
+        false
+      ],
+      [
+        false,
+        false
+      ],
+      [
+        false,
+        false
+      ],
+      [
+        false,
+        false
+      ]
+    ],
+    "states": {
+      "one": {
+        "behaviour": "idle",
+        "floor": 3,
+        "direction": "stop",
+        "cabRequests": [
+          false,
+          false,
+          false,
+          false
+        ]
+      }
+    }
+  },
+  "CyclicCounter": {
+    "hallRequests": [
+      [
+        2,
+        1
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    "states": {
+      "one": {
+        "behaviour": 27,
+        "floor": 27,
+        "direction": 27,
+        "cabRequests": [
+          27,
+          28,
+          27,
+          29
+        ]
+      }
+    }
+  }
+}

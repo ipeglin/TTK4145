@@ -5,10 +5,7 @@ import (
 	"fmt"
 	"net"
 	"network/conn"
-	"network/local"
 	"reflect"
-
-	"github.com/sirupsen/logrus"
 )
 
 const bufferSize = 1024
@@ -59,22 +56,22 @@ func Receiver(ownIp string, port int, chans ...interface{}) {
 	var buf [bufferSize]byte
 	conn := conn.DialBroadcastUDP(port)
 	for {
-		n, addr, e := conn.ReadFrom(buf[0:])
+		n, _, e := conn.ReadFrom(buf[0:])
 		if e != nil {
 			fmt.Printf("bcast.Receiver(%d, ...):ReadFrom() failed: \"%+v\"\n", port, e)
 		}
 
-		localIP, err := local.GetIP()
-		if err != nil {
-			logrus.Warn("ERROR: Unable to get the IP address")
-			localIP = "Disconnected"
-		}
+		// localIP, err := local.GetIP()
+		// if err != nil {
+		// 	logrus.Warn("ERROR: Unable to get the IP address")
+		// 	localIP = "Disconnected"
+		// }
 
-		ownAddress, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", localIP, port))
-		if (ownAddress.String() == addr.String()) {
-			logrus.Debug("Ignoring broadcast message from self")
-			continue
-		}
+		// ownAddress, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", localIP, port))
+		// if (ownAddress.String() == addr.String()) {
+		// 	logrus.Debug("Ignoring broadcast message from self")
+		// 	continue
+		// }
 
 		var ttj typeTaggedJSON
 		json.Unmarshal(buf[0:n], &ttj)

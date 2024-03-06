@@ -61,20 +61,20 @@ func FsmRequestButtonPress(btnFloor int, btn elevio.Button) {
 		} else {
 			//elevator.Requests[btnFloor][btn] = true
 		//trenger å sjekke at alt dette er riktig
-		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn)
+		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, checkpoint.ElevatorName)
 		fsmJSONOrderAssigner(checkpoint.JSONFile, checkpoint.ElevatorName)
 		}
 
 	case elev.EBMoving:
 		//elevator.Requests[btnFloor][btn] = true
 		//trenger å sjekke at alt dette er riktig
-		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn)
+		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, checkpoint.ElevatorName)
 		fsmJSONOrderAssigner(checkpoint.JSONFile, checkpoint.ElevatorName)
 
 	case elev.EBIdle:
 		//elevator.Requests[btnFloor][btn] = true
 		//trenger å sjekke at alt dette er riktig
-		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn)
+		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, checkpoint.ElevatorName)
 		fsmJSONOrderAssigner(checkpoint.JSONFile, checkpoint.ElevatorName)
 		pair := requests.RequestsChooseDirection(elevator)
 		elevator.Dirn = pair.Dirn
@@ -252,8 +252,8 @@ func fsmUpdateJSONWhenHallOrderIsComplete(filename string, elevatorName string, 
 	checkpoint.UpdateJSONWhenHallOrderIsComplete(elevator,filename, elevatorName, orderCompleteFloor)
 }
 
-func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button){
-	checkpoint.UpdateJSONWhenNewOrderOccurs(checkpoint.JSONFile ,checkpoint.ElevatorName ,btnFloor, btn, &elevator)
+func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorName string){
+	checkpoint.UpdateJSONWhenNewOrderOccurs(checkpoint.JSONFile ,elevatorName ,btnFloor, btn, &elevator)
 }
 
 func fsmJSONOrderAssigner(filename string, elevatorName string){
