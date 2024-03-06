@@ -1,145 +1,103 @@
 package watchdog
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
 	"os/signal"
 	"path/filepath"
-	"strconv"
-	"strings"
+	"runtime"
 	"syscall"
 	"time"
 
+	"github.com/go-cmd/cmd"
 	"github.com/mitchellh/go-ps"
 	"github.com/sirupsen/logrus"
 )
 
+/* Pseudo Code
+1. If pid is not 0, then the process is a backup process.
+	A. Loop to check if main process PID is still running
+	B. If not, break the loop
+
+2. Is main process, or should claim itself as new primary process
+	A. Start backup process watching itself
+	B. Wait for termination signal
+	C. Terminate backup process and then itself, if signal received
+*/
 func Init(pid int, done chan<- bool) {
 
-	/* Pseudo Code
-	1. If pid is not 0, then the process is a backup process.
-		A. Loop to check if main process PID is still running
-		B. If not, break the loop
-
-	2. Is main process, or should claim itself as new primary process
-		A. Start backup process watching itself
-		B. Wait for termination signal
-		C. Terminate backup process and then itself, if signal received
-	*/
-
-	/* Code begins here */
-
-	// 1. If pid is not 0, then the process is a backup process.
+	// commence watching
 	if pid != 0 {
-		logrus.Warn("Watchdog overlooking process ", pid)
+		logrus.Info("Watchdog overlooking process ", pid)
 
-		// A. Loop to check if main process PID is still running
 		for {
 			p, err := ps.FindProcess(pid)
 			if err != nil {
-				logrus.Warn("Error:", err)
+				logrus.Error("Error:", err)
 			}
 			if p == nil {
-				// B. If not, break the loop
 				logrus.Warn("Primary process has terminated")
 				break
 			}
 
-			done <- true
-			time.Sleep(1 * time.Second)
+			time.Sleep(500 * time.Millisecond)
 		}
 	}
 
-	// 2. Is main process, or should claim itself as new primary process
+	// assume primary process
 	pid = os.Getpid()
 	logrus.Debug("No process to watch. Selfassigning primary process:", pid)
 
-	// A. Start backup process watching itself
+	// fetch init entrypoints relative to pwd (must be TTK4145/Project)
 	entrypoint, err := filepath.Abs("./init/init.go")
 	logrus.Debug("Initialisation entrypoint:", entrypoint, err)
 	if err != nil {
 		logrus.Fatal("Error getting entrypoint:", err)
 	}
 
-	cmd := exec.Command("go", "run", entrypoint, "-watch", fmt.Sprintf("%d", pid))
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
+	// non-blocking process start
+	runCmd := cmd.NewCmd("go", "run", entrypoint, "-watch", fmt.Sprintf("%d", pid))
+	runCmd.Start() // non-blocking
 
-	// Capture stdout
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-			logrus.Info("Error creating StdoutPipe:", err)
-			return
-	}
+	// get PID of child process, not running command
+	var childProcessPid string
+	receivedPid := make(chan bool, 1)
+	go func() {
+		<-time.After(500 * time.Millisecond)
+		status := runCmd.Status()
+		n := len(status.Stdout)
+		childProcessPid = status.Stdout[n-1]
+		logrus.Debug("Catching watchdog PID: ", childProcessPid)
+		receivedPid <- true
+	}()
 
-	logrus.Info("Starting watchdog process to overlook process: ", pid)
-	err = cmd.Start()
-	if err != nil {
-		logrus.Fatal("Failed to start backup process:", err)
-	}
+	// wait for PID to be received
+	<-receivedPid
 
-	err = cmd.Process.Release()
-	if err != nil {
-			logrus.Fatal("cmd.Process.Release failed: ", err)
-	}
-
-
-	// Read the output line by line
-	var childProcess int
-	scanner := bufio.NewScanner(stdout)
-	for scanner.Scan() {
-			line := scanner.Text()
-			// Assuming the line contains the PID, you might adjust this based on your program's output
-			childPidStr := strings.TrimSpace(line)
-			childProcess, err = strconv.Atoi(childPidStr)
-			if err != nil {
-					logrus.Info("Error converting PID:", err)
-					return
-			}
-			logrus.Info("PID of the spawned process:", childProcess)
-			// Now you have the PID of the spawned process, you can do further operations with it.
-	}
-
-	// Check for any errors
-	if err := scanner.Err(); err != nil {
-			logrus.Info("Error reading stdout:", err)
-			return
-	}
-
-	logrus.Warn("Watchdog cmd exec PID:", cmd.Process.Pid)
-	done <- true
+	logrus.Info("Watchdog process ", childProcessPid, " is watching over process ", pid)
+	done <- true // signal continuation to init module
 
 	// gracefully handle termination
 	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(sigs, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
+	// await termination
 	termination := make(chan bool, 1)
 	go func() {
 		sig := <-sigs
-		fmt.Println("HERE!!! ", sig)
+		logrus.Debug("Received Signal: ", sig)
 		termination <- true
 	}()
 
-	// B. Wait for termination signal
 	<-termination
 
-	// C. Terminate backup process and then itself, if signal received
-	// Find the process by its PID
-	p, err := ps.FindProcess(childProcess)
-	if err != nil {
-			fmt.Println("Error finding process:", err)
-			return
+	// terminate processes
+	runCmd.Stop()
+
+	if runtime.GOOS == "windows" {
+		exec.Command("taskkill", "/F", "/T", "/PID", fmt.Sprintf("%d", os.Getpid())).Run()
+	} else {
+		os.Exit(0)
 	}
-
-	// Kill the process
-	fmt.Println("Watchdog Process: ", p)
-	// err = syscall.Kill(process.Pid, syscall.SIGKILL)
-	// if err != nil {
-	// 		fmt.Println("Error killing process:", err)
-	// 		return
-	// }
-
-	logrus.Warn("Process with PID", childProcess, "has been killed.")
 }

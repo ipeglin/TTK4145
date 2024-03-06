@@ -28,30 +28,22 @@ func getFlags() (int, error) {
 }
 
 func main() {
-	processId := os.Getpid()
-	fmt.Println(processId)
-	logrus.Info("Initialising node with PID:", processId)
-	
 	watch, err := getFlags()
 	if err != nil {
 		logrus.Fatal(err)
 		return
 	}
+	
+	processId := os.Getpid()
+	if watch != 0 {
+		fmt.Println(processId) // pass PID to watchdog with pipeline
+	}
+	logrus.Info("Initialising node PID: ", processId)
 
 	// BUG! Backup process is the one that proceedes, not the main process
 	done := make(chan bool)
 	go watchdog.Init(watch, done)
 	<-done
-	logrus.Info("Proceeding with initialisation after watchdog")
-
-	// Test crash: Unhandled Error
-	file, err := os.Open("nonexistentfile.txt")
-	if err != nil {
-			panic(err)
-	}
-	defer file.Close()
-
-
 
 	// TODO: Launch new process watching current process in case of crash
 
