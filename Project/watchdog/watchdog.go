@@ -60,7 +60,7 @@ func Init(pid int, done chan<- bool) {
 	runCmd := cmd.NewCmd("go", "run", entrypoint, "-watch", fmt.Sprintf("%d", pid))
 	runCmd.Start() // non-blocking
 
-	// get PID of child process, not running command
+	// await fetching PID of child process
 	var childProcessPid string
 	receivedPid := make(chan bool, 1)
 	go func() {
