@@ -1,12 +1,12 @@
 package checkpoint
 
 import (
-	"encoding/json"
-	"fmt"
+	//"encoding/json"
+	//"fmt"
 	"heislab/Elevator/elev"
 	"heislab/Elevator/elevio"
-	"heislab/Elevator/filehandeling"
-	"os"
+	//"heislab/Elevator/filehandeling"
+	//"os"
 )
 
 const FilenameHRAInput = "elevHRAInput.JSON"
@@ -14,7 +14,7 @@ const FilenameHRAInput = "elevHRAInput.JSON"
 type HRAElevState struct {
 	Behavior    string `json:"behaviour"`
 	Floor       int    `json:"floor"`
-	Direction   string `json:"direction"`
+	Direction   string  `json:"direction"`
 	CabRequests []bool `json:"cabRequests"`
 }
 
@@ -23,6 +23,114 @@ type HRAInput struct {
 	States       map[string]HRAElevState `json:"states"`
 }
 
+func initializeHRAInput(el elev.Elevator, elevatorName string) HRAInput {
+	// Create a default HRAInput. Modify this according to your requirements.
+	hraInput :=  HRAInput{
+		HallRequests: make([][2]bool, elevio.NFloors),
+		States:       make(map[string]HRAElevState),
+	}
+	for f := 0; f < elevio.NFloors; f++ {
+		hraInput.HallRequests[f][0] = el.Requests[f][elevio.BHallUp]
+		hraInput.HallRequests[f][1] = el.Requests[f][elevio.BHallDown]
+	}
+
+	behavior, direction, cabRequests := convertLocalElevatorState(el)
+
+	hraInput.States[elevatorName] = HRAElevState{
+		Behavior:    behavior,
+		Floor:       el.CurrentFloor,
+		Direction:   direction,
+		CabRequests: cabRequests,
+	}
+	return hraInput
+}
+
+func updateHRAInput(hraInput HRAInput, el elev.Elevator, elevatorName string)HRAInput{
+	for f := 0; f < elevio.NFloors; f++ {
+		hraInput.HallRequests[f][0] = hraInput.HallRequests[f][0] || el.Requests[f][elevio.BHallUp]
+		hraInput.HallRequests[f][1] = hraInput.HallRequests[f][1] || el.Requests[f][elevio.BHallDown]
+	}
+
+	behavior, direction, cabRequests := convertLocalElevatorState(el)
+
+	hraInput.States[elevatorName] = HRAElevState{
+		Behavior:    behavior,
+		Floor:       el.CurrentFloor,
+		Direction:   direction,
+		CabRequests: cabRequests,
+	}
+	return hraInput
+}
+
+func updateHRAInputWhenHallOrderIsComplete(el elev.Elevator, elevatorName string, orderCompleteFloor int)HRAInput{
+	hraInput :=  HRAInput{
+		HallRequests: make([][2]bool, elevio.NFloors),
+		States:       make(map[string]HRAElevState),
+	}
+
+	hraInput.HallRequests[orderCompleteFloor][0] = el.Requests[orderCompleteFloor][elevio.BHallUp]
+	hraInput.HallRequests[orderCompleteFloor][1] = el.Requests[orderCompleteFloor][elevio.BHallDown]
+
+
+	behavior, direction, cabRequests := convertLocalElevatorState(el)
+
+	hraInput.States[elevatorName] = HRAElevState{
+		Behavior:    behavior,
+		Floor:       el.CurrentFloor,
+		Direction:   direction,
+		CabRequests: cabRequests,
+	}
+	return hraInput
+}
+
+func convertLocalElevatorState(localElevator elev.Elevator) (string, string, []bool) {
+	// Convert behavior
+	var behavior string
+	switch localElevator.CurrentBehaviour {
+	case elev.EBIdle:
+		behavior = "idle"
+	case elev.EBMoving:
+		behavior = "moving"
+	case elev.EBDoorOpen:
+		behavior = "doorOpen"
+	}
+	// Convert direction
+	var direction string
+	switch localElevator.Dirn {
+	case elevio.DirUp:
+		direction = "up"
+	case elevio.DirDown:
+		direction = "down"
+	default:
+		direction = "stop"
+	}
+
+	// Convert cab requests
+	cabRequests := make([]bool, elevio.NFloors)
+	for f := 0; f < elevio.NFloors; f++ {
+		cabRequests[f] = localElevator.Requests[f][elevio.BCab]
+	}
+
+	return behavior, direction, cabRequests
+}
+
+func updateHRAInputWhenNewOrderOccurs(hraInput HRAInput, elevatorName string,btnFloor int, btn elevio.Button,localElevator *elev.Elevator )HRAInput{
+    switch btn {
+    case elevio.BHallUp:
+        hraInput.HallRequests[btnFloor][0] = true
+    case elevio.BHallDown:
+        hraInput.HallRequests[btnFloor][1] = true
+    case elevio.BCab:
+		hraInput.States[elevatorName].CabRequests[btnFloor] = true
+		localElevator.Requests[btnFloor][btn] = true
+	}
+	return hraInput
+}
+
+
+
+
+/*
 func UpdataJSONOnbtnEvent(elevatorName string, localElevator elev.Elevator, filename string) error {
 	hraInput, err := LoadHRAInput(filename)
 	if err != nil {
@@ -131,17 +239,8 @@ func saveHRAInput(hraInput HRAInput, fileName string) error {
 	return nil
 }
 
-func initializeHRAInput(filename string) error {
-	// Create a default HRAInput. Modify this according to your requirements.
-	defaultHRAInput := HRAInput{
-		HallRequests: make([][2]bool, elevio.NFloors),
-		States:       make(map[string]HRAElevState),
-	}
-	// Optionally, add default states or other initial configurations here.
 
-	return saveHRAInput(defaultHRAInput, filename)
-}
-
+/*
 func CallCompleteToJSON(elevatorName string, filename string, localElevator elev.Elevator) error {
 	hraInput, err := LoadHRAInput(filename)
 	if err != nil{
@@ -174,3 +273,4 @@ func UpdateLocalElevatorToJSON(elevatorName string, filename string, localElevat
 
     return saveHRAInput(hraInput, filename)
 }
+*/

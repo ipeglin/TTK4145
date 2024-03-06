@@ -1,7 +1,7 @@
 package fsm
 
 import (
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
 	"heislab/Elevator/checkpoint"
 	"heislab/Elevator/driver/hwelevio"
@@ -9,7 +9,7 @@ import (
 	"heislab/Elevator/elevio"
 	"heislab/Elevator/requests"
 	"heislab/Elevator/timer"
-	"os/exec"
+	//"os/exec"
 )
 
 var elevator elev.Elevator
@@ -61,14 +61,23 @@ func FsmRequestButtonPress(btnFloor int, btn elevio.Button) {
 		if requests.RequestsShouldClearImmediately(elevator, btnFloor, btn) {
 			timer.TimerStart(elevator.Config.DoorOpenDurationS)
 		} else {
-			elevator.Requests[btnFloor][btn] = true
+			//elevator.Requests[btnFloor][btn] = true
+		//trenger å sjekke at alt dette er riktig
+		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn)
+		fsmJSONOrderAssigner(checkpoint.JSONFile, checkpoint.ElevatorName)
 		}
 
 	case elev.EBMoving:
-		elevator.Requests[btnFloor][btn] = true
+		//elevator.Requests[btnFloor][btn] = true
+		//trenger å sjekke at alt dette er riktig
+		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn)
+		fsmJSONOrderAssigner(checkpoint.JSONFile, checkpoint.ElevatorName)
 
 	case elev.EBIdle:
-		elevator.Requests[btnFloor][btn] = true
+		//elevator.Requests[btnFloor][btn] = true
+		//trenger å sjekke at alt dette er riktig
+		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn)
+		fsmJSONOrderAssigner(checkpoint.JSONFile, checkpoint.ElevatorName)
 		pair := requests.RequestsChooseDirection(elevator)
 		elevator.Dirn = pair.Dirn
 		elevator.CurrentBehaviour = pair.Behaviour
@@ -98,13 +107,14 @@ func FsmFloorArrival(newFloor int) {
 	case elev.EBMoving:
 		if requests.RequestsShouldStop(elevator) {
 			outputDevice.MotorDirection(elevio.DirStop)
-			//elevator.Dirn = elevio.DirStop
+			elevator.Dirn = elevio.DirStop
 			outputDevice.DoorLight(true)
 			elevator = requests.RequestsClearAtCurrentFloor(elevator)
 			timer.TimerStart(elevator.Config.DoorOpenDurationS)
 			setAllLights()
 			elevator.CurrentBehaviour = elev.EBDoorOpen
-			checkpoint.CallCompleteToJSON("one",checkpoint.FilenameHRAInput, elevator)
+			//den klarer ikke å klarere siste ordre i køen? 
+			fsmUpdateJSONWhenHallOrderIsComplete(checkpoint.JSONFile, checkpoint.ElevatorName, elevator.CurrentFloor)
 		}
 	}
 	//fmt.Println("New state:")
@@ -201,7 +211,7 @@ func FsmMakeCheckpoint() {
 	//elev.ElevatorPrint(elevator)
 }
 
-func FsmResumeAtLatestCheckpoint() {
+func FsmResumeAtLatestCheckpoint() {BHallUp
 	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
 	//fmt.Print(elevator.Dirn)
 	outputDevice.MotorDirection(elevator.Dirn)
@@ -223,145 +233,31 @@ func FsmTestProcessPair() {
 }
 */
 
-// ///AV GUSTAV TESTER OG FUCKER
-//////NB HUSK Å BYTTE one med id til heis 
 
-
-//her er det for å oppdatere etter buttoncall 
-func FsmUpdataJSONOnbtnEvent() {
-	elevatorName := "one"     // Example elevator name, adjust as necessary.
-	localElevator := elevator // Use the current state of the elevator.
-
-	// Correctly using the exported function name with the `checkpoint.` prefix.
-	err := checkpoint.UpdataJSONOnbtnEvent(elevatorName, localElevator, checkpoint.FilenameHRAInput)
+//Json fra her 
+func FsmInitJson(filename string,  ElevatorName string){
+	combinedInput := checkpoint.InitializeCombinedInput(elevator, ElevatorName)
+	
+	// Gjør endringer på combinedInput her
+	
+	err := checkpoint.SaveCombinedInput(combinedInput, filename)
 	if err != nil {
-		fmt.Printf("Failed to update elevator state: %v\n", err)
+		fmt.Println("Feil ved lagring:", err)
 	}
 }
 
-func FsmHallRequestAssigner() {
-	//todo, trenger dynamiske navn 
-	elevatorName := "one" 
-
-	hraInput, err := checkpoint.LoadHRAInput(checkpoint.FilenameHRAInput)
-	if err != nil {
-		fmt.Printf("Failed to load HRAInput: %v\n", err)
-		return 
-	}
-
-	jsonBytes, err := json.Marshal(hraInput)
-	if err != nil {
-		fmt.Printf("Failed to marshal HRAInput: %v\n", err)
-		return
-	}
-
-
-	ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
-	if err != nil {
-		fmt.Println("exec.Command error: ", err)
-		fmt.Println(string(ret))
-		return
-	}
-
-
-	output := new(map[string][][2]bool) 
-	err = json.Unmarshal(ret, output)
-	if err != nil {
-		fmt.Println("json.Unmarshal error: ", err)
-		return
-	}
-
-	fmt.Println("Output:")
-	for k, v := range *output {
-		fmt.Printf("%6s :  %+v\n", k, v)
-	}
-
-	for floor := 0; floor < elevio.NFloors; floor++ {
-        elevator.Requests[floor][elevio.BHallUp] = (*output)[elevatorName][floor][0]
-        elevator.Requests[floor][elevio.BHallDown] = (*output)[elevatorName][floor][1]
-        // Preserve Cab requests as is
-    }
+func FsmUpdateJSON(){
+	checkpoint.UpdateJSON(elevator, checkpoint.JSONFile, checkpoint.ElevatorName)
 }
 
-
-
-func FsmUpdateLocalElevatorToJSON(){
-	checkpoint.UpdateLocalElevatorToJSON("one", checkpoint.FilenameHRAInput, elevator)
+func fsmUpdateJSONWhenHallOrderIsComplete(filename string, elevatorName string, orderCompleteFloor int){
+	checkpoint.UpdateJSONWhenHallOrderIsComplete(elevator,filename, elevatorName, orderCompleteFloor)
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-func FsmInitCyclicCounter() {
-	checkpoint.InitCyclicCounter(checkpoint.FilenameCylickCounter)
+func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button){
+	checkpoint.UpdateJSONWhenNewOrderOccurs(checkpoint.JSONFile ,checkpoint.ElevatorName ,btnFloor, btn, &elevator)
 }
 
-func FsmUpdateCylickCounterButtonPressed(btnFloor int, btn elevio.Button){
-	loadedCyclicCounter, err := checkpoint.LoadCyclicCounterInput(checkpoint.FilenameCylickCounter)
-	if err != nil {
-		fmt.Println("Feil ved lasting av CyclicCounterInput:", err)
-		return
-	}
-
-	_, ok := loadedCyclicCounter.States["one"]
-	if !ok{
-		fmt.Println("Heisen 'one' finnes ikke i cyclicCounter.States")
-	}else{
-		if btn == elevio.BCab {
-			loadedCyclicCounter.States["one"].CabRequests[btnFloor] += 1
-		}else{
-
-			loadedCyclicCounter.HallRequests[btnFloor][btn] += 1
-		}
-	}
-	err = checkpoint.SaveCyclicCounterInput(loadedCyclicCounter, checkpoint.FilenameCylickCounter)
-	if err != nil {
-		fmt.Println("Feil ved lagring av CyclicCounterInput:", err)
-		return
-	}
+func fsmJSONOrderAssigner(filename string, elevatorName string){
+	checkpoint.JSONOrderAssigner(&elevator, filename,elevatorName)
 }
-
-func FsmUpdateCylickCounterNewFloor(){
-	loadedCyclicCounter, err := checkpoint.LoadCyclicCounterInput(checkpoint.FilenameCylickCounter)
-	if err != nil {
-		fmt.Println("Feil ved lasting av CyclicCounterInput:", err)
-		return
-	}
-    if state, ok := loadedCyclicCounter.States["one"]; ok {
-        state.Floor += 1
-        loadedCyclicCounter.States["one"] = state
-    } else {
-        fmt.Println("Heisen 'one' finnes ikke i cyclicCounter.States")
-    }
-	err = checkpoint.SaveCyclicCounterInput(loadedCyclicCounter, checkpoint.FilenameCylickCounter)
-	if err != nil {
-		fmt.Println("Feil ved lagring av CyclicCounterInput:", err)
-		return
-	}
-}
-
-/*
-func UpdateCylickCounterNewbehaviour(){
-	if state, ok := cyclicCounter.States["one"]; ok {
-        state.Behavior += 1
-        cyclicCounter.States["one"] = state
-    } else {
-        fmt.Println("Heisen 'one' finnes ikke i cyclicCounter.States")
-    }
-}
-
-
-/*
-ulike case er : 
--behaviour +1
--update direction +1 
-*/
