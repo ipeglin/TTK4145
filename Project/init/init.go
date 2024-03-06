@@ -32,7 +32,7 @@ func main() {
 		for {
 			elv, _ := checkpoint.LoadCombinedInput(checkpoint.JSONFile)
 			messageTransmitterChannel <- network.Message{Payload: elv, MessageId: 0}
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(500 * time.Millisecond)
 		}
 	}()
 
