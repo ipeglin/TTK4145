@@ -9,7 +9,7 @@ import (
 	"os/exec"
 )
 
-const JSONFile = "JSONFile.json"
+//const JSONFile = "JSONFile.json"
 
 // const ElevatorName = "one"
 

@@ -31,7 +31,8 @@ func main() {
 
 	go func() {
 		for {
-			elv, _ := checkpoint.LoadCombinedInput(checkpoint.JSONFile)
+			localFilname := localIP + ".json"
+			elv, _ := checkpoint.LoadCombinedInput(localFilname)
 			messageTransmitterChannel <- network.Message{Payload: elv, MessageId: 0}
 			time.Sleep(500 * time.Millisecond)
 		}
@@ -47,11 +48,11 @@ func main() {
 			//
 			//som får filnavn lik ip
 			logrus.Info("Received message from ", msg.SenderId, ": ", msg.Payload)
-			strings := make([] string, 0)
+			strings := make([] string, 8)
 			// localIP
 			// inncomigIP.JSON 
-			localFilname := localIP + ".JSON"
-			incommigFilname := msg.SenderId +".JSON"
+			localFilname := localIP + ".json"
+			incommigFilname := msg.SenderId +".json"
 			inncommingCombinedInput := msg.Payload
 			checkpoint.InncommingJSONHandeling(localFilname , incommigFilname , inncommingCombinedInput, strings)
 		case online := <-onlineStatusChannel:
