@@ -1,7 +1,6 @@
 package elevator
 
 import (
-	"elevator/checkpoint"
 	"elevator/driver/hwelevio"
 	"elevator/elevio"
 	"elevator/fsm"
@@ -9,7 +8,7 @@ import (
 	"fmt"
 )
 
-func Init() {
+func Init(localIP string) {
 
 	fmt.Println("Started!")
 	hwelevio.Init(elevio.Addr, elevio.NFloors)
@@ -17,7 +16,7 @@ func Init() {
 	if elevio.InputDevice.FloorSensor() == -1 {
 		fsm.FsmInitBetweenFloors()
 	}
-	fsm.FsmInitJson("JSONFile.JSON", checkpoint.ElevatorName)
+	fsm.FsmInitJson("JSONFile.JSON", localIP)
 
 	drv_buttons := make(chan elevio.ButtonEvent)
 	drv_floors := make(chan int)

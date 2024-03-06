@@ -23,13 +23,13 @@ type Message struct {
 	Checksum  string
 }
 
-func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan Message, responseChannel chan<- Message, onlineStatusChannel chan<- bool) {
+func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan Message, responseChannel chan<- Message, onlineStatusChannel chan<- bool, ipChannel <-chan string) {
 	// fetching host IP and PORT
 	nodeIP, err := local.GetIP()
 	if err != nil {
 		logrus.Warn("ERROR: Unable to get the IP address")
-		nodeIP = "Disconnected"
 	}
+	ipChannel <- nodeIP
 
 	// set node unique ID
 	nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP, os.Getpid())

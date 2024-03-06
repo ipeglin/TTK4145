@@ -10,7 +10,7 @@ import (
 )
 
 const JSONFile = "JSONFile.JSON"
-const ElevatorName = "one"
+// const ElevatorName = "one"
 
 // CombinedInput kombinerer HRAInput og CyclicCounterInput.
 type CombinedInput struct {
