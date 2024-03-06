@@ -18,6 +18,7 @@ const messagePort int = basePort + 2
 
 type Message struct {
 	MessageId int
+	SenderId string // IPv4
 	Payload    interface{}
 	Checksum string
 }
@@ -86,6 +87,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 				continue
 			}
 			msg.Checksum = checksum
+			msg.SenderId = nodeIP
 
 			broadcastTransmissionChannel <- msg
 		}

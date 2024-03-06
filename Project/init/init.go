@@ -35,7 +35,7 @@ func main() {
 		case reg := <-nodeOverviewChannel:
 			logrus.Info("Known nodes:", reg.Nodes)
 		case msg := <-messageReceiveChannel:
-			fmt.Printf("Must do something with the message:%v\n", msg.Payload)
+			logrus.Info("Received message from ", msg.SenderId, ": ", msg.Payload)
 		case online:= <-onlineStatusChannel:
 			logrus.Warn("Updated online status:", online)
 		}
