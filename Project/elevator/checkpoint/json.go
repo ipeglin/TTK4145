@@ -9,8 +9,9 @@ import (
 	"os/exec"
 )
 
-const JSONFile = "JSONFile.JSON"
-const ElevatorName = "one"
+const JSONFile = "JSONFile.json"
+
+// const ElevatorName = "one"
 
 // CombinedInput kombinerer HRAInput og CyclicCounterInput.
 type CombinedInput struct {
@@ -136,32 +137,32 @@ func UpdateLocalJSON(localFilname string, incommigFilname string) {
 }
 
 func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename string) error {
-    localCombinedInput, err := LoadCombinedInput(localFilename)
-    if err != nil {
-        return fmt.Errorf("failed to load local combined input: %v", err)
-    }
+	localCombinedInput, err := LoadCombinedInput(localFilename)
+	if err != nil {
+		return fmt.Errorf("failed to load local combined input: %v", err)
+	}
 
-    // Convert slice of inactive elevator IDs to a map for efficient lookups
-    inactiveElevatorsMap := make(map[string]struct{})
-    for _, id := range inactiveElevatorIDs {
-        inactiveElevatorsMap[id] = struct{}{}
-    }
+	// Convert slice of inactive elevator IDs to a map for efficient lookups
+	inactiveElevatorsMap := make(map[string]struct{})
+	for _, id := range inactiveElevatorIDs {
+		inactiveElevatorsMap[id] = struct{}{}
+	}
 
-    // Iterate through the States in HRAInput and remove inactive elevators
-    for id := range localCombinedInput.HRAInput.States {
-        if _, exists := inactiveElevatorsMap[id]; exists {
-            delete(localCombinedInput.HRAInput.States, id)
-            delete(localCombinedInput.CyclicCounter.States, id)
-        }
-    }
+	// Iterate through the States in HRAInput and remove inactive elevators
+	for id := range localCombinedInput.HRAInput.States {
+		if _, exists := inactiveElevatorsMap[id]; exists {
+			delete(localCombinedInput.HRAInput.States, id)
+			delete(localCombinedInput.CyclicCounter.States, id)
+		}
+	}
 
-    // Save the updated CombinedInput back to the file
-    err = SaveCombinedInput(localCombinedInput, localFilename)
-    if err != nil {
-        return fmt.Errorf("failed to save updated combined input: %v", err)
-    }
+	// Save the updated CombinedInput back to the file
+	err = SaveCombinedInput(localCombinedInput, localFilename)
+	if err != nil {
+		return fmt.Errorf("failed to save updated combined input: %v", err)
+	}
 
-    return nil
+	return nil
 }
 
 func InncommingJSONHandeling(localFilname string, incommigFilname string, inncommingCombinedInput CombinedInput, inactiveElevatorIDs []string){

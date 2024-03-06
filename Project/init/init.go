@@ -17,15 +17,17 @@ import (
 func main() {
 	logrus.Info("Node initialised with PID:", os.Getpid())
 
-	// TODO: Launch new process watching current process in case of crash
-	go elevator.Init()
-
 	nodeOverviewChannel := make(chan nodes.NetworkNodeRegistry)
 	messageReceiveChannel := make(chan network.Message)
 	messageTransmitterChannel := make(chan network.Message)
 	onlineStatusChannel := make(chan bool)
+	ipChannel := make(chan string)
 
-	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel)
+	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel, ipChannel)
+
+	// TODO: Launch new process watching current process in case of crash
+	go elevator.Init(<-ipChannel)
+
 	go func() {
 		for {
 			elv, _ := checkpoint.LoadCombinedInput(checkpoint.JSONFile)

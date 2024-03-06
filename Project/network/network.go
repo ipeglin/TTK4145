@@ -23,13 +23,14 @@ type Message struct {
 	Checksum  string
 }
 
-func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan Message, responseChannel chan<- Message, onlineStatusChannel chan<- bool) {
+func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan Message, responseChannel chan<- Message, onlineStatusChannel chan<- bool, ipChannel chan<- string) {
 	// fetching host IP and PORT
 	nodeIP, err := local.GetIP()
 	if err != nil {
 		logrus.Warn("ERROR: Unable to get the IP address")
-		nodeIP = "Disconnected"
 	}
+
+	ipChannel <- nodeIP
 
 	// set node unique ID
 	nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP, os.Getpid())
@@ -66,7 +67,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 
 		case msg := <-broadcastReceiverChannel:
 			logrus.Debug("Broadcast received from network")
-			checksum, err := checksum.GenerateJSONChecksum(msg.Payload)
+			/*checksum, err := checksum.GenerateJSONChecksum(msg.Payload)
 			if err != nil {
 				logrus.Error("Checksum generation failed:", err)
 				continue
@@ -75,7 +76,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 			if msg.Checksum != checksum {
 				logrus.Error("Checksum mismatch, payload corrupted. Abort forwarding")
 				continue
-			}
+			}*/
 
 			responseChannel <- msg
 
