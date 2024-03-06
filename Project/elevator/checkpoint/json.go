@@ -170,3 +170,14 @@ func InncommingJSONHandeling(localFilname string, incommigFilname string, inncom
 	UpdateLocalJSON(localFilname, incommigFilname)
 	DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs, localFilname) 
 }
+
+
+func RemoveDisfunctionalElevatorFromJSON(localFilname string, elevatorName string){
+	combinedInput, _ := LoadCombinedInput(localFilname)
+	for id := range combinedInput.HRAInput.States {
+		if (id== elevatorName) {
+			delete(combinedInput.HRAInput.States, id)
+			delete(combinedInput.CyclicCounter.States, id)
+		}
+	}
+}
