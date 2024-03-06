@@ -1,6 +1,7 @@
 package main
 
 import (
+	"elevator"
 	"fmt"
 	"network"
 	"network/nodes"
@@ -14,6 +15,7 @@ func main() {
 	logrus.Info("Node initialised with PID:", os.Getpid())
 
 	// TODO: Launch new process watching current process in case of crash
+	go elevator.Init()
 
 	nodeOverviewChannel := make(chan nodes.NetworkNodeRegistry)
 	messageReceiveChannel := make(chan network.Message)
