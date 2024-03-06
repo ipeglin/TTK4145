@@ -49,7 +49,7 @@ func FsmInitBetweenFloors() {
 	elevator.CurrentBehaviour = elev.EBMoving
 }
 
-func FsmRequestButtonPress(btnFloor int, btn elevio.Button) {
+func FsmRequestButtonPress(btnFloor int, btn elevio.Button, elevatorName string) {
 
 	//fmt.Printf("\n\n%s(%d, %s)\n", "FsmRequestButtonPress", btnFloor, elevio.ButtonToString(btn))
 	//elev.ElevatorPrint(elevator)
@@ -60,22 +60,22 @@ func FsmRequestButtonPress(btnFloor int, btn elevio.Button) {
 			timer.TimerStart(elevator.Config.DoorOpenDurationS)
 		} else {
 			//elevator.Requests[btnFloor][btn] = true
-		//trenger å sjekke at alt dette er riktig
-		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, checkpoint.ElevatorName)
-		fsmJSONOrderAssigner(checkpoint.JSONFile, checkpoint.ElevatorName)
+			//trenger å sjekke at alt dette er riktig
+			fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName)
+			fsmJSONOrderAssigner(checkpoint.JSONFile, elevatorName)
 		}
 
 	case elev.EBMoving:
 		//elevator.Requests[btnFloor][btn] = true
 		//trenger å sjekke at alt dette er riktig
-		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, checkpoint.ElevatorName)
-		fsmJSONOrderAssigner(checkpoint.JSONFile, checkpoint.ElevatorName)
+		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName)
+		fsmJSONOrderAssigner(checkpoint.JSONFile, elevatorName)
 
 	case elev.EBIdle:
 		//elevator.Requests[btnFloor][btn] = true
 		//trenger å sjekke at alt dette er riktig
-		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, checkpoint.ElevatorName)
-		fsmJSONOrderAssigner(checkpoint.JSONFile, checkpoint.ElevatorName)
+		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName)
+		fsmJSONOrderAssigner(checkpoint.JSONFile, elevatorName)
 		pair := requests.RequestsChooseDirection(elevator)
 		elevator.Dirn = pair.Dirn
 		elevator.CurrentBehaviour = pair.Behaviour
@@ -95,7 +95,7 @@ func FsmRequestButtonPress(btnFloor int, btn elevio.Button) {
 	//elev.ElevatorPrint(elevator)
 }
 
-func FsmFloorArrival(newFloor int) {
+func FsmFloorArrival(newFloor int, elevatorName string) {
 	//fmt.Printf("\n\n%s(%d)\n", "FsmFloorArrival", newFloor)
 	//elev.ElevatorPrint(elevator)
 	elevator.CurrentFloor = newFloor
@@ -111,8 +111,8 @@ func FsmFloorArrival(newFloor int) {
 			timer.TimerStart(elevator.Config.DoorOpenDurationS)
 			setAllLights()
 			elevator.CurrentBehaviour = elev.EBDoorOpen
-			//den klarer ikke å klarere siste ordre i køen? 
-			fsmUpdateJSONWhenHallOrderIsComplete(checkpoint.JSONFile, checkpoint.ElevatorName, elevator.CurrentFloor)
+			//den klarer ikke å klarere siste ordre i køen?
+			fsmUpdateJSONWhenHallOrderIsComplete(checkpoint.JSONFile, elevatorName, elevator.CurrentFloor)
 		}
 	}
 	//fmt.Println("New state:")
@@ -231,31 +231,30 @@ func FsmTestProcessPair() {
 }
 */
 
-
-//Json fra her 
-func FsmInitJson(filename string,  ElevatorName string){
+// Json fra her
+func FsmInitJson(filename string, ElevatorName string) {
 	combinedInput := checkpoint.InitializeCombinedInput(elevator, ElevatorName)
-	
+
 	// Gjør endringer på combinedInput her
-	
+
 	err := checkpoint.SaveCombinedInput(combinedInput, filename)
 	if err != nil {
 		fmt.Println("Feil ved lagring:", err)
 	}
 }
 
-func FsmUpdateJSON(){
-	checkpoint.UpdateJSON(elevator, checkpoint.JSONFile, checkpoint.ElevatorName)
+func FsmUpdateJSON(elevatorName string) {
+	checkpoint.UpdateJSON(elevator, checkpoint.JSONFile, elevatorName)
 }
 
-func fsmUpdateJSONWhenHallOrderIsComplete(filename string, elevatorName string, orderCompleteFloor int){
-	checkpoint.UpdateJSONWhenHallOrderIsComplete(elevator,filename, elevatorName, orderCompleteFloor)
+func fsmUpdateJSONWhenHallOrderIsComplete(filename string, elevatorName string, orderCompleteFloor int) {
+	checkpoint.UpdateJSONWhenHallOrderIsComplete(elevator, filename, elevatorName, orderCompleteFloor)
 }
 
-func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorName string){
-	checkpoint.UpdateJSONWhenNewOrderOccurs(checkpoint.JSONFile ,elevatorName ,btnFloor, btn, &elevator)
+func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorName string) {
+	checkpoint.UpdateJSONWhenNewOrderOccurs(checkpoint.JSONFile, elevatorName, btnFloor, btn, &elevator)
 }
 
-func fsmJSONOrderAssigner(filename string, elevatorName string){
-	checkpoint.JSONOrderAssigner(&elevator, filename,elevatorName)
+func fsmJSONOrderAssigner(filename string, elevatorName string) {
+	checkpoint.JSONOrderAssigner(&elevator, filename, elevatorName)
 }

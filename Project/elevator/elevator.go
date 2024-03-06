@@ -9,14 +9,15 @@ import (
 )
 
 func Init(localIP string) {
-
 	fmt.Println("Started!")
+	elevatorName := localIP
+
 	hwelevio.Init(elevio.Addr, elevio.NFloors)
 
 	if elevio.InputDevice.FloorSensor() == -1 {
 		fsm.FsmInitBetweenFloors()
 	}
-	fsm.FsmInitJson("JSONFile.JSON", localIP)
+	fsm.FsmInitJson("JSONFile.json", elevatorName)
 
 	drv_buttons := make(chan elevio.ButtonEvent)
 	drv_floors := make(chan int)
@@ -53,22 +54,22 @@ func Init(localIP string) {
 
 		case btnEvent := <-drv_buttons:
 			if !stop { // Process button presses only if not stopped
-				fsm.FsmUpdateJSON()
-				fsm.FsmRequestButtonPress(btnEvent.Floor, btnEvent.Button)
-				fsm.FsmUpdateJSON()
+				fsm.FsmUpdateJSON(elevatorName)
+				fsm.FsmRequestButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName)
+				fsm.FsmUpdateJSON(elevatorName)
 			}
 
 		case floor := <-drv_floors:
 			//fmt.Print("Arrived")
-			fsm.FsmFloorArrival(floor)
-			fsm.FsmUpdateJSON()
+			fsm.FsmFloorArrival(floor, elevatorName)
+			fsm.FsmUpdateJSON(elevatorName)
 
 		default:
 			if timer.TimerTimedOut() && !obst { // Check for timeout only if no obstruction
-				fsm.FsmUpdateJSON()
+				fsm.FsmUpdateJSON(elevatorName)
 				timer.TimerStop()
 				fsm.FsmDoorTimeout()
-				fsm.FsmUpdateJSON()
+				fsm.FsmUpdateJSON(elevatorName)
 			}
 		}
 		/// we need a case for each time a state updates.
