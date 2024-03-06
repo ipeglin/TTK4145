@@ -72,7 +72,6 @@ func Init(pid int, done chan<- bool) {
 		receivedPid <- true
 	}()
 
-	// wait for PID to be received
 	<-receivedPid
 
 	logrus.Info("Watchdog process ", childProcessPid, " is watching over process ", pid)
