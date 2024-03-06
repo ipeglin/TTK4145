@@ -1,6 +1,7 @@
 package network
 
 import (
+	"elevator/checkpoint"
 	"fmt"
 	"network/broadcast"
 	"network/checksum"
@@ -19,7 +20,7 @@ const messagePort int = basePort + 2
 type Message struct {
 	MessageId int
 	SenderId  string // IPv4
-	Payload   interface{}
+	Payload   checkpoint.CombinedInput
 	Checksum  string
 }
 

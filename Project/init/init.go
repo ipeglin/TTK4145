@@ -26,7 +26,8 @@ func main() {
 	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel, ipChannel)
 
 	// TODO: Launch new process watching current process in case of crash
-	go elevator.Init(<-ipChannel)
+	localIP := <-ipChannel
+	go elevator.Init(localIP)
 
 	go func() {
 		for {
@@ -46,6 +47,13 @@ func main() {
 			//
 			//som får filnavn lik ip
 			logrus.Info("Received message from ", msg.SenderId, ": ", msg.Payload)
+			strings := make([] string, 0)
+			// localIP
+			// inncomigIP.JSON 
+			localFilname := localIP + ".JSON"
+			incommigFilname := msg.SenderId +".JSON"
+			inncommingCombinedInput := msg.Payload
+			checkpoint.InncommingJSONHandeling(localFilname , incommigFilname , inncommingCombinedInput, strings)
 		case online := <-onlineStatusChannel:
 			logrus.Warn("Updated online status:", online)
 		}
