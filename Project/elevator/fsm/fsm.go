@@ -20,8 +20,8 @@ func init() {
 	outputDevice = elevio.ElevioGetOutputDevice()
 	//Burde dette gå et annet sted?
 	setAllLights()
-	hwelevio.SetDoorOpenLamp(false)
-	hwelevio.SetStopLamp(false)
+	elevio.RequestDoorOpenLamp(false)
+	elevio.RequestStopLamp(false)
 }
 
 // init og denne vil kræsje ved process pair må finnes ut av
