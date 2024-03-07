@@ -48,6 +48,8 @@ func FsmInitBetweenFloors() {
 	elevator.CurrentBehaviour = elev.EBMoving
 }
 
+//temp testing
+/*
 func FsmRequestButtonPress(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
 
 	//fmt.Printf("\n\n%s(%d, %s)\n", "FsmRequestButtonPress", btnFloor, elevio.ButtonToString(btn))
@@ -93,7 +95,7 @@ func FsmRequestButtonPress(btnFloor int, btn elevio.Button, elevatorName string,
 	//fmt.Printf("New state: \n")
 	//elev.ElevatorPrint(elevator)
 }
-
+*/
 func FsmFloorArrival(newFloor int, elevatorName string, filename string) {
 	//fmt.Printf("\n\n%s(%d)\n", "FsmFloorArrival", newFloor)
 	//elev.ElevatorPrint(elevator)
@@ -259,4 +261,42 @@ func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorNa
 
 func fsmJSONOrderAssigner(filename string, elevatorName string) {
 	checkpoint.JSONOrderAssigner(&elevator, filename, elevatorName)
+}
+
+
+func FsmRequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
+	if requests.RequestsShouldClearImmediately(elevator, btnFloor, btn) & (elevator.CurrentBehaviour =elev.EBDoorOpen){
+			timer.TimerStart(elevator.Config.DoorOpenDurationS)
+		} 
+		
+	else {
+			//elevator.Requests[btnFloor][btn] = true
+			//trenger å sjekke at alt dette er riktig
+			fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
+			//fsmJSONOrderAssigner(filename, elevatorName)
+		}
+}
+// etter denne func broadcaster vi.
+//så assigner vi 
+//så kaller vi denne  
+func FsmRequestButtonPressV3() {
+	switch elevator.CurrentBehaviour {
+	case elev.EBIdle:
+		pair := requests.RequestsChooseDirection(elevator)
+		elevator.Dirn = pair.Dirn
+		elevator.CurrentBehaviour = pair.Behaviour
+		switch pair.Behaviour {
+		case elev.EBDoorOpen:
+			outputDevice.DoorLight(true)
+			timer.TimerStart(elevator.Config.DoorOpenDurationS)
+			elevator = requests.RequestsClearAtCurrentFloor(elevator)
+
+		case elev.EBMoving:
+			//fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevator.Dirn), " in FsmRequestButtonPress")
+			outputDevice.MotorDirection(elevator.Dirn)
+		}
+	}
+	setAllLights()
+	//fmt.Printf("New state: \n")
+	//elev.ElevatorPrint(elevator)
 }

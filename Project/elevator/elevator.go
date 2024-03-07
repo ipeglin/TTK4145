@@ -55,8 +55,8 @@ func Init(localIP string) {
 
 		case btnEvent := <-drv_buttons:
 			if !stop { // Process button presses only if not stopped
-				fsm.FsmUpdateJSON(elevatorName,filename)
-				fsm.FsmRequestButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName, filename)
+				fsm.FsmUpdateJSON(elevatorName, filename)
+				fsm.FsmRequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, filename)
 				fsm.FsmUpdateJSON(elevatorName, filename)
 			}
 

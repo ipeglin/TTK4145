@@ -58,6 +58,11 @@ func main() {
 			incommigFilname := msg.SenderId +".json"
 			inncommingCombinedInput := msg.Payload
 			checkpoint.InncommingJSONHandeling(localFilname , incommigFilname , inncommingCombinedInput, strings)
+			//her må vi reassigne 
+			//temp solution 
+			//NOT VERY NICE. ONLY PROOF OF CONCEPT
+			fsm.fsmJSONOrderAssigner(localFilname, localIP) 
+			fsm.FsmRequestButtonPressV3()
 		case online := <-onlineStatusChannel:
 			logrus.Warn("Updated online status:", online)
 		}
