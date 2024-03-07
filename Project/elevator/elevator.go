@@ -57,6 +57,7 @@ func Init(localIP string) {
 			if !stop { // Process button presses only if not stopped
 				fsm.FsmUpdateJSON(elevatorName, filename)
 				fsm.FsmRequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, filename)
+				fsm.FsmRequestButtonPressV3()
 				fsm.FsmUpdateJSON(elevatorName, filename)
 			}
 
