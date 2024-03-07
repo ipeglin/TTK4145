@@ -48,7 +48,7 @@ func Init(localIP string) {
 	for {
 		select {
 		case drv_obst := <-drv_obstr:
-			logrus.Warn("Obstruction state changed: "drv_obst)
+			logrus.Warn("Obstruction state changed: ", drv_obst)
 			drv_obstr_immob <- drv_obst
 			if drv_obst == !obst { // If obstruction detected and it's a new obstruction
 				fsm.FsmObstruction()
