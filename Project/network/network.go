@@ -69,7 +69,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 			logrus.Debug("Broadcast received from network")
 
 			sum, err := checksum.GenerateJSONChecksum(msg.Payload)
-			logrus.Debug("Recieved checksum: ", msg.Checksum, "\nComputed checksum: ", sum)
+			logrus.Warn("Recieved checksum: ", msg.Checksum, "\nComputed checksum: ", sum)
 			if err != nil {
 				logrus.Error("Checksum generation failed:", err)
 				continue
