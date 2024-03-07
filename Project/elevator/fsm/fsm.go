@@ -2,7 +2,6 @@ package fsm
 
 import (
 	"elevator/checkpoint"
-	"elevator/driver/hwelevio"
 	"elevator/elev"
 	"elevator/elevio"
 	"elevator/requests"
@@ -61,7 +60,7 @@ func FsmRequestButtonPress(btnFloor int, btn elevio.Button, elevatorName string,
 		} else {
 			//elevator.Requests[btnFloor][btn] = true
 			//trenger å sjekke at alt dette er riktig
-			fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName,filename)
+			fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
 			fsmJSONOrderAssigner(filename, elevatorName)
 		}
 
@@ -147,7 +146,6 @@ func FsmDoorTimeout() {
 	//fmt.Println("New State: ")
 	//elev.ElevatorPrint(elevator)
 }
-
 
 func FsmObstruction() {
 	if !timer.TimerInf {
@@ -259,6 +257,6 @@ func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorNa
 	checkpoint.UpdateJSONWhenNewOrderOccurs(filename, elevatorName, btnFloor, btn, &elevator)
 }
 
-func fsmJSONOrderAssigner(filename string, elevatorName string, ) {
+func fsmJSONOrderAssigner(filename string, elevatorName string) {
 	checkpoint.JSONOrderAssigner(&elevator, filename, elevatorName)
 }
