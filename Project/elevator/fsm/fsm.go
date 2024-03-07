@@ -148,14 +148,18 @@ func FsmDoorTimeout() {
 	//elev.ElevatorPrint(elevator)
 }
 
-// TODO
-func FsmObstruction() {
-	if elevator.CurrentBehaviour == elev.EBDoorOpen {
-		timer.TimerStop()
-		timer.TimerStart(elevator.Config.DoorOpenDurationS)
-		//fmt.Print("timer started")
-	}
 
+func FsmObstruction() {
+	if !timer.TimerInf {
+		timer.TimerStartInf()
+		if elevator.CurrentBehaviour == elev.EBIdle {
+			outputDevice.DoorLight(true)
+			elevator.CurrentBehaviour = elev.EBDoorOpen
+		}
+	} else {
+		timer.TimerStopInf()
+		timer.TimerStart(elevator.Config.DoorOpenDurationS)
+	}
 }
 
 /*
