@@ -2,6 +2,7 @@ package elevio
 
 import (
 	"elevator/driver/hwelevio"
+	"elevator/timer"
 	"fmt"
 	"time"
 )
@@ -164,6 +165,29 @@ func PollObstructionSwitch(receiver chan<- bool) {
 			receiver <- v
 		}
 		prev = v
+	}
+}
+
+func MontitorMotorActivity(receiver chan<- bool, duration float64) {
+	timerActive := true
+	timerEndTimer := timer.GetWallTime() + duration
+	for {
+		time.Sleep(hwelevio.PollRate)
+		v := RequestFloor()
+		if v != -1 {
+			timerEndTimer = timer.GetWallTime() + duration
+			if !timerActive {
+				timerActive = true
+				receiver <- true
+			}
+		} else {
+			if timer.GetWallTime() > timerEndTimer {
+				if timerActive {
+					timerActive = false
+					receiver <- false
+				}
+			}
+		}
 	}
 }
 
