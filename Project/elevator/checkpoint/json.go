@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 //const JSONFile = "JSONFile.json"
@@ -165,19 +166,37 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 	return nil
 }
 
-func InncommingJSONHandeling(localFilname string, incommigFilname string, inncommingCombinedInput CombinedInput, inactiveElevatorIDs []string){
-	SaveCombinedInput(inncommingCombinedInput, incommigFilname) 
+func InncommingJSONHandeling(localFilname string, incommigFilname string, inncommingCombinedInput CombinedInput, inactiveElevatorIDs []string) {
+	SaveCombinedInput(inncommingCombinedInput, incommigFilname)
 	UpdateLocalJSON(localFilname, incommigFilname)
-	DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs, localFilname) 
+	inactiveElevatorIDs = DysfunctionalElevatorDetection(incommigFilname, inncommingCombinedInput, inactiveElevatorIDs)
+	DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs, localFilname)
 }
 
-
-func RemoveDisfunctionalElevatorFromJSON(localFilname string, elevatorName string){
+func RemoveDysfunctionalElevatorFromJSON(localFilname string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(localFilname)
 	for id := range combinedInput.HRAInput.States {
-		if (id== elevatorName) {
+		if id == elevatorName {
 			delete(combinedInput.HRAInput.States, id)
 			delete(combinedInput.CyclicCounter.States, id)
 		}
 	}
+	SaveCombinedInput(combinedInput, localFilname)
+}
+
+func DysfunctionalElevatorDetection(incommigFilname string, incomingCombinedInput CombinedInput, inactiveElevatorIDs []string) []string {
+	inactiveElevatorsMap := make(map[string]struct{})
+	for _, id := range inactiveElevatorIDs {
+		inactiveElevatorsMap[id] = struct{}{}
+	}
+
+	incommigElevatorName := strings.TrimSuffix(incommigFilname, ".json")
+
+	for id := range incomingCombinedInput.HRAInput.States {
+		if _, exists := inactiveElevatorsMap[id]; !exists {
+			inactiveElevatorIDs = append(inactiveElevatorIDs, incommigElevatorName)
+		}
+	}
+
+	return inactiveElevatorIDs
 }
