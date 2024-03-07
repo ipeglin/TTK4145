@@ -34,7 +34,7 @@ func init() {
   // pass log file to logrus
   f, err := os.OpenFile(projectRoot + "/log/" + logFile + ".log", os.O_WRONLY | os.O_CREATE, 0755)
   if err != nil {
-      # handle
+      logrus.Fatal("Failed to create log file")
   }
   logrus.SetOutput(f)
 }
@@ -50,7 +50,6 @@ func main() {
 
 	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel, ipChannel)
 
-	// TODO: Launch new process watching current process in case of crash
 	localIP := <-ipChannel
 	go elevator.Init(localIP)
 
@@ -59,8 +58,8 @@ func main() {
 			//antar det er her vi sender
 			//dersom local elevator dedekteres ikke funksjonell ønsker vi ikke broacaste JSON
 			//da vil alle andre heiser tro den er offline og ikke assigne den nye calls.
-			localFilname := localIP + ".json"
-			elv, _ := checkpoint.LoadCombinedInput(localFilname)
+			localFilename := localIP + ".json"
+			elv, _ := checkpoint.LoadCombinedInput(localFilename)
 			messageTransmitterChannel <- network.Message{Payload: elv}
 			time.Sleep(500 * time.Millisecond)
 		}
@@ -79,10 +78,10 @@ func main() {
 			strings := make([]string, 8)
 			// localIP
 			// inncomigIP.JSON
-			localFilname := localIP + ".json"
+			localFilename := localIP + ".json"
 			incomingFilename := msg.SenderId + ".json"
 			incomingCombinedInput := msg.Payload
-			checkpoint.IncomingJSONHandeling(localFilname, incomingFilename, incomingCombinedInput, strings)
+			checkpoint.IncomingJSONHandeling(localFilename, incomingFilename, incomingCombinedInput, strings)
 		case online := <-onlineStatusChannel:
 			logrus.Warn("Updated online status:", online)
 		}
