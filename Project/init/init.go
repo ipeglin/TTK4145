@@ -3,6 +3,7 @@ package main
 import (
 	"elevator"
 	"elevator/checkpoint"
+	"elevator/fsm"
 
 	//"fmt"
 
@@ -33,7 +34,7 @@ func main() {
 		for {
 			//antar det er her vi sender
 			//dersom local elevator dedekteres ikke funksjonell ønsker vi ikke broacaste JSON
-			//da vil alle andre heiser tro den er offline og ikke assigne den nye calls. 
+			//da vil alle andre heiser tro den er offline og ikke assigne den nye calls.
 			localFilname := localIP + ".json"
 			elv, _ := checkpoint.LoadCombinedInput(localFilname)
 			messageTransmitterChannel <- network.Message{Payload: elv, MessageId: 0}
@@ -51,17 +52,17 @@ func main() {
 			//
 			//som får filnavn lik ip
 			logrus.Info("Received message from ", msg.SenderId, ": ", msg.Payload)
-			strings := make([] string, 8)
+			strings := make([]string, 8)
 			// localIP
-			// inncomigIP.JSON 
+			// inncomigIP.JSON
 			localFilname := localIP + ".json"
-			incommigFilname := msg.SenderId +".json"
+			incommigFilname := msg.SenderId + ".json"
 			inncommingCombinedInput := msg.Payload
-			checkpoint.InncommingJSONHandeling(localFilname , incommigFilname , inncommingCombinedInput, strings)
-			//her må vi reassigne 
-			//temp solution 
+			checkpoint.InncommingJSONHandeling(localFilname, incommigFilname, inncommingCombinedInput, strings)
+			//her må vi reassigne
+			//temp solution
 			//NOT VERY NICE. ONLY PROOF OF CONCEPT
-			fsm.fsmJSONOrderAssigner(localFilname, localIP) 
+			fsm.FsmJSONOrderAssigner(localFilname, localIP)
 			fsm.FsmRequestButtonPressV3()
 		case online := <-onlineStatusChannel:
 			logrus.Warn("Updated online status:", online)
