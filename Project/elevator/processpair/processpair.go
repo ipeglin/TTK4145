@@ -12,9 +12,9 @@ var timeLimitOnline time.Duration = time.Duration(2000 * time.Millisecond)
 
 type MainFuncType func(bool)
 
-func startMainProcess(mainFunc MainFuncType) {
+func startMainProcess(mainFunc MainFuncType, firstProcsess bool) {
 	print("Im main bitch")
-	go mainFunc()
+	go mainFunc(firstProcsess)
 	startBackupProcess()
 
 }
@@ -40,7 +40,7 @@ func startBackupProcess() {
 func monitorMainProcessAndTakeOver(mainFunc MainFuncType) {
 	for {
 		if !isMainAlive() {
-			startMainProcess(mainFunc)
+			startMainProcess(mainFunc, false)
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
@@ -57,6 +57,6 @@ func ProcessPairHandler(mainFunc MainFuncType) {
 		print("Im backup")
 		monitorMainProcessAndTakeOver(mainFunc)
 	} else {
-		startMainProcess(mainFunc)
+		startMainProcess(mainFunc, true)
 	}
 }

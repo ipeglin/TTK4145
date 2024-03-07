@@ -8,20 +8,18 @@ import (
 	"fmt"
 )
 
-func Init(localIP string, firstProcess) {
+func Init(localIP string, firstProcess bool) {
 	fmt.Println("Started!")
 	elevatorName := localIP
 
 	hwelevio.Init(elevio.Addr, elevio.NFloors)
-
+	filename := elevatorName + ".json"
 	if firstProcess {
 		if elevio.InputDevice.FloorSensor() == -1 {
 			fsm.FsmInitBetweenFloors()
 		}
-		filename := elevatorName + ".json"
 		fsm.FsmInitJson(filename, elevatorName)
 	}
-	
 
 	drv_buttons := make(chan elevio.ButtonEvent)
 	drv_floors := make(chan int)
@@ -58,7 +56,7 @@ func Init(localIP string, firstProcess) {
 
 		case btnEvent := <-drv_buttons:
 			if !stop { // Process button presses only if not stopped
-				fsm.FsmUpdateJSON(elevatorName,filename)
+				fsm.FsmUpdateJSON(elevatorName, filename)
 				fsm.FsmRequestButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName, filename)
 				fsm.FsmUpdateJSON(elevatorName, filename)
 			}

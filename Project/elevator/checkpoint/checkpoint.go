@@ -1,10 +1,10 @@
 package checkpoint
 
 import (
+	"elevator/elev"
+	"elevator/filehandeling"
 	"encoding/json"
 	"fmt"
-	"heislab/Elevator/elev"
-	"heislab/Elevator/filehandeling"
 	"os"
 	"time"
 )
