@@ -34,7 +34,7 @@ func main() {
 			//da vil alle andre heiser tro den er offline og ikke assigne den nye calls.
 			localFilname := localIP + ".json"
 			elv, _ := checkpoint.LoadCombinedInput(localFilname)
-			messageTransmitterChannel <- network.Message{Payload: elv, MessageId: 0}
+			messageTransmitterChannel <- network.Message{Payload: elv}
 			time.Sleep(500 * time.Millisecond)
 		}
 	}()

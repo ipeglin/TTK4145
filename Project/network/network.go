@@ -18,10 +18,9 @@ const lifelinePort int = basePort + 1
 const messagePort int = basePort + 2
 
 type Message struct {
-	MessageId int
-	SenderId  string // IPv4
-	Payload   checkpoint.CombinedInput
-	Checksum  string
+	SenderId string // IPv4
+	Payload  checkpoint.CombinedInput
+	Checksum string
 }
 
 func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan Message, responseChannel chan<- Message, onlineStatusChannel chan<- bool, ipChannel chan<- string) {
