@@ -12,6 +12,28 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+func init() {
+  projectRoot, err := filepath.Abs("../")
+  if err != nil {
+      logrus.Fatal("Failed to find project root")
+  }
+
+  now = time.Now()
+  logFile = fmt.Printf("%d-%d-%d_%d:%d:%d",
+		currentTime.Year(),
+		currentTime.Month(),
+		currentTime.Day(),
+		currentTime.Hour(),
+		currentTime.Hour(),
+		currentTime.Second())
+
+  f, err := os.OpenFile(projectRoot + "/log/" + logFile + ".log", os.O_WRONLY | os.O_CREATE, 0755)
+  if err != nil {
+      # handle
+  }
+  logrus.SetOutput(f)
+}
+
 func main() {
 	logrus.Info("Node initialised with PID:", os.Getpid())
 
