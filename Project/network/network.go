@@ -64,7 +64,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 		case msg := <-broadcastReceiverChannel:
 			logrus.Debug("Broadcast received from network")
 
-			sum, err := checksum.GenerateJSONChecksum(msg.Payload)
+			sum, err := checksum.GenerateChecksum(msg.Payload)
 			if err != nil {
 				logrus.Error("Checksum generation failed:", err)
 				continue
@@ -82,7 +82,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 		case msg := <-messageChannel:
 			logrus.Debug("Broadcast transmitted to network")
 
-			sum, err := checksum.GenerateJSONChecksum(msg.Payload)
+			sum, err := checksum.GenerateChecksum(msg.Payload)
 			if err != nil {
 				logrus.Error("Checksum generation failed:", err)
 				continue
