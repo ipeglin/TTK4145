@@ -1,9 +1,8 @@
 package processpair
 
-/*
 import (
-	"fmt"
 	"elevator/checkpoint"
+	"fmt"
 	"os"
 	"os/exec"
 	"time"
@@ -11,7 +10,7 @@ import (
 
 var timeLimitOnline time.Duration = time.Duration(2000 * time.Millisecond)
 
-type MainFuncType func()
+type MainFuncType func(bool)
 
 func startMainProcess(mainFunc MainFuncType) {
 	print("Im main bitch")
@@ -28,7 +27,6 @@ func startMainProcess(mainFunc MainFuncType) {
 		fmt.Println("Backup process started successfully")
 	}
 }*/
-/*
 
 func startBackupProcess() {
 	cmd := exec.Command("gnome-terminal", "--", "./myElevatorProgram", "backup")
@@ -62,4 +60,3 @@ func ProcessPairHandler(mainFunc MainFuncType) {
 		startMainProcess(mainFunc)
 	}
 }
-*/

@@ -14,7 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func main() {
+func mainLogic(firstProcess bool){
 	logrus.Info("Node initialised with PID:", os.Getpid())
 
 	nodeOverviewChannel := make(chan nodes.NetworkNodeRegistry)
@@ -27,7 +27,7 @@ func main() {
 
 	// TODO: Launch new process watching current process in case of crash
 	localIP := <-ipChannel
-	go elevator.Init(localIP)
+	go elevator.Init(localIP, firstProcess)
 
 	go func() {
 		for {
@@ -62,4 +62,14 @@ func main() {
 			logrus.Warn("Updated online status:", online)
 		}
 	}
+
+}
+
+func main() {
+	var mainFuncObject processpair.MainFuncType = mainLogic
+	processpair.ProcessPairHandler(mainFuncObject)
+
+	// Block the main goroutine indefinitely
+	done := make(chan struct{})
+	<-done
 }
