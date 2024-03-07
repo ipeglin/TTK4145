@@ -58,12 +58,15 @@ func main() {
 			localFilname := localIP + ".json"
 			incommigFilname := msg.SenderId + ".json"
 			inncommingCombinedInput := msg.Payload
-			checkpoint.InncommingJSONHandeling(localFilname, incommigFilname, inncommingCombinedInput, strings)
+			
 			//her må vi reassigne
 			//temp solution
 			//NOT VERY NICE. ONLY PROOF OF CONCEPT
-			fsm.FsmJSONOrderAssigner(localFilname, localIP)
-			fsm.FsmRequestButtonPressV3()
+			if (!checkpoint.IncomingDataIsCorrupt(inncommingCombinedInput)){
+				checkpoint.InncommingJSONHandeling(localFilname, incommigFilname, inncommingCombinedInput, strings)
+				fsm.FsmJSONOrderAssigner(localFilname, localIP)
+				fsm.FsmRequestButtonPressV3()
+			}
 		case online := <-onlineStatusChannel:
 			logrus.Warn("Updated online status:", online)
 		}

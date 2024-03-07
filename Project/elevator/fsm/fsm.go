@@ -259,26 +259,24 @@ func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorNa
 	checkpoint.UpdateJSONWhenNewOrderOccurs(filename, elevatorName, btnFloor, btn, &elevator)
 }
 
-func fsmJSONOrderAssigner(filename string, elevatorName string) {
+func FsmJSONOrderAssigner(filename string, elevatorName string) {
 	checkpoint.JSONOrderAssigner(&elevator, filename, elevatorName)
 }
 
-
 func FsmRequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
-	if requests.RequestsShouldClearImmediately(elevator, btnFloor, btn) & (elevator.CurrentBehaviour =elev.EBDoorOpen){
-			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-		} 
-		
-	else {
-			//elevator.Requests[btnFloor][btn] = true
-			//trenger å sjekke at alt dette er riktig
-			fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
-			//fsmJSONOrderAssigner(filename, elevatorName)
-		}
+	if requests.RequestsShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
+		timer.TimerStart(elevator.Config.DoorOpenDurationS)
+	} else {
+		//elevator.Requests[btnFloor][btn] = true
+		//trenger å sjekke at alt dette er riktig
+		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
+		//fsmJSONOrderAssigner(filename, elevatorName)
+	}
 }
+
 // etter denne func broadcaster vi.
-//så assigner vi 
-//så kaller vi denne  
+// så assigner vi
+// så kaller vi denne
 func FsmRequestButtonPressV3() {
 	switch elevator.CurrentBehaviour {
 	case elev.EBIdle:
