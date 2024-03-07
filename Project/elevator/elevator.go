@@ -6,7 +6,6 @@ import (
 	"elevator/fsm"
 	"elevator/immobility"
 	"elevator/timer"
-	"fmt"
 
 	"github.com/sirupsen/logrus"
 )
