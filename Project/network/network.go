@@ -68,27 +68,30 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 
 		case msg := <-broadcastReceiverChannel:
 			logrus.Debug("Broadcast received from network")
-			/*checksum, err := checksum.GenerateJSONChecksum(msg.Payload)
+
+			sum, err := checksum.GenerateJSONChecksum(msg.Payload)
+			logrus.Debug("Recieved checksum: ", msg.Checksum, "\nComputed checksum: ", sum)
 			if err != nil {
 				logrus.Error("Checksum generation failed:", err)
 				continue
 			}
 
-			if msg.Checksum != checksum {
+			if msg.Checksum != sum {
 				logrus.Error("Checksum mismatch, payload corrupted. Abort forwarding")
 				continue
-			}*/
+			}
 
 			responseChannel <- msg
 
 		case msg := <-messageChannel:
 			logrus.Debug("Broadcast transmitted to network")
-			checksum, err := checksum.GenerateJSONChecksum(msg.Payload)
+			sum, err := checksum.GenerateJSONChecksum(msg.Payload)
 			if err != nil {
 				logrus.Error("Checksum generation failed:", err)
 				continue
 			}
-			msg.Checksum = checksum
+			msg.Checksum = sum
+			logrus.Debug("Generated checksum: ", sum) // Should be Debug
 			msg.SenderId = nodeIP
 
 			broadcastTransmissionChannel <- msg
