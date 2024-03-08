@@ -32,7 +32,7 @@ func init() {
 
   logFile, err := os.Create(projectRoot + "/log/" + timestamp + ".log")
       if err != nil {
-          log.Fatal(err)
+          logrus.Fatal(err)
       }
   defer logFile.Close()
 
