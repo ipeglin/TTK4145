@@ -13,14 +13,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func init() {
-  // get project root path
-  projectRoot, err := filepath.Abs("../")
+func createLogFile() {
+  rootPath, err := filepath.Abs("../") // procject root
   if err != nil {
-      logrus.Fatal("Failed to find project root")
+      logrus.Fatal("Failed to find project root", err)
   }
 
-  // generate log file
+  // generate timestamp
   now := time.Now()
   timestamp := fmt.Sprintf("runtime_%d-%d-%d_%d:%d:%d",
 		now.Year(),
@@ -30,15 +29,21 @@ func init() {
 		now.Hour(),
 		now.Second())
 
-  logFile, err := os.Create(fmt.Sprintf("%s/log/%s.log", projectRoot, timestamp))
+  filename = fmt.Sprintf("%s/log/%s.log", rootPath, timestamp)
+  file, err := os.Create(filename, rootPath, timestamp))
       if err != nil {
           logrus.Fatal(err)
       }
-  fileName := logFile.Name()
-  logFile.Close()
+  file.Close()
+
+  return filename
+}
+
+func init() {
+  logFile := createLogFile()
 
   // pass log file to logrus
-  f, err := os.OpenFile(fileName, os.O_WRONLY | os.O_CREATE, 0755)
+  f, err := os.OpenFile(logFile, os.O_WRONLY | os.O_CREATE, 0755)
   if err != nil {
       logrus.Fatal("Failed to create log file. ", err)
   }
