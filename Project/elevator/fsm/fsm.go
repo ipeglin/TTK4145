@@ -171,7 +171,7 @@ func FsmResumeAtLatestCheckpoint(floor int) {
 	//fmt.Print(elevator.Dirn)
 	outputDevice.MotorDirection(elevator.Dirn)
 
-	if  floor != -1{
+	if floor != -1 {
 		timer.TimerStart(elev.DoorOpenDurationSConfig)
 		outputDevice.DoorLight(true)
 	}
@@ -197,7 +197,6 @@ func FsmUpdateJSON(elevatorName string, filename string) {
 	checkpoint.UpdateJSON(elevator, filename, elevatorName)
 	FsmMakeCheckpoint()
 }
-
 
 func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
 	checkpoint.UpdateJSONWhenNewOrderOccurs(filename, elevatorName, btnFloor, btn, &elevator)
