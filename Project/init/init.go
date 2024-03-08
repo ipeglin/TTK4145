@@ -30,7 +30,7 @@ func init() {
 		now.Hour(),
 		now.Second())
 
-  logFile, err := os.Create(projectRoot + "/log/" + timestamp + ".log")
+  logFile, err := os.Create(fmt.Sprintf("%s/log/%s.log", projectRoot, timestamp))
       if err != nil {
           logrus.Fatal(err)
       }
