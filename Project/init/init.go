@@ -14,7 +14,7 @@ import (
 )
 
 func createLogFile() string {
-  rootPath, err := filepath.Abs("../") // procject root
+  rootPath, err := filepath.Abs("../Project/") // procject root
   if err != nil {
       logrus.Fatal("Failed to find project root", err)
   }
