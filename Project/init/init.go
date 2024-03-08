@@ -30,7 +30,7 @@ func createLogFile() {
 		now.Second())
 
   filename = fmt.Sprintf("%s/log/%s.log", rootPath, timestamp)
-  file, err := os.Create(filename, rootPath, timestamp))
+  file, err := os.Create(filename, rootPath, timestamp)
       if err != nil {
           logrus.Fatal(err)
       }
