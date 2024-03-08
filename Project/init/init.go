@@ -15,7 +15,7 @@ import (
 )
 
 func createLogFile() string {
-  rootPath, err := filepath.Abs("../Project/") // procject root
+  rootPath, err := filepath.Abs("../") // procject root
   if err != nil {
       logrus.Fatal("Failed to find project root", err)
   }
@@ -52,7 +52,6 @@ func init() {
   }
   logrus.SetOutput(f)
   logrus.SetReportCaller(true)
-  logrus.SetFormatter(&logrus.JSONFormatter{})
   logrus.SetLevel(logrus.DebugLevel)
 }
 
