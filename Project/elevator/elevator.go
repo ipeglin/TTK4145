@@ -10,17 +10,22 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func Init(localIP string) {
+func Init(localIP string, firstProcess bool) {
 	elevatorName := localIP
 	logrus.Info("Elevator module initiated with name ", localIP)
 
 	hwelevio.Init(elevio.Addr, elevio.NFloors)
-
-	if elevio.InputDevice.FloorSensor() == -1 {
-		fsm.FsmInitBetweenFloors()
-	}
 	filename := elevatorName + ".json"
-	fsm.FsmInitJson(filename, elevatorName)
+	if firstProcess {
+		if elevio.InputDevice.FloorSensor() == -1 {
+			fsm.FsmInitBetweenFloors()
+		}
+		fsm.FsmInitJson(filename, elevatorName)
+	} else {
+		floor := elevio.InputDevice.FloorSensor()
+		fsm.FsmResumeAtLatestCheckpoint(floor)
+		
+	}
 
 	drv_buttons := make(chan elevio.ButtonEvent)
 	drv_floors := make(chan int)
@@ -79,6 +84,7 @@ func Init(localIP string) {
 				fsm.FsmDoorTimeout()
 				fsm.FsmUpdateJSON(elevatorName, filename)
 			}
+			fsm.FsmMakeCheckpoint()
 		}
 		/// we need a case for each time a state updates.
 	}

@@ -160,78 +160,27 @@ func FsmObstruction() {
 	}
 }
 
-/*
-// TODO
-// Huske state før stop, så resume den? Tror det vil være en god løsning, midlertidig løsning for nå
-func FsmStop(stop bool) {
-	FsmMakeCheckpoint()
-	fmt.Print("kallet stopp: ", stop)
-	outputDevice.StopButtonLight(stop)
-	if stop {
-		elevator.Dirn = elevio.DirStop
-		outputDevice.MotorDirection(elevator.Dirn)
-		if elevio.InputDevice.FloorSensor() != -1 {
-			elevator.CurrentBehaviour = elev.EBDoorOpen
-			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-			hwelevio.SetDoorOpenLamp(true)
-		}
-	} else {
-		FsmResumeAtLatestCheckpoint()
-	}
-}
-
-/*
-func FsmStop(stop bool) {
-	fmt.Println("FsmStop(): ", stop)
-	elev.ElevatorPrint(elevator)
-	hwelevio.SetStopLamp(stop)
-	if stop {
-		requests.RequestsClearAll(&elevator)
-		setAllLights()
-		outputDevice.MotorDirection(elevio.ElevDir(hwelevio.MD_Stop))
-		elevator.Dirn = elevio.DirStop
-		if elevio.InputDevice.FloorSensor() != -1 {
-			elevator.CurrentBehaviour = elev.EBDoorOpen
-			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-			hwelevio.SetDoorOpenLamp(true)
-		}
-	} else {
-		if elevator.CurrentBehaviour == elev.EBDoorOpen {
-			elevator.CurrentBehaviour = elev.EBIdle
-		} else if elevio.InputDevice.FloorSensor() != -1 {
-			FsmInitBetweenFloors()
-		}
-	}
-	elev.ElevatorPrint(elevator)
-}*/
-/*
 func FsmMakeCheckpoint() {
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 	//fmt.Print("The elevator which were saved: \n")
 	//elev.ElevatorPrint(elevator)
 }
 
-func FsmResumeAtLatestCheckpoint() {BHallUp
+func FsmResumeAtLatestCheckpoint(floor int) {
 	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
+	setAllLights()
 	//fmt.Print(elevator.Dirn)
 	outputDevice.MotorDirection(elevator.Dirn)
+
+	if  floor != -1{
+		timer.TimerStart(elev.DoorOpenDurationSConfig)
+		outputDevice.DoorLight(true)
+	}
 }
 
 func FsmLoadLatestCheckpoint() {
 	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
 }
-
-func FsmTestProcessPair() {
-	for {
-		FsmLoadLatestCheckpoint()
-		elevator.CurrentFloor += 1
-		fmt.Print(elevator.CurrentFloor)
-		FsmMakeCheckpoint()
-		time.Sleep(1000 * time.Millisecond)
-	}
-
-}
-*/
 
 // Json fra her
 func FsmInitJson(filename string, ElevatorName string) {
@@ -247,6 +196,7 @@ func FsmInitJson(filename string, ElevatorName string) {
 
 func FsmUpdateJSON(elevatorName string, filename string) {
 	checkpoint.UpdateJSON(elevator, filename, elevatorName)
+	FsmMakeCheckpoint()
 }
 
 func fsmUpdateJSONWhenHallOrderIsComplete(filename string, elevatorName string, orderCompleteFloor int) {
