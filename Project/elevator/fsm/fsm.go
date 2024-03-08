@@ -108,19 +108,20 @@ func FsmFloorArrival(newFloor int, elevatorName string, filename string) {
 			outputDevice.MotorDirection(elevio.DirStop)
 			elevator.Dirn = elevio.DirStop
 			outputDevice.DoorLight(true)
-			elevator = requests.RequestsClearAtCurrentFloor(elevator)
+			elevator = requests.RequestsClearAtCurrentFloor(elevator, filename, elevatorName)
 			timer.TimerStart(elevator.Config.DoorOpenDurationS)
 			setAllLights()
 			elevator.CurrentBehaviour = elev.EBDoorOpen
 			//den klarer ikke å klarere siste ordre i køen?
-			fsmUpdateJSONWhenHallOrderIsComplete(filename, elevatorName, elevator.CurrentFloor)
+			//sett denne inne i RequestsClearAtCurrentFloor
+			//fsmUpdateJSONWhenHallOrderIsComplete(filename, elevatorName, elevator.CurrentFloor)
 		}
 	}
 	//fmt.Println("New state:")
 	//elev.ElevatorPrint(elevator)
 }
 
-func FsmDoorTimeout() {
+func FsmDoorTimeout(filename string, elevatorName string) {
 	//fmt.Printf("\n\n%s()\n", "FsmDoorTimeout")
 	//elev.ElevatorPrint(elevator)
 	//Hvorfor switch
@@ -133,7 +134,7 @@ func FsmDoorTimeout() {
 		switch elevator.CurrentBehaviour {
 		case elev.EBDoorOpen:
 			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-			elevator = requests.RequestsClearAtCurrentFloor(elevator)
+			elevator = requests.RequestsClearAtCurrentFloor(elevator, filename, elevatorName)
 			setAllLights()
 
 		case elev.EBMoving:
@@ -201,9 +202,6 @@ func FsmUpdateJSON(elevatorName string, filename string) {
 	FsmMakeCheckpoint()
 }
 
-func fsmUpdateJSONWhenHallOrderIsComplete(filename string, elevatorName string, orderCompleteFloor int) {
-	checkpoint.UpdateJSONWhenHallOrderIsComplete(elevator, filename, elevatorName, orderCompleteFloor)
-}
 
 func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
 	checkpoint.UpdateJSONWhenNewOrderOccurs(filename, elevatorName, btnFloor, btn, &elevator)
@@ -227,7 +225,7 @@ func FsmRequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName strin
 // etter denne func broadcaster vi.
 // så assigner vi
 // så kaller vi denne
-func FsmRequestButtonPressV3() {
+func FsmRequestButtonPressV3(filename string, elevatorName string) {
 	switch elevator.CurrentBehaviour {
 	case elev.EBIdle:
 		pair := requests.RequestsChooseDirection(elevator)
@@ -237,7 +235,7 @@ func FsmRequestButtonPressV3() {
 		case elev.EBDoorOpen:
 			outputDevice.DoorLight(true)
 			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-			elevator = requests.RequestsClearAtCurrentFloor(elevator)
+			elevator = requests.RequestsClearAtCurrentFloor(elevator, filename, elevatorName)
 
 		case elev.EBMoving:
 			//fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevator.Dirn), " in FsmRequestButtonPress")

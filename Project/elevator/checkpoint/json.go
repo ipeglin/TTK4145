@@ -62,16 +62,28 @@ func LoadCombinedInput(filename string) (CombinedInput, error) {
 func UpdateJSON(el elev.Elevator, filename string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(filename)
 	combinedInput.HRAInput = updateHRAInput(combinedInput.HRAInput, el, elevatorName)
-	combinedInput.CyclicCounter = updateLocalElevatorsCyclicCounterInput(combinedInput.CyclicCounter, elevatorName)
+	combinedInput.CyclicCounter = updateCyclicCounterInput(combinedInput.CyclicCounter, elevatorName)
 	SaveCombinedInput(combinedInput, filename)
 }
-
+//old version 
+/*
 func UpdateJSONWhenHallOrderIsComplete(el elev.Elevator, filename string, elevatorName string, orderCompleteFloor int) {
 	combinedInput, _ := LoadCombinedInput(filename)
 	combinedInput.HRAInput = updateHRAInputWhenHallOrderIsComplete(el, elevatorName, orderCompleteFloor)
 	combinedInput.CyclicCounter = updateCyclicCounterWhenHallOrderIsComplete(combinedInput.CyclicCounter, orderCompleteFloor, elevatorName)
 	SaveCombinedInput(combinedInput, filename)
 }
+*/
+
+func UpdateJSONWhenHallOrderIsComplete(el elev.Elevator, filename string, elevatorName string, btn_floor int, btn_type elevio.Button) {
+	combinedInput, _ := LoadCombinedInput(filename)
+	combinedInput.HRAInput = updateHRAInputWhenOrderIsComplete(combinedInput.HRAInput,el, elevatorName, btn_floor, btn_type)
+	combinedInput.CyclicCounter = updateCyclicCounterWhenOrderIsComplete(combinedInput.CyclicCounter,elevatorName , btn_floor, btn_type)
+	SaveCombinedInput(combinedInput, filename)
+}
+
+
+
 
 func UpdateJSONWhenNewOrderOccurs(filename string, elevatorName string, btnFloor int, btn elevio.Button, el *elev.Elevator) {
 	combinedInput, _ := LoadCombinedInput(filename)
@@ -122,15 +134,14 @@ func UpdateLocalJSON(localFilname string, incomingFilename string) {
 			}
 		}
 	}
-	// trenger man forloop inne i her for alle behaviours i state?
-	for i, state := range otherCombinedInput.CyclicCounter.States {
+	for i, state := range otherCombinedInput.HRAInput.States {
 		if _, exists := localCombinedInput.CyclicCounter.States[i]; !exists {
-			localCombinedInput.HRAInput.States[i] = otherCombinedInput.HRAInput.States[i]
-			localCombinedInput.CyclicCounter.States[i] = state
+			localCombinedInput.HRAInput.States[i] = state
+			localCombinedInput.CyclicCounter.States[i] = otherCombinedInput.CyclicCounter.States[i]
 		} else {
-			if state.Behavior > localCombinedInput.CyclicCounter.States[i].Behavior {
-				localCombinedInput.HRAInput.States[i] = otherCombinedInput.HRAInput.States[i]
-				localCombinedInput.CyclicCounter.States[i] = state
+			if otherCombinedInput.CyclicCounter.States[i] > localCombinedInput.CyclicCounter.States[i] {
+				localCombinedInput.HRAInput.States[i] = state
+				localCombinedInput.CyclicCounter.States[i] = otherCombinedInput.CyclicCounter.States[i]
 			}
 		}
 	}

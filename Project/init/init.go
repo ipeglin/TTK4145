@@ -106,7 +106,7 @@ func mainLogic(firstProcess bool) {
 			if (!checkpoint.IncomingDataIsCorrupt(inncommingCombinedInput)){
 				checkpoint.InncommingJSONHandeling(localFilname, incommigFilname, inncommingCombinedInput, strings)
 				fsm.FsmJSONOrderAssigner(localFilname, localIP)
-				fsm.FsmRequestButtonPressV3()
+				fsm.FsmRequestButtonPressV3(localFilname, localIP)
 			}
 
 		case online := <-onlineStatusChannel:

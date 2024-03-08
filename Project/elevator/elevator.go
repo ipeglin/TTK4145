@@ -70,7 +70,7 @@ func Init(localIP string, firstProcess bool) {
 			fsm.FsmUpdateJSON(elevatorName, filename)
 			fsm.FsmRequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, filename)
 			fsm.FsmJSONOrderAssigner(filename, elevatorName)
-			fsm.FsmRequestButtonPressV3()
+			fsm.FsmRequestButtonPressV3(filename, elevatorName)
 			fsm.FsmUpdateJSON(elevatorName, filename)
 
 		case floor := <-drv_floors:
@@ -83,7 +83,7 @@ func Init(localIP string, firstProcess bool) {
 			  logrus.Debug("Elevator timeout")
 				fsm.FsmUpdateJSON(elevatorName, filename)
 				timer.TimerStop()
-				fsm.FsmDoorTimeout()
+				fsm.FsmDoorTimeout(filename, elevatorName)
 				fsm.FsmUpdateJSON(elevatorName, filename)
 			}
 			fsm.FsmMakeCheckpoint()

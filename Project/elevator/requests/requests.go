@@ -2,6 +2,7 @@ package requests
 
 import (
 	//"fmt"
+	"elevator/checkpoint"
 	"elevator/elev"
 	"elevator/elevio"
 )
@@ -119,7 +120,7 @@ func RequestsShouldClearImmediately(e elev.Elevator, btn_floor int, btn_type ele
 	}
 }
 
-func RequestsClearAtCurrentFloor(e elev.Elevator) elev.Elevator {
+func RequestsClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName string) elev.Elevator {
 	//fmt.Print("RequestsClearAtCurrentFloor: ")
 	switch e.Config.ClearRequestVariant {
 	case elev.CRVAll:
@@ -131,22 +132,29 @@ func RequestsClearAtCurrentFloor(e elev.Elevator) elev.Elevator {
 	case elev.CRVInDirn:
 		//fmt.Print("CRVInDirn, RequestsClearAtCurrentFloor")
 		e.Requests[e.CurrentFloor][elevio.BCab] = false
+		checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor, elevio.BCab)
 		switch e.Dirn {
 		case elevio.DirUp:
 			if !requestsAbove(e) && !e.Requests[e.CurrentFloor][elevio.BHallUp] {
 				e.Requests[e.CurrentFloor][elevio.BHallDown] = false
+				checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor, elevio.BHallDown)
 			}
 			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
+			checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallUp)
 
 		case elevio.DirDown:
 			if !requestsBelow(e) && !e.Requests[e.CurrentFloor][elevio.BHallDown] {
 				e.Requests[e.CurrentFloor][elevio.BHallUp] = false
+				checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallUp)
 			}
 			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
+			checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallUp)
 
 		default:
 			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
+			checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallUp)
 			e.Requests[e.CurrentFloor][elevio.BHallDown] = false
+			checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallDown)
 		}
 	default:
 
