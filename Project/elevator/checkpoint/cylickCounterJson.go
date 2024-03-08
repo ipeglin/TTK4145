@@ -22,7 +22,6 @@ func InitializeCyclicCounterInput(ElevatorName string) CyclicCounterInput {
 }
 
 
-
 func updateCyclicCounterWhenOrderIsComplete(cyclicCounter CyclicCounterInput, elevatorName string, btn_floor int, btn_type elevio.Button) CyclicCounterInput{
 	switch btn_type {
 	case elevio.BHallUp:

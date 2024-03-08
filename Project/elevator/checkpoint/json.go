@@ -65,15 +65,6 @@ func UpdateJSON(el elev.Elevator, filename string, elevatorName string) {
 	combinedInput.CyclicCounter = updateCyclicCounterInput(combinedInput.CyclicCounter, elevatorName)
 	SaveCombinedInput(combinedInput, filename)
 }
-//old version 
-/*
-func UpdateJSONWhenHallOrderIsComplete(el elev.Elevator, filename string, elevatorName string, orderCompleteFloor int) {
-	combinedInput, _ := LoadCombinedInput(filename)
-	combinedInput.HRAInput = updateHRAInputWhenHallOrderIsComplete(el, elevatorName, orderCompleteFloor)
-	combinedInput.CyclicCounter = updateCyclicCounterWhenHallOrderIsComplete(combinedInput.CyclicCounter, orderCompleteFloor, elevatorName)
-	SaveCombinedInput(combinedInput, filename)
-}
-*/
 
 func UpdateJSONWhenHallOrderIsComplete(el elev.Elevator, filename string, elevatorName string, btn_floor int, btn_type elevio.Button) {
 	combinedInput, _ := LoadCombinedInput(filename)
@@ -81,9 +72,6 @@ func UpdateJSONWhenHallOrderIsComplete(el elev.Elevator, filename string, elevat
 	combinedInput.CyclicCounter = updateCyclicCounterWhenOrderIsComplete(combinedInput.CyclicCounter,elevatorName , btn_floor, btn_type)
 	SaveCombinedInput(combinedInput, filename)
 }
-
-
-
 
 func UpdateJSONWhenNewOrderOccurs(filename string, elevatorName string, btnFloor int, btn elevio.Button, el *elev.Elevator) {
 	combinedInput, _ := LoadCombinedInput(filename)
@@ -118,7 +106,6 @@ func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) 
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		el.Requests[floor][elevio.BHallUp] = (*output)[elevatorName][floor][0]
 		el.Requests[floor][elevio.BHallDown] = (*output)[elevatorName][floor][1]
-		// Preserve Cab requests as is
 	}
 }
 

@@ -119,6 +119,7 @@ func updateHRAInputWhenNewOrderOccurs(hraInput HRAInput, elevatorName string, bt
 		hraInput.HallRequests[btnFloor][1] = true
 	case elevio.BCab:
 		hraInput.States[elevatorName].CabRequests[btnFloor] = true
+		//denne burde ikke endres inne i her, men krever ellers så mange if setninger i kode. tenk smart løsning
 		localElevator.Requests[btnFloor][btn] = true
 	}
 	return hraInput

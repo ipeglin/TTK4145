@@ -1,13 +1,12 @@
 package elevator
 
 import (
+	"elevator/checkpoint"
 	"elevator/driver/hwelevio"
 	"elevator/elevio"
 	"elevator/fsm"
 	"elevator/immobility"
 	"elevator/timer"
-	"fmt"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -62,12 +61,12 @@ func Init(localIP string, firstProcess bool) {
 
 		case immobile = <-immob:
 			if immobile {
-				//TODO
+				//dette skjer veldig sent
+				checkpoint.RemoveDysfunctionalElevatorFromJSON(filename, elevatorName)
 				logrus.Warn("Immobile state changed: ", immobile)
-				fmt.Print("Immobile")
 			} else {
 				//fra imobil til mobil
-				fmt.Print("Back online")
+				fsm.FsmUpdateJSON(elevatorName, filename)
 			}
 
 		case btnEvent := <-drv_buttons:
