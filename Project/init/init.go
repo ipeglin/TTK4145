@@ -34,7 +34,7 @@ func init() {
       if err != nil {
           logrus.Fatal(err)
       }
-  fileName = logFile.Name()
+  fileName := logFile.Name()
   logFile.Close()
 
   // pass log file to logrus
