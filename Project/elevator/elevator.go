@@ -66,9 +66,11 @@ func Init(localIP string, firstProcess bool) {
 			}
 
 		case btnEvent := <-drv_buttons:
-		  logrus.Debug("Button press detected: ", btnEvent)
+			logrus.Debug("Button press detected: ", btnEvent)
 			fsm.FsmUpdateJSON(elevatorName, filename)
-			fsm.FsmRequestButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName, filename)
+			fsm.FsmRequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, filename)
+			fsm.FsmJSONOrderAssigner(filename, elevatorName)
+			fsm.FsmRequestButtonPressV3()
 			fsm.FsmUpdateJSON(elevatorName, filename)
 
 		case floor := <-drv_floors:

@@ -3,6 +3,7 @@ package main
 import (
 	"elevator"
 	"elevator/checkpoint"
+	"elevator/fsm"
 	"elevator/processpair"
 	"fmt"
 	"network"
@@ -94,10 +95,20 @@ func mainLogic(firstProcess bool) {
 			strings := make([]string, 8)
 			// localIP
 			// inncomigIP.JSON
-			localFilename := localIP + ".json"
-			incomingFilename := msg.SenderId + ".json"
-			incomingCombinedInput := msg.Payload
-			checkpoint.IncomingJSONHandeling(localFilename, incomingFilename, incomingCombinedInput, strings)
+
+			localFilname := localIP + ".json"
+			incommigFilname := msg.SenderId + ".json"
+			inncommingCombinedInput := msg.Payload
+			
+			//her må vi reassigne
+			//temp solution
+			//NOT VERY NICE. ONLY PROOF OF CONCEPT
+			if (!checkpoint.IncomingDataIsCorrupt(inncommingCombinedInput)){
+				checkpoint.InncommingJSONHandeling(localFilname, incommigFilname, inncommingCombinedInput, strings)
+				fsm.FsmJSONOrderAssigner(localFilname, localIP)
+				fsm.FsmRequestButtonPressV3()
+			}
+
 		case online := <-onlineStatusChannel:
 			logrus.Warn("Updated online status:", online)
 		}

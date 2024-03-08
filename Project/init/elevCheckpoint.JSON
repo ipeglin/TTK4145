@@ -1,0 +1,34 @@
+{
+  "State": {
+    "CurrentFloor": 1,
+    "Dirn": 0,
+    "Requests": [
+      [
+        false,
+        false,
+        false
+      ],
+      [
+        false,
+        false,
+        false
+      ],
+      [
+        false,
+        false,
+        false
+      ],
+      [
+        false,
+        false,
+        false
+      ]
+    ],
+    "CurrentBehaviour": 0,
+    "Config": {
+      "ClearRequestVariant": 0,
+      "DoorOpenDurationS": 0
+    }
+  },
+  "Timestamp": "2024-03-07T15:00:41.172843919+01:00"
+}

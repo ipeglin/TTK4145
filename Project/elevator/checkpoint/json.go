@@ -166,10 +166,10 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 	return nil
 }
 
-func IncomingJSONHandeling(localFilname string, incomingFilename string, incomingCombinedInput CombinedInput, inactiveElevatorIDs []string) {
-	SaveCombinedInput(incomingCombinedInput, incomingFilename)
-	UpdateLocalJSON(localFilname, incomingFilename)
-	inactiveElevatorIDs = DysfunctionalElevatorDetection(incomingFilename, incomingCombinedInput, inactiveElevatorIDs)
+func InncommingJSONHandeling(localFilname string, incommigFilname string, inncommingCombinedInput CombinedInput, inactiveElevatorIDs []string) {
+	SaveCombinedInput(inncommingCombinedInput, incommigFilname)
+	UpdateLocalJSON(localFilname, incommigFilname)
+	//inactiveElevatorIDs = DysfunctionalElevatorDetection(incommigFilname, inncommingCombinedInput, inactiveElevatorIDs)
 	DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs, localFilname)
 }
 
@@ -199,4 +199,45 @@ func DysfunctionalElevatorDetection(incomingFilename string, incomingCombinedInp
 	}
 
 	return inactiveElevatorIDs
+}
+
+
+
+// Antagelser om strukturer og hjelpefunksjoner fra tidligere eksempel ...
+// IsValidBehavior sjekker om oppgitt atferd er gyldig
+func IsValidBehavior(behavior string) bool {
+	switch behavior {
+	case "idle", "moving", "doorOpen":
+		return true
+	default:
+		return false
+	}
+}
+
+// IsValidDirection sjekker om oppgitt retning er gyldig
+func IsValidDirection(direction string) bool {
+	switch direction {
+	case "up", "down", "stop":
+		return true
+	default:
+		return false
+	}
+}
+// IncomingDataIsCorrupt sjekker om inngående data er korrupt
+func IncomingDataIsCorrupt(incomingCombinedInput CombinedInput) bool {
+	incomingHRAInput := incomingCombinedInput.HRAInput
+	if len(incomingHRAInput.HallRequests) != elevio.NFloors {
+		return true
+	}
+	for _, state := range incomingHRAInput.States {
+		if !IsValidBehavior(state.Behavior) || !IsValidDirection(state.Direction) {
+			return true // Data er korrupt basert på ugyldig Behavior eller Direction
+		}
+		
+		// Sjekk om CabRequests har riktig lengde og inneholder boolske verdier
+		if len(state.CabRequests) != elevio.NFloors{
+			return true // Data er korrupt basert på lengde
+		}
+	}
+	return false // Data er gyldig
 }
