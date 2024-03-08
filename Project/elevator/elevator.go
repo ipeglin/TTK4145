@@ -6,12 +6,13 @@ import (
 	"elevator/fsm"
 	"elevator/immobility"
 	"elevator/timer"
-	"fmt"
+
+	"github.com/sirupsen/logrus"
 )
 
 func Init(localIP string, firstProcess bool) {
-	fmt.Println("Started!")
 	elevatorName := localIP
+	logrus.Info("Elevator module initiated with name ", localIP)
 
 	hwelevio.Init(elevio.Addr, elevio.NFloors)
 	filename := elevatorName + ".json"
@@ -51,7 +52,7 @@ func Init(localIP string, firstProcess bool) {
 	for {
 		select {
 		case drv_obst := <-drv_obstr:
-			//fmt.Print(("obst"))
+			logrus.Warn("Obstruction state changed: ", drv_obst)
 			drv_obstr_immob <- drv_obst
 			if drv_obst == !obst { // If obstruction detected and it's a new obstruction
 				fsm.FsmObstruction()
@@ -61,22 +62,23 @@ func Init(localIP string, firstProcess bool) {
 		case immobile = <-immob:
 			if immobile {
 				//TODO
-				fmt.Print("Immobile")
+				logrus.Warn("Immobile state changed: ", immobile)
 			}
-			fmt.Print(immobile)
 
 		case btnEvent := <-drv_buttons:
+		  logrus.Debug("Button press detected: ", btnEvent)
 			fsm.FsmUpdateJSON(elevatorName, filename)
 			fsm.FsmRequestButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName, filename)
 			fsm.FsmUpdateJSON(elevatorName, filename)
 
 		case floor := <-drv_floors:
-			//fmt.Print("Arrived")
+			logrus.Debug("Floor sensor triggered: ", floor)
 			fsm.FsmFloorArrival(floor, elevatorName, filename)
 			fsm.FsmUpdateJSON(elevatorName, filename)
 
 		default:
 			if timer.TimerTimedOut() && !obst { // Check for timeout only if no obstruction
+			  logrus.Debug("Elevator timeout")
 				fsm.FsmUpdateJSON(elevatorName, filename)
 				timer.TimerStop()
 				fsm.FsmDoorTimeout()

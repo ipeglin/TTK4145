@@ -4,14 +4,57 @@ import (
 	"elevator"
 	"elevator/checkpoint"
 	"elevator/processpair"
-
+	"fmt"
 	"network"
 	"network/nodes"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/sirupsen/logrus"
 )
+
+func createLogFile() string {
+  rootPath, err := filepath.Abs("../Project/") // procject root
+  if err != nil {
+      logrus.Fatal("Failed to find project root", err)
+  }
+
+  // generate timestamp
+  now := time.Now()
+  timestamp := fmt.Sprintf("runtime_%d-%d-%d_%d:%d:%d",
+		now.Year(),
+		now.Month(),
+		now.Day(),
+		now.Hour(),
+		now.Hour(),
+		now.Second())
+
+  filename := fmt.Sprintf("%s/log/%s.log", rootPath, timestamp)
+  os.MkdirAll(filepath.Dir(filename), 0755)
+  file, err := os.Create(filename)
+      if err != nil {
+          logrus.Fatal(err)
+      }
+  file.Close()
+  logrus.Info("Created log file: ", filename)
+
+  return filename
+}
+
+func init() {
+  logFile := createLogFile()
+
+  // pass log file to logrus
+  f, err := os.OpenFile(logFile, os.O_WRONLY | os.O_CREATE, 0755)
+  if err != nil {
+      logrus.Fatal("Failed to create log file. ", err)
+  }
+  logrus.SetOutput(f)
+  logrus.SetReportCaller(true)
+  logrus.SetFormatter(&logrus.JSONFormatter{})
+  logrus.SetLevel(logrus.DebugLevel)
+}
 
 func mainLogic(firstProcess bool) {
 	logrus.Info("Node initialised with PID:", os.Getpid())
@@ -24,7 +67,6 @@ func mainLogic(firstProcess bool) {
 
 	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel, ipChannel)
 
-	// TODO: Launch new process watching current process in case of crash
 	localIP := <-ipChannel
 	go elevator.Init(localIP, firstProcess)
 
@@ -33,8 +75,8 @@ func mainLogic(firstProcess bool) {
 			//antar det er her vi sender
 			//dersom local elevator dedekteres ikke funksjonell ønsker vi ikke broacaste JSON
 			//da vil alle andre heiser tro den er offline og ikke assigne den nye calls.
-			localFilname := localIP + ".json"
-			elv, _ := checkpoint.LoadCombinedInput(localFilname)
+			localFilename := localIP + ".json"
+			elv, _ := checkpoint.LoadCombinedInput(localFilename)
 			messageTransmitterChannel <- network.Message{Payload: elv}
 			time.Sleep(500 * time.Millisecond)
 		}
@@ -53,10 +95,10 @@ func mainLogic(firstProcess bool) {
 			strings := make([]string, 8)
 			// localIP
 			// inncomigIP.JSON
-			localFilname := localIP + ".json"
+			localFilename := localIP + ".json"
 			incomingFilename := msg.SenderId + ".json"
 			incomingCombinedInput := msg.Payload
-			checkpoint.IncomingJSONHandeling(localFilname, incomingFilename, incomingCombinedInput, strings)
+			checkpoint.IncomingJSONHandeling(localFilename, incomingFilename, incomingCombinedInput, strings)
 		case online := <-onlineStatusChannel:
 			logrus.Warn("Updated online status:", online)
 		}
