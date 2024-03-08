@@ -9,6 +9,18 @@ import (
   "github.com/sirupsen/logrus"
 )
 
+type WarnLevelHook struct{}
+
+func (hook *WarnLevelHook) Levels() []logrus.Level {
+	return []logrus.Level{logrus.WarnLevel, logrus.ErrorLevel, logrus.FatalLevel, logrus.PanicLevel}
+}
+
+func (hook *WarnLevelHook) Fire(entry *logrus.Entry) error {
+	// Here, you can write the log entry to stdout
+	entry.Logger.Out = os.Stdout
+	return nil
+}
+
 func createLogFile() string {
   rootPath, err := filepath.Abs("../") // procject root
   if err != nil {
@@ -45,8 +57,19 @@ func Setup() {
   if err != nil {
       logrus.Fatal("Failed to create log file. ", err)
   }
+  defer file.Close()
+
   mw := io.MultiWriter(os.Stdout, file)
   logrus.SetOutput(mw)
   logrus.SetReportCaller(true)
   logrus.SetLevel(logrus.DebugLevel)
+
+  logrus.AddHook(&WarnLevelHook{})
+
+  // Test logging
+	logrus.Debug("This is a debug message")
+	logrus.Info("This is an info message")
+	logrus.Warn("This is a warning message")
+	logrus.Error("This is an error message")
+	logrus.Fatal("This is a fatal message")
 }
