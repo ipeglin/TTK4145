@@ -50,6 +50,9 @@ func init() {
       logrus.Fatal("Failed to create log file. ", err)
   }
   logrus.SetOutput(f)
+  logrus.SetReportCaller(true)
+  logrus.SetFormatter(&logrus.JSONFormatter{})
+  logrus.SetLevel(logrus.DebugLevel)
 }
 
 func main() {
