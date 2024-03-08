@@ -166,28 +166,21 @@ func FsmMakeCheckpoint() {
 	//elev.ElevatorPrint(elevator)
 }
 
-func FsmResumeAtLatestCheckpoint() {
+func FsmResumeAtLatestCheckpoint(floor int) {
 	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
+	setAllLights()
 	//fmt.Print(elevator.Dirn)
 	outputDevice.MotorDirection(elevator.Dirn)
+
+	if  floor != -1{
+		timer.TimerStart(elev.DoorOpenDurationSConfig)
+		outputDevice.DoorLight(true)
+	}
 }
 
 func FsmLoadLatestCheckpoint() {
 	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
 }
-
-/*
-func FsmTestProcessPair() {
-	for {
-		FsmLoadLatestCheckpoint()
-		elevator.CurrentFloor += 1
-		fmt.Print(elevator.CurrentFloor)
-		FsmMakeCheckpoint()
-		time.Sleep(1000 * time.Millisecond)
-	}
-
-}
-*/
 
 // Json fra her
 func FsmInitJson(filename string, ElevatorName string) {
@@ -203,6 +196,7 @@ func FsmInitJson(filename string, ElevatorName string) {
 
 func FsmUpdateJSON(elevatorName string, filename string) {
 	checkpoint.UpdateJSON(elevator, filename, elevatorName)
+	FsmMakeCheckpoint()
 }
 
 func fsmUpdateJSONWhenHallOrderIsComplete(filename string, elevatorName string, orderCompleteFloor int) {
