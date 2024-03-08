@@ -28,8 +28,7 @@ func init() {
 		now.Day(),
 		now.Hour(),
 		now.Hour(),
-		now.Second()
-  )
+		now.Second())
 
   // pass log file to logrus
   f, err := os.OpenFile(projectRoot + "/log/" + logFile + ".log", os.O_WRONLY | os.O_CREATE, 0755)
