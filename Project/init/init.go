@@ -34,10 +34,11 @@ func init() {
       if err != nil {
           logrus.Fatal(err)
       }
-  defer logFile.Close()
+  fileName = logFile.Name()
+  logFile.Close()
 
   // pass log file to logrus
-  f, err := os.OpenFile(logFile.Name(), os.O_WRONLY | os.O_CREATE, 0755)
+  f, err := os.OpenFile(fileName, os.O_WRONLY | os.O_CREATE, 0755)
   if err != nil {
       logrus.Fatal("Failed to create log file. ", err)
   }
