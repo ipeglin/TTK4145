@@ -1,6 +1,6 @@
 {
   "State": {
-    "CurrentFloor": 1,
+    "CurrentFloor": 3,
     "Dirn": 0,
     "Requests": [
       [
@@ -26,9 +26,9 @@
     ],
     "CurrentBehaviour": 0,
     "Config": {
-      "ClearRequestVariant": 0,
-      "DoorOpenDurationS": 0
+      "ClearRequestVariant": 1,
+      "DoorOpenDurationS": 3
     }
   },
-  "Timestamp": "2024-03-07T15:00:41.172843919+01:00"
+  "Timestamp": "2024-03-08T13:05:08.538059269+01:00"
 }
