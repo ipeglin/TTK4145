@@ -36,6 +36,7 @@ func createLogFile() string {
           logrus.Fatal(err)
       }
   file.Close()
+  logrus.Info("Created log file: ", filename)
 
   return filename
 }
