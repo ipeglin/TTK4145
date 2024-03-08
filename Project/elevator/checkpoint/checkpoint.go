@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const FilenameCheckpoint = "elevCheckpoint.JSON" // Filepath is kinda a stupid way to do this
+const FilenameCheckpoint = "elevCheckpoint.json" // Filepath is kinda a stupid way to do this
 
 type ElevCheckpoint struct {
 	State     elev.Elevator

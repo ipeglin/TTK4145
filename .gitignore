@@ -1,3 +1,7 @@
 *.json
 *.JSON
 *.log
+
+# Ignore extensionless files in init (typically executables)
+/**/init/*
+!/**/init/*.*

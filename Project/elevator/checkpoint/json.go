@@ -68,8 +68,8 @@ func UpdateJSON(el elev.Elevator, filename string, elevatorName string) {
 
 func UpdateJSONWhenHallOrderIsComplete(el elev.Elevator, filename string, elevatorName string, btn_floor int, btn_type elevio.Button) {
 	combinedInput, _ := LoadCombinedInput(filename)
-	combinedInput.HRAInput = updateHRAInputWhenOrderIsComplete(combinedInput.HRAInput,el, elevatorName, btn_floor, btn_type)
-	combinedInput.CyclicCounter = updateCyclicCounterWhenOrderIsComplete(combinedInput.CyclicCounter,elevatorName , btn_floor, btn_type)
+	combinedInput.HRAInput = updateHRAInputWhenOrderIsComplete(combinedInput.HRAInput, el, elevatorName, btn_floor, btn_type)
+	combinedInput.CyclicCounter = updateCyclicCounterWhenOrderIsComplete(combinedInput.CyclicCounter, elevatorName, btn_floor, btn_type)
 	SaveCombinedInput(combinedInput, filename)
 }
 
@@ -199,8 +199,6 @@ func DysfunctionalElevatorDetection(incomingFilename string, incomingCombinedInp
 	return inactiveElevatorIDs
 }
 
-
-
 // Antagelser om strukturer og hjelpefunksjoner fra tidligere eksempel ...
 // IsValidBehavior sjekker om oppgitt atferd er gyldig
 func IsValidBehavior(behavior string) bool {
@@ -221,6 +219,7 @@ func IsValidDirection(direction string) bool {
 		return false
 	}
 }
+
 // IncomingDataIsCorrupt sjekker om inngående data er korrupt
 func IncomingDataIsCorrupt(incomingCombinedInput CombinedInput) bool {
 	incomingHRAInput := incomingCombinedInput.HRAInput
@@ -231,9 +230,9 @@ func IncomingDataIsCorrupt(incomingCombinedInput CombinedInput) bool {
 		if !IsValidBehavior(state.Behavior) || !IsValidDirection(state.Direction) {
 			return true // Data er korrupt basert på ugyldig Behavior eller Direction
 		}
-		
+
 		// Sjekk om CabRequests har riktig lengde og inneholder boolske verdier
-		if len(state.CabRequests) != elevio.NFloors{
+		if len(state.CabRequests) != elevio.NFloors {
 			return true // Data er korrupt basert på lengde
 		}
 	}
