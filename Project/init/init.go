@@ -13,7 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func createLogFile() {
+func createLogFile() string {
   rootPath, err := filepath.Abs("../") // procject root
   if err != nil {
       logrus.Fatal("Failed to find project root", err)
