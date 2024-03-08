@@ -6,6 +6,7 @@ import (
 	"elevator/fsm"
 	"elevator/immobility"
 	"elevator/timer"
+	"fmt"
 
 	"github.com/sirupsen/logrus"
 )
@@ -63,6 +64,10 @@ func Init(localIP string, firstProcess bool) {
 			if immobile {
 				//TODO
 				logrus.Warn("Immobile state changed: ", immobile)
+				fmt.Print("Immobile")
+			} else {
+				//fra imobil til mobil
+				fmt.Print("Back online")
 			}
 
 		case btnEvent := <-drv_buttons:
@@ -79,8 +84,8 @@ func Init(localIP string, firstProcess bool) {
 			fsm.FsmUpdateJSON(elevatorName, filename)
 
 		default:
-			if timer.TimerTimedOut() && !obst { // Check for timeout only if no obstruction
-			  logrus.Debug("Elevator timeout")
+			if timer.TimerTimedOut(){ // Check for timeout only if no obstruction
+			  	logrus.Debug("Elevator timeout")
 				fsm.FsmUpdateJSON(elevatorName, filename)
 				timer.TimerStop()
 				fsm.FsmDoorTimeout(filename, elevatorName)

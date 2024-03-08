@@ -106,15 +106,11 @@ func FsmFloorArrival(newFloor int, elevatorName string, filename string) {
 	case elev.EBMoving:
 		if requests.RequestsShouldStop(elevator) {
 			outputDevice.MotorDirection(elevio.DirStop)
-			elevator.Dirn = elevio.DirStop
 			outputDevice.DoorLight(true)
 			elevator = requests.RequestsClearAtCurrentFloor(elevator, filename, elevatorName)
 			timer.TimerStart(elevator.Config.DoorOpenDurationS)
 			setAllLights()
 			elevator.CurrentBehaviour = elev.EBDoorOpen
-			//den klarer ikke å klarere siste ordre i køen?
-			//sett denne inne i RequestsClearAtCurrentFloor
-			//fsmUpdateJSONWhenHallOrderIsComplete(filename, elevatorName, elevator.CurrentFloor)
 		}
 	}
 	//fmt.Println("New state:")

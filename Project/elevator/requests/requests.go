@@ -147,14 +147,16 @@ func RequestsClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName 
 				e.Requests[e.CurrentFloor][elevio.BHallUp] = false
 				checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallUp)
 			}
-			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
-			checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallUp)
+			//elevio.BHallDown]
+			e.Requests[e.CurrentFloor][elevio.BHallDown] = false
+			checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallDown)
 
 		default:
 			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
 			checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallUp)
 			e.Requests[e.CurrentFloor][elevio.BHallDown] = false
 			checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallDown)
+			
 		}
 	default:
 
