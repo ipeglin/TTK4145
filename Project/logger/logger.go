@@ -71,5 +71,4 @@ func Setup() {
 	logrus.Info("This is an info message")
 	logrus.Warn("This is a warning message")
 	logrus.Error("This is an error message")
-	logrus.Fatal("This is a fatal message")
 }
