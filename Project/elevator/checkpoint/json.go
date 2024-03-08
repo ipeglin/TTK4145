@@ -110,9 +110,9 @@ func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) 
 	}
 }
 
-func UpdateLocalJSON(localFilname string, incommigFilname string) {
+func UpdateLocalJSON(localFilname string, incomingFilename string) {
 	localCombinedInput, _ := LoadCombinedInput(localFilname)
-	otherCombinedInput, _ := LoadCombinedInput(incommigFilname)
+	otherCombinedInput, _ := LoadCombinedInput(incomingFilename)
 
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
@@ -184,13 +184,13 @@ func RemoveDysfunctionalElevatorFromJSON(localFilname string, elevatorName strin
 	SaveCombinedInput(combinedInput, localFilname)
 }
 
-func DysfunctionalElevatorDetection(incommigFilname string, incomingCombinedInput CombinedInput, inactiveElevatorIDs []string) []string {
+func DysfunctionalElevatorDetection(incomingFilename string, incomingCombinedInput CombinedInput, inactiveElevatorIDs []string) []string {
 	inactiveElevatorsMap := make(map[string]struct{})
 	for _, id := range inactiveElevatorIDs {
 		inactiveElevatorsMap[id] = struct{}{}
 	}
 
-	incommigElevatorName := strings.TrimSuffix(incommigFilname, ".json")
+	incommigElevatorName := strings.TrimSuffix(incomingFilename, ".json")
 
 	for id := range incomingCombinedInput.HRAInput.States {
 		if _, exists := inactiveElevatorsMap[id]; !exists {

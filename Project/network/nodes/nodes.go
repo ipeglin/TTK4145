@@ -59,9 +59,6 @@ func Receiver(port int, updateChannel chan<- NetworkNodeRegistry) {
 			lastSeen[id] = time.Now()
 		}
 
-		// TODO! Remove connections with nodes experiencing extensive packet loss
-		// Suggestions: Utilise message TTL, and remove nodes with TTL - now < 0
-
 		// Removing dead connection
 		reg.Lost = make([]string, 0)
 		for k, v := range lastSeen {
