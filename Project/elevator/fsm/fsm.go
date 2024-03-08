@@ -160,58 +160,13 @@ func FsmObstruction() {
 	}
 }
 
-/*
-// TODO
-// Huske state før stop, så resume den? Tror det vil være en god løsning, midlertidig løsning for nå
-func FsmStop(stop bool) {
-	FsmMakeCheckpoint()
-	fmt.Print("kallet stopp: ", stop)
-	outputDevice.StopButtonLight(stop)
-	if stop {
-		elevator.Dirn = elevio.DirStop
-		outputDevice.MotorDirection(elevator.Dirn)
-		if elevio.InputDevice.FloorSensor() != -1 {
-			elevator.CurrentBehaviour = elev.EBDoorOpen
-			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-			hwelevio.SetDoorOpenLamp(true)
-		}
-	} else {
-		FsmResumeAtLatestCheckpoint()
-	}
-}
-
-/*
-func FsmStop(stop bool) {
-	fmt.Println("FsmStop(): ", stop)
-	elev.ElevatorPrint(elevator)
-	hwelevio.SetStopLamp(stop)
-	if stop {
-		requests.RequestsClearAll(&elevator)
-		setAllLights()
-		outputDevice.MotorDirection(elevio.ElevDir(hwelevio.MD_Stop))
-		elevator.Dirn = elevio.DirStop
-		if elevio.InputDevice.FloorSensor() != -1 {
-			elevator.CurrentBehaviour = elev.EBDoorOpen
-			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-			hwelevio.SetDoorOpenLamp(true)
-		}
-	} else {
-		if elevator.CurrentBehaviour == elev.EBDoorOpen {
-			elevator.CurrentBehaviour = elev.EBIdle
-		} else if elevio.InputDevice.FloorSensor() != -1 {
-			FsmInitBetweenFloors()
-		}
-	}
-	elev.ElevatorPrint(elevator)
-}*/
-/*
 func FsmMakeCheckpoint() {
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 	//fmt.Print("The elevator which were saved: \n")
 	//elev.ElevatorPrint(elevator)
 }
 
-func FsmResumeAtLatestCheckpoint() {BHallUp
+func FsmResumeAtLatestCheckpoint() {
 	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
 	//fmt.Print(elevator.Dirn)
 	outputDevice.MotorDirection(elevator.Dirn)
@@ -221,6 +176,7 @@ func FsmLoadLatestCheckpoint() {
 	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
 }
 
+/*
 func FsmTestProcessPair() {
 	for {
 		FsmLoadLatestCheckpoint()
