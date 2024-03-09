@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"network/local"
 	"os"
+	"time"
 )
 
 var elevator elev.Elevator
@@ -168,9 +169,11 @@ func FsmObstruction() {
 }
 
 func FsmMakeCheckpoint() {
-	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
-	//fmt.Print("The elevator which were saved: \n")
-	//elev.ElevatorPrint(elevator)
+	for {
+		checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
+		time.Sleep(50 * time.Millisecond)
+	}
+
 }
 
 func FsmResumeAtLatestCheckpoint(floor int) {
@@ -208,7 +211,7 @@ func FsmInitJson(filename string, ElevatorName string) {
 
 func FsmUpdateJSON(elevatorName string, filename string) {
 	checkpoint.UpdateJSON(elevator, filename, elevatorName)
-	FsmMakeCheckpoint()
+	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
 func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorName string, filename string) {

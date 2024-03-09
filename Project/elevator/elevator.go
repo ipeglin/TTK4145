@@ -7,6 +7,7 @@ import (
 	"elevator/fsm"
 	"elevator/immobility"
 	"elevator/timer"
+	"fmt"
 
 	"github.com/sirupsen/logrus"
 )
@@ -24,8 +25,8 @@ func Init(localIP string, firstProcess bool) {
 		fsm.FsmInitJson(filename, elevatorName)
 	} else {
 		floor := elevio.InputDevice.FloorSensor()
+		fmt.Print("\n Resuming")
 		fsm.FsmResumeAtLatestCheckpoint(floor)
-
 	}
 
 	drv_buttons := make(chan elevio.ButtonEvent)
@@ -45,6 +46,7 @@ func Init(localIP string, firstProcess bool) {
 	go elevio.PollStopButton(drv_stop)
 	go elevio.MontitorMotorActivity(drv_motorActivity, 3.0)
 	go immobility.Immobility(drv_obstr_immob, drv_motorActivity, immob)
+	go fsm.FsmMakeCheckpoint()
 	//go elvio.PollDirection(drv_direction)
 	//go elvio.PollBehaviour(drv_behaviour)
 
@@ -83,6 +85,7 @@ func Init(localIP string, firstProcess bool) {
 			logrus.Debug("Floor sensor triggered: ", floor)
 			fsm.FsmFloorArrival(floor, elevatorName, filename)
 			fsm.FsmUpdateJSON(elevatorName, filename)
+			fsm.FsmMakeCheckpoint()
 
 		default:
 			if timer.TimerTimedOut() { // Check for timeout only if no obstruction
@@ -92,7 +95,7 @@ func Init(localIP string, firstProcess bool) {
 				fsm.FsmDoorTimeout(filename, elevatorName)
 				fsm.FsmUpdateJSON(elevatorName, filename)
 			}
-			fsm.FsmMakeCheckpoint()
+
 		}
 		/// we need a case for each time a state updates.
 	}

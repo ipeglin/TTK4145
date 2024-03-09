@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var timeLimitOnline time.Duration = time.Duration(2000 * time.Millisecond)
+var timeLimitOnline time.Duration = time.Duration(3 * time.Second)
 
 type MainFuncType func(bool)
 
