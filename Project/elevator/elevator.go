@@ -46,7 +46,6 @@ func Init(localIP string, firstProcess bool) {
 	go elevio.PollStopButton(drv_stop)
 	go elevio.MontitorMotorActivity(drv_motorActivity, 3.0)
 	go immobility.Immobility(drv_obstr_immob, drv_motorActivity, immob)
-	go fsm.FsmMakeCheckpoint()
 	//go elvio.PollDirection(drv_direction)
 	//go elvio.PollBehaviour(drv_behaviour)
 
@@ -95,7 +94,7 @@ func Init(localIP string, firstProcess bool) {
 				fsm.FsmDoorTimeout(filename, elevatorName)
 				fsm.FsmUpdateJSON(elevatorName, filename)
 			}
-
+			fsm.FsmMakeCheckpoint()
 		}
 		/// we need a case for each time a state updates.
 	}

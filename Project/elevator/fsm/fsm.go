@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"network/local"
 	"os"
-	"time"
 )
 
 var elevator elev.Elevator
@@ -169,10 +168,7 @@ func FsmObstruction() {
 }
 
 func FsmMakeCheckpoint() {
-	for {
-		checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
-		time.Sleep(50 * time.Millisecond)
-	}
+	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 
 }
 
