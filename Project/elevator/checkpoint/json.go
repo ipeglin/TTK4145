@@ -178,6 +178,10 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 }
 
 func InncommingJSONHandeling(localFilname string, incommigFilname string, inncommingCombinedInput CombinedInput, inactiveElevatorIDs []string) {
+	err := os.Remove(incommigFilname)
+	if err != nil {
+		fmt.Println("Feil ved fjerning:", err)
+	}
 	SaveCombinedInput(inncommingCombinedInput, incommigFilname)
 	UpdateLocalJSON(localFilname, incommigFilname)
 	inactiveElevatorIDs = DysfunctionalElevatorDetection(incommigFilname, inncommingCombinedInput, inactiveElevatorIDs)
