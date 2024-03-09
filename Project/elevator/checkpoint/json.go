@@ -207,6 +207,7 @@ func DysfunctionalElevatorDetection(incomingFilename string, incomingCombinedInp
 
 	incommigElevatorName := strings.TrimSuffix(incomingFilename, ".json")
 	if _, exists := incomingCombinedInput.HRAInput.States[incommigElevatorName]; !exists {
+		print(incommigElevatorName)
 		inactiveElevatorIDs = append(inactiveElevatorIDs, incommigElevatorName)
 	}
 
