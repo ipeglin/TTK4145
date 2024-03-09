@@ -7,6 +7,7 @@ import (
 	"elevator/fsm"
 	"elevator/immobility"
 	"elevator/timer"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -24,7 +25,7 @@ func Init(localIP string, firstProcess bool) {
 	} else {
 		floor := elevio.InputDevice.FloorSensor()
 		fsm.FsmResumeAtLatestCheckpoint(floor)
-		
+
 	}
 
 	drv_buttons := make(chan elevio.ButtonEvent)
@@ -72,6 +73,7 @@ func Init(localIP string, firstProcess bool) {
 		case btnEvent := <-drv_buttons:
 			logrus.Debug("Button press detected: ", btnEvent)
 			fsm.FsmUpdateJSON(elevatorName, filename)
+			//trenger ikke være her. assign kun ved innkomende mld da heis offline ikke skal assigne
 			fsm.FsmRequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, filename)
 			fsm.FsmJSONOrderAssigner(filename, elevatorName)
 			fsm.FsmRequestButtonPressV3(filename, elevatorName)
@@ -83,8 +85,8 @@ func Init(localIP string, firstProcess bool) {
 			fsm.FsmUpdateJSON(elevatorName, filename)
 
 		default:
-			if timer.TimerTimedOut(){ // Check for timeout only if no obstruction
-			  	logrus.Debug("Elevator timeout")
+			if timer.TimerTimedOut() { // Check for timeout only if no obstruction
+				logrus.Debug("Elevator timeout")
 				fsm.FsmUpdateJSON(elevatorName, filename)
 				timer.TimerStop()
 				fsm.FsmDoorTimeout(filename, elevatorName)

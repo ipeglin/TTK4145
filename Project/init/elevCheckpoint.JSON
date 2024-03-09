@@ -1,10 +1,10 @@
 {
   "State": {
     "CurrentFloor": 1,
-    "Dirn": -1,
+    "Dirn": 0,
     "Requests": [
       [
-        true,
+        false,
         false,
         false
       ],
@@ -24,11 +24,11 @@
         false
       ]
     ],
-    "CurrentBehaviour": 2,
+    "CurrentBehaviour": 0,
     "Config": {
       "ClearRequestVariant": 1,
       "DoorOpenDurationS": 3
     }
   },
-  "Timestamp": "2024-03-08T14:53:04.233705799+01:00"
+  "Timestamp": "2024-03-09T18:16:56.639776667+01:00"
 }

@@ -3,6 +3,7 @@ package checkpoint
 import (
 	"elevator/elev"
 	"elevator/elevio"
+	"elevator/filehandeling"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -29,6 +30,13 @@ func InitializeCombinedInput(el elev.Elevator, ElevatorName string) CombinedInpu
 
 // SaveCombinedInput serialiserer CombinedInput til JSON og lagrer det i en fil.
 func SaveCombinedInput(combinedInput CombinedInput, filename string) error {
+	osFile, err := filehandeling.LockFile(filename)
+	if err != nil {
+		return err
+
+	}
+	defer filehandeling.UnlockFile(osFile) // Ensure file is unlocked after reading
+
 	data, err := json.MarshalIndent(combinedInput, "", "  ")
 	if err != nil {
 		return fmt.Errorf("kunne ikke serialisere CombinedInput til JSON: %v", err)
@@ -45,6 +53,11 @@ func SaveCombinedInput(combinedInput CombinedInput, filename string) error {
 // LoadCombinedInput deserialiserer CombinedInput fra en JSON-fil.
 func LoadCombinedInput(filename string) (CombinedInput, error) {
 	var combinedInput CombinedInput
+	osFile, err := filehandeling.LockFile(filename) // Lock the file for reading
+	if err != nil {
+		return combinedInput, err
+	}
+	defer filehandeling.UnlockFile(osFile) // Ensure file is unlocked after reading
 
 	data, err := os.ReadFile(filename)
 	if err != nil {
@@ -68,8 +81,8 @@ func UpdateJSON(el elev.Elevator, filename string, elevatorName string) {
 
 func UpdateJSONWhenHallOrderIsComplete(el elev.Elevator, filename string, elevatorName string, btn_floor int, btn_type elevio.Button) {
 	combinedInput, _ := LoadCombinedInput(filename)
-	combinedInput.HRAInput = updateHRAInputWhenOrderIsComplete(combinedInput.HRAInput,el, elevatorName, btn_floor, btn_type)
-	combinedInput.CyclicCounter = updateCyclicCounterWhenOrderIsComplete(combinedInput.CyclicCounter,elevatorName , btn_floor, btn_type)
+	combinedInput.HRAInput = updateHRAInputWhenOrderIsComplete(combinedInput.HRAInput, el, elevatorName, btn_floor, btn_type)
+	combinedInput.CyclicCounter = updateCyclicCounterWhenOrderIsComplete(combinedInput.CyclicCounter, elevatorName, btn_floor, btn_type)
 	SaveCombinedInput(combinedInput, filename)
 }
 
@@ -199,8 +212,6 @@ func DysfunctionalElevatorDetection(incomingFilename string, incomingCombinedInp
 	return inactiveElevatorIDs
 }
 
-
-
 // Antagelser om strukturer og hjelpefunksjoner fra tidligere eksempel ...
 // IsValidBehavior sjekker om oppgitt atferd er gyldig
 func IsValidBehavior(behavior string) bool {
@@ -221,6 +232,7 @@ func IsValidDirection(direction string) bool {
 		return false
 	}
 }
+
 // IncomingDataIsCorrupt sjekker om inngående data er korrupt
 func IncomingDataIsCorrupt(incomingCombinedInput CombinedInput) bool {
 	incomingHRAInput := incomingCombinedInput.HRAInput
@@ -231,11 +243,21 @@ func IncomingDataIsCorrupt(incomingCombinedInput CombinedInput) bool {
 		if !IsValidBehavior(state.Behavior) || !IsValidDirection(state.Direction) {
 			return true // Data er korrupt basert på ugyldig Behavior eller Direction
 		}
-		
+
 		// Sjekk om CabRequests har riktig lengde og inneholder boolske verdier
-		if len(state.CabRequests) != elevio.NFloors{
+		if len(state.CabRequests) != elevio.NFloors {
 			return true // Data er korrupt basert på lengde
 		}
 	}
 	return false // Data er gyldig
+}
+
+func JSONsetAllLights(localFilname string, elevatorName string) {
+	combinedInput, _ := LoadCombinedInput(localFilname)
+	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
+		for floor := 0; floor < elevio.NFloors; floor++ {
+			elevio.RequestButtonLight(floor, elevio.BHallUp, combinedInput.HRAInput.HallRequests[floor][0])
+			elevio.RequestButtonLight(floor, elevio.BHallDown, combinedInput.HRAInput.HallRequests[floor][1])
+		}
+	}
 }

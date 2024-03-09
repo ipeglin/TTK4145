@@ -7,13 +7,17 @@ import (
 	"elevator/requests"
 	"elevator/timer"
 	"fmt"
+	"network/local"
+	"os"
 )
 
 var elevator elev.Elevator
 var outputDevice elevio.ElevOutputDevice
+var localIP string
 
 func init() {
 	elevator = elev.ElevatorInit()
+	localIP, _ = local.GetIP()
 	//fmt.Println("fsm_init has happend")
 	//TODO
 	outputDevice = elevio.ElevioGetOutputDevice()
@@ -33,10 +37,14 @@ func SetElevator(f int, cb elev.ElevatorBehaviour, dirn elevio.ElevDir, r [elevi
 }
 
 func setAllLights() {
+	//note should be global vaiable
+	localFilname := localIP + ".json"
+	elevatorName := localIP
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
+
+			checkpoint.JSONsetAllLights(localFilname, elevatorName)
 			outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
-			//fmt.Println(floor, " ", hwelevio.ButtonToString(btn), " ", elevator.Requests[floor][btn])
 		}
 	}
 }
@@ -171,7 +179,7 @@ func FsmResumeAtLatestCheckpoint(floor int) {
 	//fmt.Print(elevator.Dirn)
 	outputDevice.MotorDirection(elevator.Dirn)
 
-	if  floor != -1{
+	if floor != -1 {
 		timer.TimerStart(elev.DoorOpenDurationSConfig)
 		outputDevice.DoorLight(true)
 	}
@@ -183,11 +191,16 @@ func FsmLoadLatestCheckpoint() {
 
 // Json fra her
 func FsmInitJson(filename string, ElevatorName string) {
+	// Gjør endringer på combinedInput her
+	print(filename)
+	err := os.Remove(filename)
+	if err != nil {
+		fmt.Println("Feil ved fjerning:", err)
+	}
 	combinedInput := checkpoint.InitializeCombinedInput(elevator, ElevatorName)
 
-	// Gjør endringer på combinedInput her
-
-	err := checkpoint.SaveCombinedInput(combinedInput, filename)
+	// If the file was successfully deleted, return nil
+	err = checkpoint.SaveCombinedInput(combinedInput, filename)
 	if err != nil {
 		fmt.Println("Feil ved lagring:", err)
 	}
@@ -197,7 +210,6 @@ func FsmUpdateJSON(elevatorName string, filename string) {
 	checkpoint.UpdateJSON(elevator, filename, elevatorName)
 	FsmMakeCheckpoint()
 }
-
 
 func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
 	checkpoint.UpdateJSONWhenNewOrderOccurs(filename, elevatorName, btnFloor, btn, &elevator)
