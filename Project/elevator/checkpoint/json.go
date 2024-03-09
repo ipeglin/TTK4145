@@ -185,6 +185,12 @@ func InncommingJSONHandeling(localFilname string, incommigFilname string, inncom
 	SaveCombinedInput(inncommingCombinedInput, incommigFilname)
 	UpdateLocalJSON(localFilname, incommigFilname)
 	inactiveElevatorIDs = DysfunctionalElevatorDetection(incommigFilname, inncommingCombinedInput, inactiveElevatorIDs)
+	if len(inactiveElevatorIDs) > 0 {
+		for _, id := range inactiveElevatorIDs {
+			fmt.Println(id) // Using fmt.Println for printing each ID on a new line
+		}
+	}
+	
 	DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs, localFilname)
 }
 

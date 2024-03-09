@@ -87,6 +87,7 @@ func mainLogic(firstProcess bool) {
 	for {
 		select {
 		case reg := <-nodeOverviewChannel:
+			localFilname := localIP + ".json"
 			lostNodes = reg.Lost
 			logrus.Info("Known nodes:", reg.Nodes)
 			var updatedLostNodes []string // This will hold the processed IP addresses
@@ -99,10 +100,18 @@ func mainLogic(firstProcess bool) {
 						ip := parts[1] // The IP address is the second element
 						updatedLostNodes = append(updatedLostNodes, ip)
 						logrus.Info("Processing lost node IP:", ip)
+						//print(ip)
 					}
 				}
 				lostNodes = updatedLostNodes // Update the lostNodes with just the IPs
+				for _, id := range lostNodes {
+					fmt.Println(id) // Using fmt.Println for printing each ID on a new line
+				}
+				checkpoint.DeleteInactiveElevatorsFromJSON(lostNodes,localFilname)
+				fsm.FsmJSONOrderAssigner(localFilname, localIP)
+				fsm.FsmRequestButtonPressV3(localFilname, localIP)
 			}
+
 		case msg := <-messageReceiveChannel:
 			//todo
 			//load 			msg.Payload
@@ -120,7 +129,7 @@ func mainLogic(firstProcess bool) {
 			//her må vi reassigne
 			//temp solution
 			//NOT VERY NICE. ONLY PROOF OF CONCEPT
-			print(lostNodes)
+			//print(lostNodes)
 			if !checkpoint.IncomingDataIsCorrupt(inncommingCombinedInput) {
 				checkpoint.InncommingJSONHandeling(localFilname, incommigFilname, inncommingCombinedInput, lostNodes)
 				fsm.FsmJSONOrderAssigner(localFilname, localIP)
