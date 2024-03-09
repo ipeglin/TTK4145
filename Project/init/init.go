@@ -43,6 +43,7 @@ func createLogFile() string {
   return filename
 }
 
+var reg nodes.NetworkNodeRegistry
 func init() {
   logFile := createLogFile()
 
@@ -84,7 +85,8 @@ func mainLogic(firstProcess bool) {
 
 	for {
 		select {
-		case reg := <-nodeOverviewChannel:
+		case reg = <-nodeOverviewChannel:
+			
 			logrus.Info("Known nodes:", reg.Nodes)
 		case msg := <-messageReceiveChannel:
 			//todo
@@ -92,7 +94,7 @@ func mainLogic(firstProcess bool) {
 			//
 			//som får filnavn lik ip
 			logrus.Info("Received message from ", msg.SenderId, ": ", msg.Payload)
-			strings := make([]string, 8)
+			//strings := make([]string, 8)
 			// localIP
 			// inncomigIP.JSON
 
@@ -104,7 +106,7 @@ func mainLogic(firstProcess bool) {
 			//temp solution
 			//NOT VERY NICE. ONLY PROOF OF CONCEPT
 			if (!checkpoint.IncomingDataIsCorrupt(inncommingCombinedInput)){
-				checkpoint.InncommingJSONHandeling(localFilname, incommigFilname, inncommingCombinedInput, strings)
+				checkpoint.InncommingJSONHandeling(localFilname, incommigFilname, inncommingCombinedInput, reg.Lost)
 				fsm.FsmJSONOrderAssigner(localFilname, localIP)
 				fsm.FsmRequestButtonPressV3(localFilname, localIP)
 			}
