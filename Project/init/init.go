@@ -107,7 +107,7 @@ func mainLogic(firstProcess bool) {
 				for _, id := range lostNodes {
 					fmt.Println(id) // Using fmt.Println for printing each ID on a new line
 				}
-				checkpoint.DeleteInactiveElevatorsFromJSON(lostNodes,localFilname)
+				checkpoint.DeleteInactiveElevatorsFromJSON(lostNodes, localFilname)
 				fsm.FsmJSONOrderAssigner(localFilname, localIP)
 				fsm.FsmRequestButtonPressV3(localFilname, localIP)
 			}
@@ -131,6 +131,7 @@ func mainLogic(firstProcess bool) {
 			//NOT VERY NICE. ONLY PROOF OF CONCEPT
 			//print(lostNodes)
 			if !checkpoint.IncomingDataIsCorrupt(inncommingCombinedInput) {
+				//oppdater og fjern lostNodes
 				checkpoint.InncommingJSONHandeling(localFilname, incommigFilname, inncommingCombinedInput, lostNodes)
 				fsm.FsmJSONOrderAssigner(localFilname, localIP)
 				fsm.FsmRequestButtonPressV3(localFilname, localIP)
