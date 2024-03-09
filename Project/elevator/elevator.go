@@ -8,6 +8,7 @@ import (
 	"elevator/immobility"
 	"elevator/timer"
 	"fmt"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -46,6 +47,7 @@ func Init(localIP string, firstProcess bool) {
 	go elevio.PollStopButton(drv_stop)
 	go elevio.MontitorMotorActivity(drv_motorActivity, 3.0)
 	go immobility.Immobility(drv_obstr_immob, drv_motorActivity, immob)
+	go fsm.FsmMakeCheckpointGo()
 	//go elvio.PollDirection(drv_direction)
 	//go elvio.PollBehaviour(drv_behaviour)
 
@@ -94,7 +96,7 @@ func Init(localIP string, firstProcess bool) {
 				fsm.FsmDoorTimeout(filename, elevatorName)
 				fsm.FsmUpdateJSON(elevatorName, filename)
 			}
-			fsm.FsmMakeCheckpoint()
+			time.Sleep(50 * time.Millisecond)
 		}
 		/// we need a case for each time a state updates.
 	}

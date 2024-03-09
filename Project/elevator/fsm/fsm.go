@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"network/local"
 	"os"
+	"time"
 )
 
 var elevator elev.Elevator
@@ -167,17 +168,25 @@ func FsmObstruction() {
 	}
 }
 
+func FsmMakeCheckpointGo() {
+	for {
+		checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
+		time.Sleep(50 * time.Millisecond)
+	}
+
+}
+
 func FsmMakeCheckpoint() {
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
-
 }
 
 func FsmResumeAtLatestCheckpoint(floor int) {
 	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
 	setAllLights()
 	//fmt.Print(elevator.Dirn)
-	outputDevice.MotorDirection(elevator.Dirn)
-
+	if elevator.Dirn != elevio.DirStop && floor == -1 {
+		outputDevice.MotorDirection(elevator.Dirn)
+	}
 	if floor != -1 {
 		timer.TimerStart(elev.DoorOpenDurationSConfig)
 		outputDevice.DoorLight(true)
