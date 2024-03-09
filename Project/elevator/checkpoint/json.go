@@ -180,7 +180,7 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 func InncommingJSONHandeling(localFilname string, incommigFilname string, inncommingCombinedInput CombinedInput, inactiveElevatorIDs []string) {
 	SaveCombinedInput(inncommingCombinedInput, incommigFilname)
 	UpdateLocalJSON(localFilname, incommigFilname)
-	//inactiveElevatorIDs = DysfunctionalElevatorDetection(incommigFilname, inncommingCombinedInput, inactiveElevatorIDs)
+	inactiveElevatorIDs = DysfunctionalElevatorDetection(incommigFilname, inncommingCombinedInput, inactiveElevatorIDs)
 	DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs, localFilname)
 }
 
