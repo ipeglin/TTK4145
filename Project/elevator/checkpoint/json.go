@@ -204,13 +204,10 @@ func DysfunctionalElevatorDetection(incomingFilename string, incomingCombinedInp
 	for _, id := range inactiveElevatorIDs {
 		inactiveElevatorsMap[id] = struct{}{}
 	}
-
+	
 	incommigElevatorName := strings.TrimSuffix(incomingFilename, ".json")
-
-	for id := range incomingCombinedInput.HRAInput.States {
-		if _, exists := inactiveElevatorsMap[id]; !exists {
-			inactiveElevatorIDs = append(inactiveElevatorIDs, incommigElevatorName)
-		}
+	if _, exists := incomingCombinedInput.HRAInput.States[incommigElevatorName]; exists {
+		inactiveElevatorIDs = append(inactiveElevatorIDs, incommigElevatorName)
 	}
 
 	return inactiveElevatorIDs
