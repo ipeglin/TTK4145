@@ -222,7 +222,6 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 
 func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInput, incomingFilename string) {
 	localCombinedInput, _ := LoadCombinedInput(localFilname)
-
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
 			if otherCombinedInput.CyclicCounter.HallRequests[f][i] > localCombinedInput.CyclicCounter.HallRequests[f][i] {
@@ -244,6 +243,7 @@ func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInp
 			}
 		}
 	}
+	SaveCombinedInput(localCombinedInput, localFilname)
 }
 
 

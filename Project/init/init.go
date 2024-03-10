@@ -76,14 +76,14 @@ func initNode(isPrimaryProcess bool) {
 			// TODO: handle incoming messages
 			logrus.Info("Received message from ", msg.SenderId, ": ", msg.Payload)
 
-			externalStateFile := msg.SenderId + ".json"
 			incomingState := msg.Payload
-
+			incomingFileName := msg.SenderId + ".json"
 			// TODO: Reassign orders
 
 			// update and remove list nodes
 			if !checkpoint.IncomingDataIsCorrupt(incomingState) {
-				checkpoint.InncommingJSONHandeling(localStateFile, incomingState, externalStateFile)
+				//checkpoint.SaveCombinedInput(incomingState, incomingFileName)
+				checkpoint.InncommingJSONHandeling(localStateFile, incomingState, incomingFileName)
 				fsm.FsmJSONOrderAssigner(localStateFile, localIP)
 				fsm.FsmRequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
 			}
