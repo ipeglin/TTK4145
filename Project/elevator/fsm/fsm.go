@@ -9,25 +9,29 @@ import (
 	"fmt"
 	"network/local"
 	"os"
+
+	"github.com/sirupsen/logrus"
 )
 
 var elevator elev.Elevator
 var outputDevice elevio.ElevOutputDevice
-var localIP string
+var elevatorName string
+var localStateFile string
 
 func init() {
 	elevator = elev.ElevatorInit()
-	localIP, _ = local.GetIP()
-	//fmt.Println("fsm_init has happend")
-	//TODO
+	elevatorName, _ = local.GetIP()
 	outputDevice = elevio.ElevioGetOutputDevice()
+
+	localStateFile = elevatorName + ".json"
+
 	//Burde dette gå et annet sted?
 	setAllLights()
 	elevio.RequestDoorOpenLamp(false)
 	elevio.RequestStopLamp(false)
 }
 
-// init og denne vil kræsje ved process pair må finnes ut av
+// BUG: Init and SetElevator crashes when using process pairs
 func SetElevator(f int, cb elev.ElevatorBehaviour, dirn elevio.ElevDir, r [elevio.NFloors][elevio.NButtons]bool, c elev.ElevatorConfig) {
 	elevator.CurrentFloor = f
 	elevator.CurrentBehaviour = cb
@@ -37,13 +41,10 @@ func SetElevator(f int, cb elev.ElevatorBehaviour, dirn elevio.ElevDir, r [elevi
 }
 
 func setAllLights() {
-	//note should be global vaiable
-	localFilname := localIP + ".json"
-	elevatorName := localIP
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
 
-			checkpoint.JSONsetAllLights(localFilname, elevatorName)
+			checkpoint.JSONsetAllLights(localStateFile, elevatorName)
 			outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
 		}
 	}
@@ -105,7 +106,7 @@ func FsmRequestButtonPress(btnFloor int, btn elevio.Button, elevatorName string,
 }
 */
 func FsmFloorArrival(newFloor int, elevatorName string, filename string) {
-	//fmt.Printf("\n\n%s(%d)\n", "FsmFloorArrival", newFloor)
+	logrus.Warn("Arrived at new floor: ", newFloor)
 	//elev.ElevatorPrint(elevator)
 	elevator.CurrentFloor = newFloor
 	outputDevice.FloorIndicator(elevator.CurrentFloor)
