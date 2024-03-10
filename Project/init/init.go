@@ -5,58 +5,17 @@ import (
 	"elevator/checkpoint"
 	"elevator/fsm"
 	"elevator/processpair"
-	"fmt"
+	"logger"
 	"network"
 	"network/nodes"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
-func createLogFile() string {
-	rootPath, err := filepath.Abs("../") // procject root
-	if err != nil {
-		logrus.Fatal("Failed to find project root", err)
-	}
-
-	// generate timestamp
-	now := time.Now()
-	timestamp := fmt.Sprintf("runtime_%d-%d-%d_%d:%d:%d",
-		now.Year(),
-		now.Month(),
-		now.Day(),
-		now.Hour(),
-		now.Hour(),
-		now.Second())
-
-	filename := fmt.Sprintf("%s/log/%s.log", rootPath, timestamp)
-	os.MkdirAll(filepath.Dir(filename), 0755)
-	file, err := os.Create(filename)
-	if err != nil {
-		logrus.Fatal(err)
-	}
-	file.Close()
-	logrus.Info("Created log file: ", filename)
-
-	return filename
-}
-
-func init() {
-	logFile := createLogFile()
-
-	// pass log file to logrus
-	f, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE, 0755)
-	if err != nil {
-		logrus.Fatal("Failed to create log file. ", err)
-	}
-	logrus.SetOutput(f)
-	logrus.SetReportCaller(true)
-	logrus.SetLevel(logrus.DebugLevel)
-}
-
 func mainLogic(firstProcess bool) {
+  logger.Setup()
 	logrus.Info("Node initialised with PID:", os.Getpid())
 
 	nodeOverviewChannel := make(chan nodes.NetworkNodeRegistry)
