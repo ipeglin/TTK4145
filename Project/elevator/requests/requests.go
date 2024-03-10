@@ -119,7 +119,7 @@ func RequestsShouldClearImmediately(e elev.Elevator, btn_floor int, btn_type ele
 		return false
 	}
 }
-
+/*
 func RequestsClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName string) elev.Elevator {
 	//fmt.Print("RequestsClearAtCurrentFloor: ")
 	switch e.Config.ClearRequestVariant {
@@ -132,34 +132,75 @@ func RequestsClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName 
 	case elev.CRVInDirn:
 		//fmt.Print("CRVInDirn, RequestsClearAtCurrentFloor")
 		e.Requests[e.CurrentFloor][elevio.BCab] = false
-		checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor, elevio.BCab)
+		//checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor, elevio.BCab)
 		switch e.Dirn {
 		case elevio.DirUp:
 			if !requestsAbove(e) && !e.Requests[e.CurrentFloor][elevio.BHallUp] {
 				e.Requests[e.CurrentFloor][elevio.BHallDown] = false
-				checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor, elevio.BHallDown)
+				//checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor, elevio.BHallDown)
 			}
 			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
-			checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallUp)
+			//checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallUp)
 
 		case elevio.DirDown:
 			if !requestsBelow(e) && !e.Requests[e.CurrentFloor][elevio.BHallDown] {
 				e.Requests[e.CurrentFloor][elevio.BHallUp] = false
-				checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallUp)
+				//checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallUp)
 			}
 			//elevio.BHallDown]
 			e.Requests[e.CurrentFloor][elevio.BHallDown] = false
-			checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallDown)
+			//checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallDown)
 
 		default:
+			print("deult ble kallet")
 			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
-			checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallUp)
+			//checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallUp)
 			e.Requests[e.CurrentFloor][elevio.BHallDown] = false
-			checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallDown)
+			//checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallDown)
 			
 		}
 	default:
 
+	}
+	return e
+}
+*/
+func RequestsClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName string) elev.Elevator {
+
+	beforeClear := make(map[elevio.Button]bool)
+	for btn := 0; btn < elevio.NButtons; btn++ {
+		beforeClear[elevio.Button(btn)] = e.Requests[e.CurrentFloor][btn]
+	}
+	switch e.Config.ClearRequestVariant {
+	case elev.CRVAll:
+		for btn := 0; btn < elevio.NButtons; btn++ {
+			e.Requests[e.CurrentFloor][btn] = false
+		}
+
+	case elev.CRVInDirn:
+		e.Requests[e.CurrentFloor][elevio.BCab] = false
+		switch e.Dirn {
+		case elevio.DirUp:
+			if !requestsAbove(e) && !e.Requests[e.CurrentFloor][elevio.BHallUp] {
+				e.Requests[e.CurrentFloor][elevio.BHallDown] = false
+			}
+			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
+
+		case elevio.DirDown:
+			if !requestsBelow(e) && !e.Requests[e.CurrentFloor][elevio.BHallDown] {
+				e.Requests[e.CurrentFloor][elevio.BHallUp] = false
+			}
+			e.Requests[e.CurrentFloor][elevio.BHallDown] = false
+		default:
+			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
+			e.Requests[e.CurrentFloor][elevio.BHallDown] = false
+			
+	}
+	}
+	for btn, wasPressed := range beforeClear {
+		if wasPressed && !e.Requests[e.CurrentFloor][btn] {
+			checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,btn)
+		}
 	}
 	return e
 }
