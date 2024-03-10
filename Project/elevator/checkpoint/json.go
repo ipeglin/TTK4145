@@ -229,7 +229,7 @@ func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInp
 				localCombinedInput.HRAInput.HallRequests[f][i] = otherCombinedInput.HRAInput.HallRequests[f][i]
 			}
 			if (otherCombinedInput.CyclicCounter.HallRequests[f][i] == localCombinedInput.CyclicCounter.HallRequests[f][i]){ 
-			 	if (localCombinedInput.CyclicCounter.HallRequests[f][i] != otherCombinedInput.CyclicCounter.HallRequests[f][i]){
+			 	if (localCombinedInput.HRAInput.HallRequests[f][i] != otherCombinedInput.HRAInput.HallRequests[f][i]){
 					//midliertilig konflikt logikk dersom den ene er true og den andre er false 
 					//oppstår ved motostop og bostruksjoner etc dersom den har selv claimet en orde som blir utført ila den har motorstop
 					//Tenk om dette er beste løsning  
