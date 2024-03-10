@@ -228,7 +228,7 @@ func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInp
 		}
 	}
 	localElevatorName := strings.TrimSuffix(localFilname, ".json")
-	if _, exists := otherCombinedInput.HRAInput.States[localElevatorName]; exists {
+	if _, exists := otherCombinedInput.CyclicCounter.States[localElevatorName]; exists {
 		if otherCombinedInput.CyclicCounter.States[localElevatorName] > localCombinedInput.CyclicCounter.States[localElevatorName] {
 			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] +1 
 		}
