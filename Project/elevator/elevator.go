@@ -7,7 +7,7 @@ import (
 	"elevator/fsm"
 	"elevator/immobility"
 	"elevator/timer"
-
+	"time"
 	"github.com/sirupsen/logrus"
 )
 
@@ -42,6 +42,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 	go elevio.PollStopButton(drv_stop)
 	go elevio.MontitorMotorActivity(drv_motorActivity, 3.0)
 	go immobility.Immobility(drv_obstr_immob, drv_motorActivity, immob)
+	go fsm.FsmMakeCheckpointGo()
 	// TODO: Add polling for direction and behaviour
 
 	// initial hinderance states
@@ -83,7 +84,6 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			logrus.Debug("Floor sensor triggered: ", floor)
 			fsm.FloorArrival(floor, elevatorName, elevatorStateFile)
 			fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
-			fsm.FsmMakeCheckpoint()
 
 		default:
 			if timer.TimerTimedOut() { // Check for timeout only if no obstruction
@@ -93,7 +93,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 				fsm.FsmDoorTimeout(elevatorStateFile, elevatorName)
 				fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
 			}
-			fsm.FsmMakeCheckpoint()
+			time.Sleep(50 * time.Millisecond)
 		}
 		/// we need a case for each time a state updates.
 	}

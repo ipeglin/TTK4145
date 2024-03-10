@@ -1,6 +1,6 @@
 module init
 
-go 1.21.7
+go 1.23
 
 require github.com/sirupsen/logrus v1.9.3
 
