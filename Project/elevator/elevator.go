@@ -7,7 +7,6 @@ import (
 	"elevator/fsm"
 	"elevator/immobility"
 	"elevator/timer"
-	"fmt"
 
 	"github.com/sirupsen/logrus"
 )
@@ -25,7 +24,6 @@ func Init(localIP string, firstProcess bool) {
 		fsm.FsmInitJson(filename, elevatorName)
 	} else {
 		floor := elevio.InputDevice.FloorSensor()
-		fmt.Print("\n Resuming")
 		fsm.FsmResumeAtLatestCheckpoint(floor)
 	}
 

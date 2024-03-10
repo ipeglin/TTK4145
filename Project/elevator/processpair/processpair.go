@@ -29,7 +29,7 @@ func startMainProcess(mainFunc MainFuncType, firstProcsess bool) {
 }*/
 
 func startBackupProcess() {
-	cmd := exec.Command("gnome-terminal", "--", "./myElevatorProgram", "backup")
+	cmd := exec.Command("gnome-terminal", "--", "./elevator", "backup")
 	if err := cmd.Start(); err != nil {
 		fmt.Printf("Failed to start backup process in a new terminal: %s\n", err)
 	} else {
