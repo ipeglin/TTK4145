@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	//"strings"
+	"strings"
 )
 
 //const JSONFile = "JSONFile.json"
@@ -222,10 +222,15 @@ func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInp
 			}
 		}
 	}else{
-		print("slett den jævla heisen")
 		if _, exists := localCombinedInput.HRAInput.States[incomingElevatorName]; exists {
 			delete(localCombinedInput.HRAInput.States, incomingElevatorName)
-			//delete(localCombinedInput.CyclicCounter.States, incomingElevatorName)
+			delete(localCombinedInput.CyclicCounter.States, incomingElevatorName)
+		}
+	}
+	localElevatorName := strings.TrimSuffix(localFilname, ".json")
+	if _, exists := otherCombinedInput.HRAInput.States[localElevatorName]; exists {
+		if otherCombinedInput.CyclicCounter.States[localElevatorName] > localCombinedInput.CyclicCounter.States[localElevatorName] {
+			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] +1 
 		}
 	}
 	SaveCombinedInput(localCombinedInput, localFilname)
@@ -237,7 +242,7 @@ func RemoveDysfunctionalElevatorFromJSON(localFilname string, elevatorName strin
 	for id := range combinedInput.HRAInput.States {
 		if id == elevatorName {
 			delete(combinedInput.HRAInput.States, id)
-			//delete(combinedInput.CyclicCounter.States, id)
+			delete(combinedInput.CyclicCounter.States, id)
 		}
 	}
 	SaveCombinedInput(combinedInput, localFilname)
@@ -260,7 +265,7 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 		if _, exists := inactiveElevatorsMap[id]; exists {
 			delete(localCombinedInput.HRAInput.States, id)
 			//ønsker ikke fjerne cylick counter
-			//delete(localCombinedInput.CyclicCounter.States, id)
+			delete(localCombinedInput.CyclicCounter.States, id)
 		}
 	}
 
