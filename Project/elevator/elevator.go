@@ -79,7 +79,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 
 		case floor := <-drv_floors:
 			logrus.Debug("Floor sensor triggered: ", floor)
-			fsm.FsmFloorArrival(floor, elevatorName, elevatorStateFile)
+			fsm.FloorArrival(floor, elevatorName, elevatorStateFile)
 			fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
 			fsm.FsmMakeCheckpoint()
 
