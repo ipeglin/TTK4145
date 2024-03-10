@@ -1,3 +1,9 @@
 *.json
 *.JSON
 *.log
+
+# Ignore executables and json
+**/init/*
+!**/init/*.*
+**/init/*.json
+**/init/*.JSON

@@ -68,7 +68,6 @@ func updateHRAInputWhenOrderIsComplete(hraInput HRAInput, el elev.Elevator, elev
 		hraInput.States[elevatorName].CabRequests[btn_floor] = false
 	}
 
-
 	behavior, direction, cabRequests := convertLocalElevatorState(el)
 
 	hraInput.States[elevatorName] = HRAElevState{
@@ -124,4 +123,3 @@ func updateHRAInputWhenNewOrderOccurs(hraInput HRAInput, elevatorName string, bt
 	}
 	return hraInput
 }
-

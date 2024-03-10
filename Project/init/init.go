@@ -5,58 +5,21 @@ import (
 	"elevator/checkpoint"
 	"elevator/fsm"
 	"elevator/processpair"
-	"fmt"
+	"logger"
 	"network"
 	"network/nodes"
 	"os"
-	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
-func createLogFile() string {
-	rootPath, err := filepath.Abs("../") // procject root
-	if err != nil {
-		logrus.Fatal("Failed to find project root", err)
-	}
+func initNode(isPrimaryProcess bool) {
+	var lostNodes []string
+	var localStateFile string
 
-	// generate timestamp
-	now := time.Now()
-	timestamp := fmt.Sprintf("runtime_%d-%d-%d_%d:%d:%d",
-		now.Year(),
-		now.Month(),
-		now.Day(),
-		now.Hour(),
-		now.Hour(),
-		now.Second())
-
-	filename := fmt.Sprintf("%s/log/%s.log", rootPath, timestamp)
-	os.MkdirAll(filepath.Dir(filename), 0755)
-	file, err := os.Create(filename)
-	if err != nil {
-		logrus.Fatal(err)
-	}
-	file.Close()
-	logrus.Info("Created log file: ", filename)
-
-	return filename
-}
-
-func init() {
-	logFile := createLogFile()
-
-	// pass log file to logrus
-	f, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE, 0755)
-	if err != nil {
-		logrus.Fatal("Failed to create log file. ", err)
-	}
-	logrus.SetOutput(f)
-	logrus.SetReportCaller(true)
-	logrus.SetLevel(logrus.DebugLevel)
-}
-
-func mainLogic(firstProcess bool) {
+	logger.Setup()
 	logrus.Info("Node initialised with PID:", os.Getpid())
 
 	nodeOverviewChannel := make(chan nodes.NetworkNodeRegistry)
@@ -67,46 +30,62 @@ func mainLogic(firstProcess bool) {
 
 	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel, ipChannel)
 
+	// await ip from network module
 	localIP := <-ipChannel
-	go elevator.Init(localIP, firstProcess)
+	localStateFile = localIP + ".json"
 
+	go elevator.Init(localIP, isPrimaryProcess)
+
+	// broadcast state
 	go func() {
 		for {
-			//antar det er her vi sender
-			//dersom local elevator dedekteres ikke funksjonell ønsker vi ikke broacaste JSON
-			//da vil alle andre heiser tro den er offline og ikke assigne den nye calls.
-			localFilename := localIP + ".json"
-			elv, _ := checkpoint.LoadCombinedInput(localFilename)
+			// TODO: If invalid json, do not broadcast, so ther nodes will think it is offline
+			elv, _ := checkpoint.LoadCombinedInput(localStateFile)
 			messageTransmitterChannel <- network.Message{Payload: elv}
 			time.Sleep(500 * time.Millisecond)
 		}
 	}()
 
+	// handle incoming messages
 	for {
 		select {
 		case reg := <-nodeOverviewChannel:
 			logrus.Info("Known nodes:", reg.Nodes)
+			if len(reg.Lost) <= 0 {
+				logrus.Info("No lost nodes")
+				lostNodes = []string{}
+				continue
+			}
+			logrus.Warn("Lost nodes:", reg.Lost)
+
+			// extract ip from node names
+			var lostNodeAddresses []string
+			for _, node := range reg.Lost {
+				ip := strings.Split(node, "-")[1]
+				lostNodeAddresses = append(lostNodeAddresses, ip)
+			}
+			logrus.Debug("Removing lost IPs: ", lostNodeAddresses)
+
+			lostNodes = lostNodeAddresses // Update the lostNodes
+
+			checkpoint.DeleteInactiveElevatorsFromJSON(lostNodes, localStateFile)
+			fsm.FsmJSONOrderAssigner(localStateFile, localIP)
+			fsm.FsmRequestButtonPressV3(localStateFile, localIP)
+
 		case msg := <-messageReceiveChannel:
-			//todo
-			//load 			msg.Payload
-			//
-			//som får filnavn lik ip
+			// TODO: handle incoming messages
 			logrus.Info("Received message from ", msg.SenderId, ": ", msg.Payload)
-			strings := make([]string, 8)
-			// localIP
-			// inncomigIP.JSON
 
-			localFilname := localIP + ".json"
-			incommigFilname := msg.SenderId + ".json"
-			inncommingCombinedInput := msg.Payload
+			externalStateFile := msg.SenderId + ".json"
+			incomingState := msg.Payload
 
-			//her må vi reassigne
-			//temp solution
-			//NOT VERY NICE. ONLY PROOF OF CONCEPT
-			if !checkpoint.IncomingDataIsCorrupt(inncommingCombinedInput) {
-				checkpoint.InncommingJSONHandeling(localFilname, incommigFilname, inncommingCombinedInput, strings)
-				fsm.FsmJSONOrderAssigner(localFilname, localIP)
-				fsm.FsmRequestButtonPressV3(localFilname, localIP)
+			// TODO: Reassign orders
+
+			// update and remove list nodes
+			if !checkpoint.IncomingDataIsCorrupt(incomingState) {
+				checkpoint.InncommingJSONHandeling(localStateFile, externalStateFile, incomingState, lostNodes)
+				fsm.FsmJSONOrderAssigner(localStateFile, localIP)
+				fsm.FsmRequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
 			}
 
 		case online := <-onlineStatusChannel:
@@ -117,8 +96,8 @@ func mainLogic(firstProcess bool) {
 }
 
 func main() {
-	var mainFuncObject processpair.MainFuncType = mainLogic
-	processpair.ProcessPairHandler(mainFuncObject)
+	var entryPointFunction processpair.TFunc = initNode
+	processpair.ProcessPairHandler(entryPointFunction)
 
 	// Block the main goroutine indefinitely
 	done := make(chan struct{})

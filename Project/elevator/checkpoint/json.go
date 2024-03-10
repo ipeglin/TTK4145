@@ -178,9 +178,19 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 }
 
 func InncommingJSONHandeling(localFilname string, incommigFilname string, inncommingCombinedInput CombinedInput, inactiveElevatorIDs []string) {
+	err := os.Remove(incommigFilname)
+	if err != nil {
+		fmt.Println("Feil ved fjerning:", err)
+	}
 	SaveCombinedInput(inncommingCombinedInput, incommigFilname)
 	UpdateLocalJSON(localFilname, incommigFilname)
-	//inactiveElevatorIDs = DysfunctionalElevatorDetection(incommigFilname, inncommingCombinedInput, inactiveElevatorIDs)
+	inactiveElevatorIDs = DysfunctionalElevatorDetection(incommigFilname, inncommingCombinedInput, inactiveElevatorIDs)
+	if len(inactiveElevatorIDs) > 0 {
+		for _, id := range inactiveElevatorIDs {
+			fmt.Println(id) // Using fmt.Println for printing each ID on a new line
+		}
+	}
+	
 	DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs, localFilname)
 }
 
@@ -202,11 +212,9 @@ func DysfunctionalElevatorDetection(incomingFilename string, incomingCombinedInp
 	}
 
 	incommigElevatorName := strings.TrimSuffix(incomingFilename, ".json")
-
-	for id := range incomingCombinedInput.HRAInput.States {
-		if _, exists := inactiveElevatorsMap[id]; !exists {
-			inactiveElevatorIDs = append(inactiveElevatorIDs, incommigElevatorName)
-		}
+	if _, exists := incomingCombinedInput.HRAInput.States[incommigElevatorName]; !exists {
+		print(incommigElevatorName)
+		inactiveElevatorIDs = append(inactiveElevatorIDs, incommigElevatorName)
 	}
 
 	return inactiveElevatorIDs

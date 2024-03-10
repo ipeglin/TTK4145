@@ -15,7 +15,7 @@ type NetworkNodeRegistry struct {
 }
 
 const interval = 150 * time.Millisecond
-const timeout = 500 * time.Millisecond
+const timeout = 5000 * time.Millisecond
 
 func Sender(port int, id string, enableTransmit <-chan bool) {
 	conn := conn.DialBroadcastUDP(port)
@@ -64,6 +64,7 @@ func Receiver(port int, updateChannel chan<- NetworkNodeRegistry) {
 		for k, v := range lastSeen {
 			if time.Now().Sub(v) > timeout {
 				updated = true
+				//print(k)
 				reg.Lost = append(reg.Lost, k)
 				delete(lastSeen, k)
 			}
@@ -78,7 +79,7 @@ func Receiver(port int, updateChannel chan<- NetworkNodeRegistry) {
 			}
 
 			sort.Strings(reg.Nodes)
-			sort.Strings(reg.Lost)
+			//sort.Strings(reg.Lost)
 			updateChannel <- reg
 		}
 	}

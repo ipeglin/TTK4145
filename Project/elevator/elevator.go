@@ -7,26 +7,24 @@ import (
 	"elevator/fsm"
 	"elevator/immobility"
 	"elevator/timer"
-	"fmt"
 	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
-func Init(localIP string, firstProcess bool) {
-	elevatorName := localIP
-	logrus.Info("Elevator module initiated with name ", localIP)
+func Init(elevatorName string, isPrimaryProcess bool) {
+	logrus.Info("Elevator module initiated with name ", elevatorName)
 
 	hwelevio.Init(elevio.Addr, elevio.NFloors)
-	filename := elevatorName + ".json"
-	if firstProcess {
+	elevatorStateFile := elevatorName + ".json"
+	if isPrimaryProcess {
 		if elevio.InputDevice.FloorSensor() == -1 {
-			fsm.FsmInitBetweenFloors()
+			// elevator initialised between floors
+			fsm.MoveDownToFloor()
 		}
-		fsm.FsmInitJson(filename, elevatorName)
+		fsm.FsmInitJson(elevatorStateFile, elevatorName)
 	} else {
 		floor := elevio.InputDevice.FloorSensor()
-		fmt.Print("\n Resuming")
 		fsm.FsmResumeAtLatestCheckpoint(floor)
 	}
 
@@ -37,9 +35,7 @@ func Init(localIP string, firstProcess bool) {
 	drv_stop := make(chan bool)
 	drv_motorActivity := make(chan bool)
 	immob := make(chan bool)
-	//todo
-	//drv_direction :=make(chan int)
-	//drv_behaviour
+	// TODO: Add channels for direction and behaviour
 
 	go elevio.PollButtons(drv_buttons)
 	go elevio.PollFloorSensor(drv_floors)
@@ -51,50 +47,52 @@ func Init(localIP string, firstProcess bool) {
 	//go elvio.PollDirection(drv_direction)
 	//go elvio.PollBehaviour(drv_behaviour)
 
+	// initial hinderance states
 	var obst bool = false
 	var immobile bool = false
+
 	for {
 		select {
 		case drv_obst := <-drv_obstr:
 			logrus.Warn("Obstruction state changed: ", drv_obst)
 			drv_obstr_immob <- drv_obst
 			if drv_obst == !obst { // If obstruction detected and it's a new obstruction
+				logrus.Debug("New obstruction detected: ", drv_obst)
 				fsm.FsmObstruction()
 			}
 			obst = drv_obst
 
 		case immobile = <-immob:
+			logrus.Warn("Immobile state changed: ", immobile)
 			if immobile {
-				//dette skjer veldig sent
-				checkpoint.RemoveDysfunctionalElevatorFromJSON(filename, elevatorName)
-				logrus.Warn("Immobile state changed: ", immobile)
+				// BUG: THis occurs very late
+				checkpoint.RemoveDysfunctionalElevatorFromJSON(elevatorStateFile, elevatorName)
 			} else {
-				//fra imobil til mobil
-				fsm.FsmUpdateJSON(elevatorName, filename)
+				fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
 			}
 
 		case btnEvent := <-drv_buttons:
 			logrus.Debug("Button press detected: ", btnEvent)
-			fsm.FsmUpdateJSON(elevatorName, filename)
+			fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
 			//trenger ikke være her. assign kun ved innkomende mld da heis offline ikke skal assigne
-			fsm.FsmRequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, filename)
-			fsm.FsmJSONOrderAssigner(filename, elevatorName)
-			fsm.FsmRequestButtonPressV3(filename, elevatorName)
-			fsm.FsmUpdateJSON(elevatorName, filename)
+			fsm.FsmRequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
+			fsm.FsmJSONOrderAssigner(elevatorStateFile, elevatorName)
+			fsm.FsmRequestButtonPressV3(elevatorStateFile, elevatorName)
+			fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
 
 		case floor := <-drv_floors:
 			logrus.Debug("Floor sensor triggered: ", floor)
-			fsm.FsmFloorArrival(floor, elevatorName, filename)
-			fsm.FsmUpdateJSON(elevatorName, filename)
+			fsm.FloorArrival(floor, elevatorName, elevatorStateFile)
+			fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
 			fsm.FsmMakeCheckpoint()
 
 		default:
 			if timer.TimerTimedOut() { // Check for timeout only if no obstruction
 				logrus.Debug("Elevator timeout")
-				fsm.FsmUpdateJSON(elevatorName, filename)
+				fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
 				timer.TimerStop()
-				fsm.FsmDoorTimeout(filename, elevatorName)
-				fsm.FsmUpdateJSON(elevatorName, filename)
+				fsm.FsmDoorTimeout(elevatorStateFile, elevatorName)
+				fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
 			}
 			time.Sleep(50 * time.Millisecond)
 		}
