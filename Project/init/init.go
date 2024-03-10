@@ -5,7 +5,6 @@ import (
 	"elevator/checkpoint"
 	"elevator/fsm"
 	"elevator/processpair"
-	"fmt"
 	"logger"
 	"network"
 	"network/nodes"
