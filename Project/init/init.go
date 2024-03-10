@@ -18,7 +18,7 @@ import (
 
 func mainLogic(firstProcess bool) {
 	var lostNodes []string
-  
+
 	logger.Setup()
 	logrus.Info("Node initialised with PID:", os.Getpid())
 
