@@ -18,7 +18,8 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 	elevatorStateFile := elevatorName + ".json"
 	if isPrimaryProcess {
 		if elevio.InputDevice.FloorSensor() == -1 {
-			fsm.FsmInitBetweenFloors()
+			// elevator initialised between floors
+			fsm.MoveDownToFloor()
 		}
 		fsm.FsmInitJson(elevatorStateFile, elevatorName)
 	} else {
