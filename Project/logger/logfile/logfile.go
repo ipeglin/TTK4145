@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	log "github.com/sirupsen/log"
+	log "github.com/sirupsen/logrus"
 )
 
 func getCurrentTimeStamp() string {

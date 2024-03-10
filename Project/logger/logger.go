@@ -5,7 +5,7 @@ import (
 	"logger/logfile"
 	"os"
 
-	log "github.com/sirupsen/log"
+	log "github.com/sirupsen/logrus"
 )
 
 /*
