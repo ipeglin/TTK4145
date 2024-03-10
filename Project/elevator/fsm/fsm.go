@@ -104,7 +104,7 @@ func FsmRequestButtonPress(btnFloor int, btn elevio.Button, elevatorName string,
 	//elev.ElevatorPrint(elevator)
 }
 */
-func FsmFloorArrival(newFloor int, elevatorName string, filename string) {
+func FloorArrival(newFloor int, elevatorName string, filename string) {
 	logrus.Warn("Arrived at new floor: ", newFloor)
 	//elev.ElevatorPrint(elevator)
 	elevator.CurrentFloor = newFloor
