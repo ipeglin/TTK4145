@@ -159,15 +159,16 @@ func UpdateLocalJSON(localFilname string, incomingFilename string) {
 		}
 	}
 	incommigElevatorName := strings.TrimSuffix(incomingFilename, ".json")
-	if _, exists := localCombinedInput.CyclicCounter.States[iincommigElevatorName]; !exists {
+	if _, exists := localCombinedInput.CyclicCounter.States[incommigElevatorName]; !exists {
 		localCombinedInput.HRAInput.States[incommigElevatorName] = otherCombinedInput.HRAInput.States[incommigElevatorName]
 		localCombinedInput.CyclicCounter.States[incommigElevatorName] = otherCombinedInput.CyclicCounter.States[incommigElevatorName]
 	} else {
 		if otherCombinedInput.CyclicCounter.States[incommigElevatorName] > localCombinedInput.CyclicCounter.States[incommigElevatorName] {
-			localCombinedInput.HRAInput.States[incommigElevatorName] = state
-			localCombinedInput.CyclicCounter.States[incommigElevatorName] = otherCombinedInput.HRAInput.States[incommigElevatorName]
+			localCombinedInput.HRAInput.States[incommigElevatorName] = otherCombinedInput.HRAInput.States[incommigElevatorName]
+			localCombinedInput.CyclicCounter.States[incommigElevatorName] = otherCombinedInput.CyclicCounter.States[incommigElevatorName]
 
 		}
+	}
 	//legg kunn til deres local elevator 
 	/*
 	for i, state := range otherCombinedInput.HRAInput.States {
