@@ -1,74 +1,62 @@
 package logger
 
 import (
-  "os"
-  "io"
-  "fmt"
-  "time"
-  "path/filepath"
-  "github.com/sirupsen/logrus"
+	"io"
+	"logger/logfile"
+	"os"
+
+	log "github.com/sirupsen/log"
 )
 
-type WarnLevelHook struct{}
+/*
+Hook code for writing log messages to separate targets based on log level
 
-func (hook *WarnLevelHook) Levels() []logrus.Level {
-	return []logrus.Level{logrus.WarnLevel, logrus.ErrorLevel, logrus.FatalLevel, logrus.PanicLevel}
+author: @bunyk
+*/
+type WriterHook struct {
+	Writer    io.Writer
+	LogLevels []log.Level
 }
 
-func (hook *WarnLevelHook) Fire(entry *logrus.Entry) error {
-	// Here, you can write the log entry to stdout
-	entry.Logger.Out = os.Stdout
-	return nil
+func (hook *WriterHook) Fire(entry *log.Entry) error {
+	line, err := entry.String()
+	if err != nil {
+		return err
+	}
+	_, err = hook.Writer.Write([]byte(line))
+	return err
 }
 
-func createLogFile() string {
-  rootPath, err := filepath.Abs("../") // procject root
-  if err != nil {
-      logrus.Fatal("Failed to find project root", err)
-  }
-
-  // generate timestamp
-  now := time.Now()
-  timestamp := fmt.Sprintf("runtime_%d-%d-%d_%d:%d:%d",
-		now.Year(),
-		now.Month(),
-		now.Day(),
-		now.Hour(),
-		now.Hour(),
-		now.Second())
-
-  filename := fmt.Sprintf("%s/log/%s.log", rootPath, timestamp)
-  os.MkdirAll(filepath.Dir(filename), 0755)
-  file, err := os.Create(filename)
-      if err != nil {
-          logrus.Fatal(err)
-      }
-  file.Close()
-  logrus.Info("Created log file: ", filename)
-
-  return filename
+func (hook *WriterHook) Levels() []log.Level {
+	return hook.LogLevels
 }
 
 func Setup() {
-  filePath := createLogFile()
+	file := logfile.CreateLogFile()
 
-  // pass log file to logrus
-  file, err := os.OpenFile(filePath, os.O_WRONLY | os.O_CREATE, 0755)
-  if err != nil {
-      logrus.Fatal("Failed to create log file. ", err)
-  }
-  defer file.Close()
+	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE, 0755)
+	if err != nil {
+		log.Fatal("Failed to create log file. ", err)
+	}
+	defer f.Close()
 
-  mw := io.MultiWriter(os.Stdout, file)
-  logrus.SetOutput(mw)
-  logrus.SetReportCaller(true)
-  logrus.SetLevel(logrus.DebugLevel)
+	log.SetOutput(io.Discard) // Send all logs to nowhere by default
+	log.AddHook(&WriterHook{  // Send logs with level higher than warning to log file
+		Writer: f,
+		LogLevels: []log.Level{
+			log.PanicLevel,
+			log.FatalLevel,
+			log.ErrorLevel,
+			log.WarnLevel,
+			log.DebugLevel,
+		},
+	})
 
-  logrus.AddHook(&WarnLevelHook{})
-
-  // Test logging
-	logrus.Debug("This is a debug message")
-	logrus.Info("This is an info message")
-	logrus.Warn("This is a warning message")
-	logrus.Error("This is an error message")
+	log.AddHook(&WriterHook{ // Send info and trace logs to stdout
+		Writer: os.Stdout,
+		LogLevels: []log.Level{
+			log.InfoLevel,
+			log.TraceLevel,
+		},
+	})
 }
