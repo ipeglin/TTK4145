@@ -16,7 +16,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func mainLogic(firstProcess bool) {
+func initNode(firstProcess bool) {
 	var lostNodes []string
 
 	logger.Setup()
@@ -106,8 +106,8 @@ func mainLogic(firstProcess bool) {
 }
 
 func main() {
-	var mainFuncObject processpair.MainFuncType = mainLogic
-	processpair.ProcessPairHandler(mainFuncObject)
+	var entryPointFunction processpair.TFunc = initNode
+	processpair.ProcessPairHandler(entryPointFunction)
 
 	// Block the main goroutine indefinitely
 	done := make(chan struct{})

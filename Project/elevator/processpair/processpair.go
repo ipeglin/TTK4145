@@ -10,9 +10,9 @@ import (
 
 var timeLimitOnline time.Duration = time.Duration(3 * time.Second)
 
-type MainFuncType func(bool)
+type TFunc func(bool)
 
-func startMainProcess(mainFunc MainFuncType, firstProcsess bool) {
+func startMainProcess(mainFunc TFunc, firstProcsess bool) {
 	print("Im main bitch")
 	go mainFunc(firstProcsess)
 	startBackupProcess()
@@ -37,7 +37,7 @@ func startBackupProcess() {
 	}
 }
 
-func monitorMainProcessAndTakeOver(mainFunc MainFuncType) {
+func monitorMainProcessAndTakeOver(mainFunc TFunc) {
 	for {
 		if !isMainAlive() {
 			startMainProcess(mainFunc, false)
@@ -52,7 +52,7 @@ func isMainAlive() bool {
 	return timeLimitOnline >= timeSinceCheckpoint
 }
 
-func ProcessPairHandler(mainFunc MainFuncType) {
+func ProcessPairHandler(mainFunc TFunc) {
 	if len(os.Args) > 1 && os.Args[1] == "backup" {
 		print("Im backup")
 		monitorMainProcessAndTakeOver(mainFunc)
