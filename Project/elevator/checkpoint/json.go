@@ -76,8 +76,8 @@ func UpdateJSON(el elev.Elevator, filename string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(filename)
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
 		combinedInput.HRAInput = updateHRAInput(combinedInput.HRAInput, el, elevatorName)
+		combinedInput.CyclicCounter = updateCyclicCounterInput(combinedInput.CyclicCounter, elevatorName)
 	}
-	combinedInput.CyclicCounter = updateCyclicCounterInput(combinedInput.CyclicCounter, elevatorName)
 	SaveCombinedInput(combinedInput, filename)
 }
 
@@ -227,6 +227,14 @@ func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInp
 			if otherCombinedInput.CyclicCounter.HallRequests[f][i] > localCombinedInput.CyclicCounter.HallRequests[f][i] {
 				localCombinedInput.CyclicCounter.HallRequests[f][i] = otherCombinedInput.CyclicCounter.HallRequests[f][i]
 				localCombinedInput.HRAInput.HallRequests[f][i] = otherCombinedInput.HRAInput.HallRequests[f][i]
+			}
+			if (otherCombinedInput.CyclicCounter.HallRequests[f][i] == localCombinedInput.CyclicCounter.HallRequests[f][i]){ 
+			 	if (localCombinedInput.CyclicCounter.HallRequests[f][i] != otherCombinedInput.CyclicCounter.HallRequests[f][i]){
+					//midliertilig konflikt logikk dersom den ene er true og den andre er false 
+					//oppstår ved motostop og bostruksjoner etc dersom den har selv claimet en orde som blir utført ila den har motorstop
+					//Tenk om dette er beste løsning  
+					localCombinedInput.HRAInput.HallRequests[f][i] = false
+				} 
 			}
 		}
 	}
