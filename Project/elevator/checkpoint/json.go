@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
+	//"strings"
 )
 
 //const JSONFile = "JSONFile.json"
@@ -220,7 +220,7 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 }
 
 
-func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInput, incomingFilename string) {
+func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInput, incomingElevatorName string) {
 	localCombinedInput, _ := LoadCombinedInput(localFilname)
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
@@ -230,8 +230,6 @@ func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInp
 			}
 		}
 	}
-
-	incomingElevatorName := strings.TrimSuffix(incomingFilename, ".json")
 	if _, exists := otherCombinedInput.HRAInput.States[incomingElevatorName]; exists {
 		if _, exists := localCombinedInput.HRAInput.States[incomingElevatorName]; !exists {
 			localCombinedInput.HRAInput.States[incomingElevatorName] = otherCombinedInput.HRAInput.States[incomingElevatorName]
@@ -241,6 +239,12 @@ func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInp
 				localCombinedInput.HRAInput.States[incomingElevatorName] = otherCombinedInput.HRAInput.States[incomingElevatorName]
 				localCombinedInput.CyclicCounter.States[incomingElevatorName] = otherCombinedInput.CyclicCounter.States[incomingElevatorName]
 			}
+		}
+	}else{
+		print("slett den jævla heisen")
+		if _, exists := localCombinedInput.HRAInput.States[incomingElevatorName]; exists {
+			delete(localCombinedInput.HRAInput.States, incomingElevatorName)
+			delete(localCombinedInput.CyclicCounter.States, incomingElevatorName)
 		}
 	}
 	SaveCombinedInput(localCombinedInput, localFilname)
