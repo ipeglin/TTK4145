@@ -4,6 +4,7 @@ import (
 	"io"
 	"logger/logfile"
 	"os"
+	"fmt"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -33,6 +34,7 @@ func (hook *WriterHook) Levels() []log.Level {
 
 func Setup() {
 	file := logfile.CreateLogFile()
+	fmt.Println("HERE:", file)
 
 	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {

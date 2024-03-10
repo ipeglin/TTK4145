@@ -7,6 +7,7 @@ import (
 	"elevator/fsm"
 	"elevator/immobility"
 	"elevator/timer"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -42,7 +43,9 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 	go elevio.PollStopButton(drv_stop)
 	go elevio.MontitorMotorActivity(drv_motorActivity, 3.0)
 	go immobility.Immobility(drv_obstr_immob, drv_motorActivity, immob)
-	// TODO: Add polling for direction and behaviour
+	go fsm.FsmMakeCheckpointGo()
+	//go elvio.PollDirection(drv_direction)
+	//go elvio.PollBehaviour(drv_behaviour)
 
 	// initial hinderance states
 	var obst bool = false
@@ -73,8 +76,8 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
 			//trenger ikke være her. assign kun ved innkomende mld da heis offline ikke skal assigne
 			fsm.FsmRequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
-			fsm.FsmJSONOrderAssigner(elevatorStateFile, elevatorName)
-			fsm.FsmRequestButtonPressV3(elevatorStateFile, elevatorName)
+			//fsm.FsmJSONOrderAssigner(elevatorStateFile, elevatorName)
+			//fsm.FsmRequestButtonPressV3(elevatorStateFile, elevatorName)
 			fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
 
 		case floor := <-drv_floors:
@@ -91,7 +94,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 				fsm.FsmDoorTimeout(elevatorStateFile, elevatorName)
 				fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
 			}
-			fsm.FsmMakeCheckpoint()
+			time.Sleep(50 * time.Millisecond)
 		}
 		/// we need a case for each time a state updates.
 	}
