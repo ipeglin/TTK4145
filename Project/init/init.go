@@ -69,8 +69,8 @@ func initNode(isPrimaryProcess bool) {
 			lostNodes = lostNodeAddresses // Update the lostNodes
 
 			checkpoint.DeleteInactiveElevatorsFromJSON(lostNodes, localStateFile)
-			fsm.FsmJSONOrderAssigner(localStateFile, localIP)
-			fsm.FsmRequestButtonPressV3(localStateFile, localIP)
+			fsm.JSONOrderAssigner(localStateFile, localIP)
+			fsm.RequestButtonPressV3(localStateFile, localIP)
 
 		case msg := <-messageReceiveChannel:
 			// TODO: handle incoming messages
@@ -84,8 +84,8 @@ func initNode(isPrimaryProcess bool) {
 			// update and remove list nodes
 			if !checkpoint.IncomingDataIsCorrupt(incomingState) {
 				checkpoint.InncommingJSONHandeling(localStateFile, externalStateFile, incomingState, lostNodes)
-				fsm.FsmJSONOrderAssigner(localStateFile, localIP)
-				fsm.FsmRequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
+				fsm.JSONOrderAssigner(localStateFile, localIP)
+				fsm.RequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
 			}
 
 		case online := <-onlineStatusChannel:

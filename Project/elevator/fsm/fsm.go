@@ -70,21 +70,21 @@ func FsmRequestButtonPress(btnFloor int, btn elevio.Button, elevatorName string,
 		} else {
 			//elevator.Requests[btnFloor][btn] = true
 			//trenger å sjekke at alt dette er riktig
-			fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
-			fsmJSONOrderAssigner(filename, elevatorName)
+			UpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
+			JSONOrderAssigner(filename, elevatorName)
 		}
 
 	case elev.EBMoving:
 		//elevator.Requests[btnFloor][btn] = true
 		//trenger å sjekke at alt dette er riktig
-		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
-		fsmJSONOrderAssigner(filename, elevatorName)
+		UpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
+		JSONOrderAssigner(filename, elevatorName)
 
 	case elev.EBIdle:
 		//elevator.Requests[btnFloor][btn] = true
 		//trenger å sjekke at alt dette er riktig
-		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
-		fsmJSONOrderAssigner(filename, elevatorName)
+		UpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
+		JSONOrderAssigner(filename, elevatorName)
 		pair := requests.RequestsChooseDirection(elevator)
 		elevator.Dirn = pair.Dirn
 		elevator.CurrentBehaviour = pair.Behaviour
@@ -125,8 +125,8 @@ func FloorArrival(newFloor int, elevatorName string, filename string) {
 	//elev.ElevatorPrint(elevator)
 }
 
-func FsmDoorTimeout(filename string, elevatorName string) {
-	//fmt.Printf("\n\n%s()\n", "FsmDoorTimeout")
+func DoorTimeout(filename string, elevatorName string) {
+	//fmt.Printf("\n\n%s()\n", "DoorTimeout")
 	//elev.ElevatorPrint(elevator)
 	//Hvorfor switch
 	switch elevator.CurrentBehaviour {
@@ -143,7 +143,7 @@ func FsmDoorTimeout(filename string, elevatorName string) {
 
 		case elev.EBMoving:
 			outputDevice.DoorLight(false)
-			//fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevio.DirStop), " in FsmDoorTimeout")
+			//fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevio.DirStop), " in DoorTimeout")
 			outputDevice.MotorDirection(elevator.Dirn)
 		case elev.EBIdle:
 			outputDevice.DoorLight(false)
@@ -154,7 +154,7 @@ func FsmDoorTimeout(filename string, elevatorName string) {
 	//elev.ElevatorPrint(elevator)
 }
 
-func FsmObstruction() {
+func Obstruction() {
 	if !timer.TimerInf {
 		timer.TimerStartInf()
 		if elevator.CurrentBehaviour == elev.EBIdle {
@@ -167,12 +167,12 @@ func FsmObstruction() {
 	}
 }
 
-func FsmMakeCheckpoint() {
+func MakeCheckpoint() {
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 
 }
 
-func FsmResumeAtLatestCheckpoint(floor int) {
+func ResumeAtLatestCheckpoint(floor int) {
 	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
 	setAllLights()
 	//fmt.Print(elevator.Dirn)
@@ -184,12 +184,13 @@ func FsmResumeAtLatestCheckpoint(floor int) {
 	}
 }
 
-func FsmLoadLatestCheckpoint() {
+// TODO! Never used
+func LoadLatestCheckpoint() {
 	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
 }
 
 // Json fra her
-func FsmInitJson(filename string, ElevatorName string) {
+func InitJson(filename string, ElevatorName string) {
 	// Gjør endringer på combinedInput her
 	print(filename)
 	err := os.Remove(filename)
@@ -205,34 +206,34 @@ func FsmInitJson(filename string, ElevatorName string) {
 	}
 }
 
-func FsmUpdateJSON(elevatorName string, filename string) {
+func UpdateJSON(elevatorName string, filename string) {
 	checkpoint.UpdateJSON(elevator, filename, elevatorName)
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
-func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
+func UpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
 	checkpoint.UpdateJSONWhenNewOrderOccurs(filename, elevatorName, btnFloor, btn, &elevator)
 }
 
-func FsmJSONOrderAssigner(filename string, elevatorName string) {
+func JSONOrderAssigner(filename string, elevatorName string) {
 	checkpoint.JSONOrderAssigner(&elevator, filename, elevatorName)
 }
 
-func FsmRequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
+func RequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
 	if requests.RequestsShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
 		timer.TimerStart(elevator.Config.DoorOpenDurationS)
 	} else {
 		//elevator.Requests[btnFloor][btn] = true
 		//trenger å sjekke at alt dette er riktig
-		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
-		//fsmJSONOrderAssigner(filename, elevatorName)
+		UpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
+		//JSONOrderAssigner(filename, elevatorName)
 	}
 }
 
 // etter denne func broadcaster vi.
 // så assigner vi
 // så kaller vi denne
-func FsmRequestButtonPressV3(filename string, elevatorName string) {
+func RequestButtonPressV3(filename string, elevatorName string) {
 	switch elevator.CurrentBehaviour {
 	case elev.EBIdle:
 		pair := requests.RequestsChooseDirection(elevator)

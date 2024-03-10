@@ -11,20 +11,21 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func Init(elevatorName string, isPrimaryProcess bool) {
+func Init(elevatorName string, isFirstProcess bool) {
 	logrus.Info("Elevator module initiated with name ", elevatorName)
 
 	hwelevio.Init(elevio.Addr, elevio.NFloors)
 	elevatorStateFile := elevatorName + ".json"
-	if isPrimaryProcess {
+
+	if isFirstProcess {
 		if elevio.InputDevice.FloorSensor() == -1 {
 			// elevator initialised between floors
 			fsm.MoveDownToFloor()
 		}
-		fsm.FsmInitJson(elevatorStateFile, elevatorName)
+		fsm.InitJson(elevatorStateFile, elevatorName)
 	} else {
 		floor := elevio.InputDevice.FloorSensor()
-		fsm.FsmResumeAtLatestCheckpoint(floor)
+		fsm.ResumeAtLatestCheckpoint(floor)
 	}
 
 	drv_buttons := make(chan elevio.ButtonEvent)
@@ -55,7 +56,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			drv_obstr_immob <- drv_obst
 			if drv_obst == !obst { // If obstruction detected and it's a new obstruction
 				logrus.Debug("New obstruction detected: ", drv_obst)
-				fsm.FsmObstruction()
+				fsm.Obstruction()
 			}
 			obst = drv_obst
 
@@ -65,33 +66,33 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 				// BUG: THis occurs very late
 				checkpoint.RemoveDysfunctionalElevatorFromJSON(elevatorStateFile, elevatorName)
 			} else {
-				fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
+				fsm.UpdateJSON(elevatorName, elevatorStateFile)
 			}
 
 		case btnEvent := <-drv_buttons:
 			logrus.Debug("Button press detected: ", btnEvent)
-			fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
+			fsm.UpdateJSON(elevatorName, elevatorStateFile)
 			//trenger ikke være her. assign kun ved innkomende mld da heis offline ikke skal assigne
-			fsm.FsmRequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
-			fsm.FsmJSONOrderAssigner(elevatorStateFile, elevatorName)
-			fsm.FsmRequestButtonPressV3(elevatorStateFile, elevatorName)
-			fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
+			fsm.RequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
+			fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
+			fsm.RequestButtonPressV3(elevatorStateFile, elevatorName)
+			fsm.UpdateJSON(elevatorName, elevatorStateFile)
 
 		case floor := <-drv_floors:
 			logrus.Debug("Floor sensor triggered: ", floor)
 			fsm.FloorArrival(floor, elevatorName, elevatorStateFile)
-			fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
-			fsm.FsmMakeCheckpoint()
+			fsm.UpdateJSON(elevatorName, elevatorStateFile)
+			fsm.MakeCheckpoint()
 
 		default:
 			if timer.TimerTimedOut() { // Check for timeout only if no obstruction
 				logrus.Debug("Elevator timeout")
-				fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
+				fsm.UpdateJSON(elevatorName, elevatorStateFile)
 				timer.TimerStop()
-				fsm.FsmDoorTimeout(elevatorStateFile, elevatorName)
-				fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
+				fsm.DoorTimeout(elevatorStateFile, elevatorName)
+				fsm.UpdateJSON(elevatorName, elevatorStateFile)
 			}
-			fsm.FsmMakeCheckpoint()
+			fsm.MakeCheckpoint()
 		}
 		/// we need a case for each time a state updates.
 	}
