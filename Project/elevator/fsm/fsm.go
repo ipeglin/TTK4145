@@ -9,12 +9,9 @@ import (
 	"fmt"
 	"network/local"
 	"os"
-<<<<<<< HEAD
 	"time"
-=======
 
 	"github.com/sirupsen/logrus"
->>>>>>> main
 )
 
 var elevator elev.Elevator
