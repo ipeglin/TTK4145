@@ -145,10 +145,10 @@ func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) 
 	}
 }
 
-
-func UpdateLocalJSON(localFilname string, incomingFilename string) {
+/*
+func UpdateLocalJSON(localFilname string, otherCombinedInput CombinedInput, incomingFilename string) {
 	localCombinedInput, _ := LoadCombinedInput(localFilname)
-	otherCombinedInput, _ := LoadCombinedInput(incomingFilename)
+	//otherCombinedInput, _ := LoadCombinedInput(incomingFilename)
 
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
@@ -159,16 +159,19 @@ func UpdateLocalJSON(localFilname string, incomingFilename string) {
 		}
 	}
 	incommigElevatorName := strings.TrimSuffix(incomingFilename, ".json")
-	if _, exists := localCombinedInput.CyclicCounter.States[incommigElevatorName]; !exists {
-		localCombinedInput.HRAInput.States[incommigElevatorName] = otherCombinedInput.HRAInput.States[incommigElevatorName]
-		localCombinedInput.CyclicCounter.States[incommigElevatorName] = otherCombinedInput.CyclicCounter.States[incommigElevatorName]
-	} else {
-		if otherCombinedInput.CyclicCounter.States[incommigElevatorName] > localCombinedInput.CyclicCounter.States[incommigElevatorName] {
+	if _, exists := otherCombinedInput.CyclicCounter.States[incommigElevatorName]; exists{
+		if _, exists := localCombinedInput.CyclicCounter.States[incommigElevatorName]; !exists {
 			localCombinedInput.HRAInput.States[incommigElevatorName] = otherCombinedInput.HRAInput.States[incommigElevatorName]
 			localCombinedInput.CyclicCounter.States[incommigElevatorName] = otherCombinedInput.CyclicCounter.States[incommigElevatorName]
+		} else {
+			if otherCombinedInput.CyclicCounter.States[incommigElevatorName] > localCombinedInput.CyclicCounter.States[incommigElevatorName] {
+				localCombinedInput.HRAInput.States[incommigElevatorName] = otherCombinedInput.HRAInput.States[incommigElevatorName]
+				localCombinedInput.CyclicCounter.States[incommigElevatorName] = otherCombinedInput.CyclicCounter.States[incommigElevatorName]
 
+			}
 		}
 	}
+
 	//legg kunn til deres local elevator 
 	/*
 	for i, state := range otherCombinedInput.HRAInput.States {
@@ -182,11 +185,11 @@ func UpdateLocalJSON(localFilname string, incomingFilename string) {
 			}
 		}
 	}
-	*/ 
+
 
 	SaveCombinedInput(localCombinedInput, localFilname)
 }
-
+*/
 func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename string) error {
 	localCombinedInput, err := LoadCombinedInput(localFilename)
 	if err != nil {
@@ -216,21 +219,31 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 	return nil
 }
 
-func InncommingJSONHandeling(localFilname string, incommigFilname string, inncommingCombinedInput CombinedInput, inactiveElevatorIDs []string) {
-	err := os.Remove(incommigFilname)
-	if err != nil {
-		fmt.Println("Feil ved fjerning:", err)
-	}
-	SaveCombinedInput(inncommingCombinedInput, incommigFilname)
-	UpdateLocalJSON(localFilname, incommigFilname)
-	inactiveElevatorIDs = DysfunctionalElevatorDetection(incommigFilname, inncommingCombinedInput, inactiveElevatorIDs)
-	if len(inactiveElevatorIDs) > 0 {
-		for _, id := range inactiveElevatorIDs {
-			fmt.Println(id) // Using fmt.Println for printing each ID on a new line
+func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInput, incomingFilename string)  {
+	localCombinedInput, _ := LoadCombinedInput(localFilname)
+	//otherCombinedInput, _ := LoadCombinedInput(incomingFilename)
+
+	for f := 0; f < elevio.NFloors; f++ {
+		for i := 0; i < 2; i++ {
+			if otherCombinedInput.CyclicCounter.HallRequests[f][i] > localCombinedInput.CyclicCounter.HallRequests[f][i] {
+				localCombinedInput.CyclicCounter.HallRequests[f][i] = otherCombinedInput.CyclicCounter.HallRequests[f][i]
+				localCombinedInput.HRAInput.HallRequests[f][i] = otherCombinedInput.HRAInput.HallRequests[f][i]
+			}
 		}
 	}
-	
-	DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs, localFilname)
+	incommigElevatorName := strings.TrimSuffix(incomingFilename, ".json")
+	if _, exists := otherCombinedInput.CyclicCounter.States[incommigElevatorName]; exists{
+		if _, exists := localCombinedInput.CyclicCounter.States[incommigElevatorName]; !exists {
+			localCombinedInput.HRAInput.States[incommigElevatorName] = otherCombinedInput.HRAInput.States[incommigElevatorName]
+			localCombinedInput.CyclicCounter.States[incommigElevatorName] = otherCombinedInput.CyclicCounter.States[incommigElevatorName]
+		} else {
+			if otherCombinedInput.CyclicCounter.States[incommigElevatorName] > localCombinedInput.CyclicCounter.States[incommigElevatorName] {
+				localCombinedInput.HRAInput.States[incommigElevatorName] = otherCombinedInput.HRAInput.States[incommigElevatorName]
+				localCombinedInput.CyclicCounter.States[incommigElevatorName] = otherCombinedInput.CyclicCounter.States[incommigElevatorName]
+
+			}
+		}
+	}
 }
 
 func RemoveDysfunctionalElevatorFromJSON(localFilname string, elevatorName string) {
@@ -244,20 +257,17 @@ func RemoveDysfunctionalElevatorFromJSON(localFilname string, elevatorName strin
 	SaveCombinedInput(combinedInput, localFilname)
 }
 
-func DysfunctionalElevatorDetection(incomingFilename string, incomingCombinedInput CombinedInput, inactiveElevatorIDs []string) []string {
-	inactiveElevatorsMap := make(map[string]struct{})
-	for _, id := range inactiveElevatorIDs {
-		inactiveElevatorsMap[id] = struct{}{}
+/*
+func DysfunctionalElevatorDetection(incomingFilename string, incomingCombinedInput CombinedInput) []string {
+	incomingElevatorName := strings.TrimSuffix(incomingFilename, ".json")
+	var inactiveElevatorIDs []string
+	if _, exists := incomingCombinedInput.HRAInput.States[incomingElevatorName]; !exists {
+		println(incomingElevatorName)
+		inactiveElevatorIDs = append(inactiveElevatorIDs, incomingElevatorName)
 	}
-
-	incommigElevatorName := strings.TrimSuffix(incomingFilename, ".json")
-	if _, exists := incomingCombinedInput.HRAInput.States[incommigElevatorName]; !exists {
-		print(incommigElevatorName)
-		inactiveElevatorIDs = append(inactiveElevatorIDs, incommigElevatorName)
-	}
-
 	return inactiveElevatorIDs
 }
+*/
 
 // Antagelser om strukturer og hjelpefunksjoner fra tidligere eksempel ...
 // IsValidBehavior sjekker om oppgitt atferd er gyldig
