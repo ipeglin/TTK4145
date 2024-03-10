@@ -25,11 +25,9 @@ func InitializeCyclicCounterInput(ElevatorName string) CyclicCounterInput {
 func updateCyclicCounterWhenOrderIsComplete(cyclicCounter CyclicCounterInput, elevatorName string, btn_floor int, btn_type elevio.Button) CyclicCounterInput{
 	switch btn_type {
 	case elevio.BHallUp:
-		print("up")
 		cyclicCounter.HallRequests[btn_floor][0] +=1 
 	case elevio.BHallDown:
 		cyclicCounter.HallRequests[btn_floor][1] += 1
-		print("down")
 	}
 	print("ferdig func call")
 	cyclicCounter.States[elevatorName] += 1

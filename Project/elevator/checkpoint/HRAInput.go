@@ -57,6 +57,22 @@ func updateHRAInput(hraInput HRAInput, el elev.Elevator, elevatorName string) HR
 	return hraInput
 	}
 
+func rebootHRAInput(hraInput HRAInput, el elev.Elevator, elevatorName string) HRAInput {
+	for f := 0; f < elevio.NFloors; f++ {
+		hraInput.HallRequests[f][0] = hraInput.HallRequests[f][0] 
+		hraInput.HallRequests[f][1] = hraInput.HallRequests[f][1] 
+	}
+		
+	behavior, direction, cabRequests := convertLocalElevatorState(el)
+	hraInput.States[elevatorName] = HRAElevState{
+		Behavior:    behavior,
+		Floor:       el.CurrentFloor,
+		Direction:   direction,
+		CabRequests: cabRequests,
+	}
+	return hraInput
+}
+
 
 func updateHRAInputWhenOrderIsComplete(hraInput HRAInput, el elev.Elevator, elevatorName string, btn_floor int, btn_type elevio.Button) HRAInput {
 	switch btn_type {
