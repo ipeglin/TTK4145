@@ -65,8 +65,11 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			if immobile {
 				// BUG: THis occurs very late
 				checkpoint.RemoveDysfunctionalElevatorFromJSON(elevatorStateFile, elevatorName)
+				//we need to remove the request// clear them if we dont want to comlete orders twice. 
+				//it is up to uss and we have functionality to do so
 			} else {
 				fsm.FsmRebootJSON(elevatorName, elevatorStateFile)
+				
 			}
 
 		case btnEvent := <-drv_buttons:
