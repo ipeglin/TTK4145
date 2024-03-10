@@ -17,6 +17,7 @@ import (
 
 func initNode(isPrimaryProcess bool) {
 	var lostNodes []string
+	var localStateFile string
 
 	logger.Setup()
 	logrus.Info("Node initialised with PID:", os.Getpid())
@@ -29,72 +30,62 @@ func initNode(isPrimaryProcess bool) {
 
 	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel, ipChannel)
 
+	// await ip from network module
 	localIP := <-ipChannel
-	go elevator.Init(localIP, firstProcess)
+	localStateFile = localIP + ".json"
 
+	go elevator.Init(localIP, isPrimaryProcess)
+
+	// broadcast state
 	go func() {
 		for {
-			//antar det er her vi sender
-			//dersom local elevator dedekteres ikke funksjonell ønsker vi ikke broacaste JSON
-			//da vil alle andre heiser tro den er offline og ikke assigne den nye calls.
-			localFilename := localIP + ".json"
-			elv, _ := checkpoint.LoadCombinedInput(localFilename)
+			// TODO: If invalid json, do not broadcast, so ther nodes will think it is offline
+			elv, _ := checkpoint.LoadCombinedInput(localStateFile)
 			messageTransmitterChannel <- network.Message{Payload: elv}
 			time.Sleep(500 * time.Millisecond)
 		}
 	}()
 
+	// handle incoming messages
 	for {
 		select {
 		case reg := <-nodeOverviewChannel:
-			localFilname := localIP + ".json"
-			lostNodes = reg.Lost
 			logrus.Info("Known nodes:", reg.Nodes)
-			var updatedLostNodes []string // This will hold the processed IP addresses
-			if len(reg.Lost) > 0 {
-				logrus.Info("Lost nodes:", reg.Lost)
-				// Handling lost nodes
-				for _, lostIP := range reg.Lost {
-					parts := strings.Split(lostIP, "-")
-					if len(parts) >= 3 { // Ensure the format matches "Peer-IP-SOME_NUMBERS"
-						ip := parts[1] // The IP address is the second element
-						updatedLostNodes = append(updatedLostNodes, ip)
-						logrus.Info("Processing lost node IP:", ip)
-						//print(ip)
-					}
-				}
-				lostNodes = updatedLostNodes // Update the lostNodes with just the IPs
-				for _, id := range lostNodes {
-					fmt.Println(id) // Using fmt.Println for printing each ID on a new line
-				}
-				checkpoint.DeleteInactiveElevatorsFromJSON(lostNodes, localStateFile)
-				fsm.FsmJSONOrderAssigner(localStateFile, localIP)
-				fsm.FsmRequestButtonPressV3(localStateFile, localIP)
+			if len(reg.Lost) <= 0 {
+				logrus.Info("No lost nodes")
+				lostNodes = []string{}
+				continue
 			}
+			logrus.Warn("Lost nodes:", reg.Lost)
+
+			// extract ip from node names
+			var lostNodeAddresses []string
+			for _, node := range reg.Lost {
+				ip := strings.Split(node, "-")[1]
+				lostNodeAddresses = append(lostNodeAddresses, ip)
+			}
+			logrus.Debug("Removing lost IPs: ", lostNodeAddresses)
+
+			lostNodes = lostNodeAddresses // Update the lostNodes
+
+			checkpoint.DeleteInactiveElevatorsFromJSON(lostNodes, localStateFile)
+			fsm.FsmJSONOrderAssigner(localStateFile, localIP)
+			fsm.FsmRequestButtonPressV3(localStateFile, localIP)
 
 		case msg := <-messageReceiveChannel:
-			//todo
-			//load 			msg.Payload
-			//
-			//som får filnavn lik ip
+			// TODO: handle incoming messages
 			logrus.Info("Received message from ", msg.SenderId, ": ", msg.Payload)
-			//strings := make([]string, 8)
-			// localIP
-			// inncomigIP.JSON
 
-			localFilname := localIP + ".json"
-			incommigFilname := msg.SenderId + ".json"
-			inncommingCombinedInput := msg.Payload
-			//print(lostNodes)
-			//her må vi reassigne
-			//temp solution
-			//NOT VERY NICE. ONLY PROOF OF CONCEPT
-			//print(lostNodes)
-			if !checkpoint.IncomingDataIsCorrupt(inncommingCombinedInput) {
-				//oppdater og fjern lostNodes
-				checkpoint.InncommingJSONHandeling(localFilname, incommigFilname, inncommingCombinedInput, lostNodes)
-				fsm.FsmJSONOrderAssigner(localFilname, localIP)
-				fsm.FsmRequestButtonPressV3(localFilname, localIP)
+			externalStateFile := msg.SenderId + ".json"
+			incomingState := msg.Payload
+
+			// TODO: Reassign orders
+
+			// update and remove list nodes
+			if !checkpoint.IncomingDataIsCorrupt(incomingState) {
+				checkpoint.InncommingJSONHandeling(localStateFile, externalStateFile, incomingState, lostNodes)
+				fsm.FsmJSONOrderAssigner(localStateFile, localIP)
+				fsm.FsmRequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
 			}
 
 		case online := <-onlineStatusChannel:
