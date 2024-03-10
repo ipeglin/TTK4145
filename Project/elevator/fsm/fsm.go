@@ -106,7 +106,7 @@ func DoorTimeout(filename string, elevatorName string) {
 	//elev.ElevatorPrint(elevator)
 }
 
-func Obstruction() {
+func SetObstruction() {
 	if !timer.IsInfinite {
 		timer.StartInfiniteTimer()
 		if elevator.CurrentBehaviour == elev.EBIdle {
@@ -121,7 +121,6 @@ func Obstruction() {
 
 func MakeCheckpoint() {
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
-
 }
 
 func ResumeAtLatestCheckpoint(floor int) {
