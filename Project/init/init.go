@@ -50,12 +50,16 @@ func initNode(isPrimaryProcess bool) {
 	for {
 		select {
 		case reg := <-nodeOverviewChannel:
+			//hvis du går fra å være offline til online legges du ikke til. 
+			// må fikses 
+			
 			logrus.Info("Known nodes:", reg.Nodes)
 			if len(reg.Lost) <= 0 {
 				logrus.Info("No lost nodes")
 				lostNodes = []string{}
 				continue
 			}
+			
 			logrus.Warn("Lost nodes:", reg.Lost)
 
 			// extract ip from node names
@@ -88,8 +92,9 @@ func initNode(isPrimaryProcess bool) {
 			}
 
 		case online := <-onlineStatusChannel:
-			//fsm.FsmJSONOrderAssigner(localStateFile, localIP)
-			//fsm.FsmRequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
+			fsm.FsmRebootJSON(localIP, localStateFile)
+			fsm.FsmJSONOrderAssigner(localStateFile, localIP)
+			fsm.FsmRequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
 			logrus.Warn("Updated online status:", online)
 		}
 	}
