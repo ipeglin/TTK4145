@@ -210,6 +210,11 @@ func FsmUpdateJSON(elevatorName string, filename string) {
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
+func FsmRebootJSON(elevatorName string, filename string) {
+	checkpoint.RebootJSON(elevator, filename, elevatorName)
+	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
+}
+
 func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
 	checkpoint.UpdateJSONWhenNewOrderOccurs(filename, elevatorName, btnFloor, btn, &elevator)
 }
@@ -225,6 +230,11 @@ func FsmRequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName strin
 		//elevator.Requests[btnFloor][btn] = true
 		//trenger å sjekke at alt dette er riktig
 		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
+		print("funksjonskall funker")
+		if btn == elevio.BCab{
+			print("hei")
+			elevator.Requests[btnFloor][btn] = true
+		}
 		//fsmJSONOrderAssigner(filename, elevatorName)
 	}
 }
