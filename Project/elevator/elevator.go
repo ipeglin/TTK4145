@@ -85,10 +85,10 @@ func Init(elevatorName string, isFirstProcess bool) {
 			fsm.MakeCheckpoint()
 
 		default:
-			if timer.TimerTimedOut() { // Check for timeout only if no obstruction
+			if timer.TimedOut() { // Check for timeout only if no obstruction
 				logrus.Debug("Elevator timeout")
 				fsm.UpdateJSON(elevatorName, elevatorStateFile)
-				timer.TimerStop()
+				timer.Stop()
 				fsm.DoorTimeout(elevatorStateFile, elevatorName)
 				fsm.UpdateJSON(elevatorName, elevatorStateFile)
 			}

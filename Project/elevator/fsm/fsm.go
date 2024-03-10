@@ -116,7 +116,7 @@ func FloorArrival(newFloor int, elevatorName string, filename string) {
 			outputDevice.MotorDirection(elevio.DirStop)
 			outputDevice.DoorLight(true)
 			elevator = requests.RequestsClearAtCurrentFloor(elevator, filename, elevatorName)
-			timer.TimerStart(elevator.Config.DoorOpenDurationS)
+			timer.Start(elevator.Config.DoorOpenDurationS)
 			setAllLights()
 			elevator.CurrentBehaviour = elev.EBDoorOpen
 		}
@@ -137,7 +137,7 @@ func DoorTimeout(filename string, elevatorName string) {
 
 		switch elevator.CurrentBehaviour {
 		case elev.EBDoorOpen:
-			timer.TimerStart(elevator.Config.DoorOpenDurationS)
+			timer.Start(elevator.Config.DoorOpenDurationS)
 			elevator = requests.RequestsClearAtCurrentFloor(elevator, filename, elevatorName)
 			setAllLights()
 
@@ -155,15 +155,15 @@ func DoorTimeout(filename string, elevatorName string) {
 }
 
 func Obstruction() {
-	if !timer.TimerInf {
-		timer.TimerStartInf()
+	if !timer.IsInfinite {
+		timer.StartInfiniteTimer()
 		if elevator.CurrentBehaviour == elev.EBIdle {
 			outputDevice.DoorLight(true)
 			elevator.CurrentBehaviour = elev.EBDoorOpen
 		}
 	} else {
-		timer.TimerStopInf()
-		timer.TimerStart(elevator.Config.DoorOpenDurationS)
+		timer.StopInfiniteTimer()
+		timer.Start(elevator.Config.DoorOpenDurationS)
 	}
 }
 
@@ -179,7 +179,7 @@ func ResumeAtLatestCheckpoint(floor int) {
 	outputDevice.MotorDirection(elevator.Dirn)
 
 	if floor != -1 {
-		timer.TimerStart(elev.DoorOpenDurationSConfig)
+		timer.Start(elev.DoorOpenDurationSConfig)
 		outputDevice.DoorLight(true)
 	}
 }
@@ -221,7 +221,7 @@ func JSONOrderAssigner(filename string, elevatorName string) {
 
 func RequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
 	if requests.RequestsShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
-		timer.TimerStart(elevator.Config.DoorOpenDurationS)
+		timer.Start(elevator.Config.DoorOpenDurationS)
 	} else {
 		//elevator.Requests[btnFloor][btn] = true
 		//trenger å sjekke at alt dette er riktig
@@ -242,7 +242,7 @@ func RequestButtonPressV3(filename string, elevatorName string) {
 		switch pair.Behaviour {
 		case elev.EBDoorOpen:
 			outputDevice.DoorLight(true)
-			timer.TimerStart(elevator.Config.DoorOpenDurationS)
+			timer.Start(elevator.Config.DoorOpenDurationS)
 			elevator = requests.RequestsClearAtCurrentFloor(elevator, filename, elevatorName)
 
 		case elev.EBMoving:
