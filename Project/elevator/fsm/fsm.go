@@ -43,14 +43,13 @@ func SetElevator(f int, cb elev.ElevatorBehaviour, dirn elevio.ElevDir, r [elevi
 func setAllLights() {
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
-
 			checkpoint.JSONsetAllLights(localStateFile, elevatorName)
 			outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
 		}
 	}
 }
 
-func FsmInitBetweenFloors() {
+func MoveDownToFloor() {
 	dirn := elevio.DirDown
 	outputDevice.MotorDirection(dirn)
 	elevator.Dirn = dirn
