@@ -158,6 +158,18 @@ func UpdateLocalJSON(localFilname string, incomingFilename string) {
 			}
 		}
 	}
+	incommigElevatorName := strings.TrimSuffix(incomingFilename, ".json")
+	if _, exists := localCombinedInput.CyclicCounter.States[iincommigElevatorName]; !exists {
+		localCombinedInput.HRAInput.States[incommigElevatorName] = otherCombinedInput.HRAInput.States[incommigElevatorName]
+		localCombinedInput.CyclicCounter.States[incommigElevatorName] = otherCombinedInput.CyclicCounter.States[incommigElevatorName]
+	} else {
+		if otherCombinedInput.CyclicCounter.States[incommigElevatorName] > localCombinedInput.CyclicCounter.States[incommigElevatorName] {
+			localCombinedInput.HRAInput.States[incommigElevatorName] = state
+			localCombinedInput.CyclicCounter.States[incommigElevatorName] = otherCombinedInput.HRAInput.States[incommigElevatorName]
+
+		}
+	//legg kunn til deres local elevator 
+	/*
 	for i, state := range otherCombinedInput.HRAInput.States {
 		if _, exists := localCombinedInput.CyclicCounter.States[i]; !exists {
 			localCombinedInput.HRAInput.States[i] = state
@@ -169,6 +181,8 @@ func UpdateLocalJSON(localFilname string, incomingFilename string) {
 			}
 		}
 	}
+	*/ 
+
 	SaveCombinedInput(localCombinedInput, localFilname)
 }
 
