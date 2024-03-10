@@ -24,7 +24,7 @@ func init() {
 	outputDevice = elevio.ElevioGetOutputDevice()
 
 	localStateFile = elevatorName + ".json"
-
+	FsmInitJson(localStateFile, elevatorName) 
 	//Burde dette gå et annet sted?
 	setAllLights()
 	elevio.RequestDoorOpenLamp(false)
@@ -191,7 +191,6 @@ func FsmLoadLatestCheckpoint() {
 // Json fra her
 func FsmInitJson(filename string, ElevatorName string) {
 	// Gjør endringer på combinedInput her
-	print(filename)
 	err := os.Remove(filename)
 	if err != nil {
 		fmt.Println("Feil ved fjerning:", err)

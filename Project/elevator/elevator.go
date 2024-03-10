@@ -21,7 +21,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			// elevator initialised between floors
 			fsm.MoveDownToFloor()
 		}
-		fsm.FsmInitJson(elevatorStateFile, elevatorName)
+		//fsm.FsmInitJson(elevatorStateFile, elevatorName)
 	} else {
 		floor := elevio.InputDevice.FloorSensor()
 		fsm.FsmResumeAtLatestCheckpoint(floor)
@@ -75,7 +75,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			print("hjelp noe må funke")
 			fsm.FsmRequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
 			fsm.FsmJSONOrderAssigner(elevatorStateFile, elevatorName)
-			
+
 			fsm.FsmRequestButtonPressV3(elevatorStateFile, elevatorName)
 			fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
 
