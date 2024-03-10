@@ -16,7 +16,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func initNode(firstProcess bool) {
+func initNode(isPrimaryProcess bool) {
 	var lostNodes []string
 
 	logger.Setup()
@@ -68,9 +68,9 @@ func initNode(firstProcess bool) {
 				for _, id := range lostNodes {
 					fmt.Println(id) // Using fmt.Println for printing each ID on a new line
 				}
-				checkpoint.DeleteInactiveElevatorsFromJSON(lostNodes, localFilname)
-				fsm.FsmJSONOrderAssigner(localFilname, localIP)
-				fsm.FsmRequestButtonPressV3(localFilname, localIP)
+				checkpoint.DeleteInactiveElevatorsFromJSON(lostNodes, localStateFile)
+				fsm.FsmJSONOrderAssigner(localStateFile, localIP)
+				fsm.FsmRequestButtonPressV3(localStateFile, localIP)
 			}
 
 		case msg := <-messageReceiveChannel:
