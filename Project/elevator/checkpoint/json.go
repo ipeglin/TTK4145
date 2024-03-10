@@ -219,9 +219,9 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 	return nil
 }
 
-func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInput, incomingFilename string)  {
+
+func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInput, incomingFilename string) {
 	localCombinedInput, _ := LoadCombinedInput(localFilname)
-	//otherCombinedInput, _ := LoadCombinedInput(incomingFilename)
 
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
@@ -231,20 +231,21 @@ func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInp
 			}
 		}
 	}
-	incommigElevatorName := strings.TrimSuffix(incomingFilename, ".json")
-	if _, exists := otherCombinedInput.CyclicCounter.States[incommigElevatorName]; exists{
-		if _, exists := localCombinedInput.CyclicCounter.States[incommigElevatorName]; !exists {
-			localCombinedInput.HRAInput.States[incommigElevatorName] = otherCombinedInput.HRAInput.States[incommigElevatorName]
-			localCombinedInput.CyclicCounter.States[incommigElevatorName] = otherCombinedInput.CyclicCounter.States[incommigElevatorName]
-		} else {
-			if otherCombinedInput.CyclicCounter.States[incommigElevatorName] > localCombinedInput.CyclicCounter.States[incommigElevatorName] {
-				localCombinedInput.HRAInput.States[incommigElevatorName] = otherCombinedInput.HRAInput.States[incommigElevatorName]
-				localCombinedInput.CyclicCounter.States[incommigElevatorName] = otherCombinedInput.CyclicCounter.States[incommigElevatorName]
 
+	incomingElevatorName := strings.TrimSuffix(incomingFilename, ".json")
+	if _, exists := otherCombinedInput.HRAInput.States[incomingElevatorName]; exists {
+		if _, exists := localCombinedInput.HRAInput.States[incomingElevatorName]; !exists {
+			localCombinedInput.HRAInput.States[incomingElevatorName] = otherCombinedInput.HRAInput.States[incomingElevatorName]
+			localCombinedInput.CyclicCounter.States[incomingElevatorName] = otherCombinedInput.CyclicCounter.States[incomingElevatorName]
+		} else {
+			if otherCombinedInput.CyclicCounter.States[incomingElevatorName] > localCombinedInput.CyclicCounter.States[incomingElevatorName] {
+				localCombinedInput.HRAInput.States[incomingElevatorName] = otherCombinedInput.HRAInput.States[incomingElevatorName]
+				localCombinedInput.CyclicCounter.States[incomingElevatorName] = otherCombinedInput.CyclicCounter.States[incomingElevatorName]
 			}
 		}
 	}
 }
+
 
 func RemoveDysfunctionalElevatorFromJSON(localFilname string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(localFilname)
