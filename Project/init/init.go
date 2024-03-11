@@ -73,7 +73,7 @@ func initNode(isFirstProcess bool) {
 			lostNodes = lostNodeAddresses // Update the lostNodes
 
 			checkpoint.DeleteInactiveElevatorsFromJSON(lostNodes, localStateFile)
-			fsm.FsmJSONOrderAssigner(localStateFile, localIP)
+			fsm.JSONOrderAssigner(localStateFile, localIP)
 			fsm.FsmRequestButtonPressV3(localStateFile, localIP)
 
 		case msg := <-messageReceiveChannel:
@@ -87,13 +87,13 @@ func initNode(isFirstProcess bool) {
 			if !checkpoint.IncomingDataIsCorrupt(incomingState) {
 				//checkpoint.SaveCombinedInput(incomingState, incomingFileName)
 				checkpoint.InncommingJSONHandeling(localStateFile, incomingState, msg.SenderId)
-				fsm.FsmJSONOrderAssigner(localStateFile, localIP)
+				fsm.JSONOrderAssigner(localStateFile, localIP)
 				fsm.FsmRequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
 			}
 
 		case online := <-onlineStatusChannel:
 			fsm.FsmRebootJSON(localIP, localStateFile)
-			fsm.FsmJSONOrderAssigner(localStateFile, localIP)
+			fsm.JSONOrderAssigner(localStateFile, localIP)
 			fsm.FsmRequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
 			logrus.Warn("Updated online status:", online)
 		}

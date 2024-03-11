@@ -180,7 +180,7 @@ func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorNa
 	checkpoint.UpdateJSONWhenNewOrderOccurs(filename, elevatorName, btnFloor, btn, &elevator)
 }
 
-func FsmJSONOrderAssigner(filename string, elevatorName string) {
+func JSONOrderAssigner(filename string, elevatorName string) {
 	checkpoint.JSONOrderAssigner(&elevator, filename, elevatorName)
 }
 
@@ -192,11 +192,10 @@ func FsmRequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName strin
 		//trenger å sjekke at alt dette er riktig
 		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
 		print("funksjonskall funker")
-		if btn == elevio.BCab{
+		if btn == elevio.BCab {
 			print("hei")
 			elevator.Requests[btnFloor][btn] = true
 		}
-		//fsmJSONOrderAssigner(filename, elevatorName)
 	}
 }
 

@@ -78,7 +78,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			//trenger ikke være her. assign kun ved innkomende mld da heis offline ikke skal assigne
 			print("hjelp noe må funke")
 			fsm.FsmRequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
-			fsm.FsmJSONOrderAssigner(elevatorStateFile, elevatorName)
+			fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
 			
 			fsm.FsmRequestButtonPressV3(elevatorStateFile, elevatorName)
 			fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
