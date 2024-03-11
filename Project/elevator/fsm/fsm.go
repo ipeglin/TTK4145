@@ -166,7 +166,7 @@ func FsmInitJson(filename string, ElevatorName string) {
 	}
 }
 
-func FsmUpdateJSON(elevatorName string, filename string) {
+func UpdateJSON(elevatorName string, filename string) {
 	checkpoint.UpdateJSON(elevator, filename, elevatorName)
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
@@ -184,7 +184,7 @@ func JSONOrderAssigner(filename string, elevatorName string) {
 	checkpoint.JSONOrderAssigner(&elevator, filename, elevatorName)
 }
 
-func FsmRequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
+func RequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
 	if requests.RequestsShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
 		timer.TimerStart(elevator.Config.DoorOpenDurationS)
 	} else {

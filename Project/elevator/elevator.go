@@ -75,27 +75,27 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 
 		case btnEvent := <-drv_buttons:
 			logrus.Debug("Button press detected: ", btnEvent)
-			fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
+			fsm.UpdateJSON(elevatorName, elevatorStateFile)
 			//trenger ikke være her. assign kun ved innkomende mld da heis offline ikke skal assigne
 			print("hjelp noe må funke")
-			fsm.FsmRequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
+			fsm.RequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
 			fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
 
 			fsm.RequestButtonPressV3(elevatorStateFile, elevatorName)
-			fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
+			fsm.UpdateJSON(elevatorName, elevatorStateFile)
 
 		case floor := <-drv_floors:
 			logrus.Debug("Floor sensor triggered: ", floor)
 			fsm.FloorArrival(floor, elevatorName, elevatorStateFile)
-			fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
+			fsm.UpdateJSON(elevatorName, elevatorStateFile)
 
 		default:
 			if timer.TimerTimedOut() { // Check for timeout only if no obstruction
 				logrus.Debug("Elevator timeout")
-				fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
+				fsm.UpdateJSON(elevatorName, elevatorStateFile)
 				timer.TimerStop()
 				fsm.FsmDoorTimeout(elevatorStateFile, elevatorName)
-				fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
+				fsm.UpdateJSON(elevatorName, elevatorStateFile)
 			}
 			time.Sleep(50 * time.Millisecond)
 		}
