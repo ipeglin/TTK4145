@@ -44,7 +44,7 @@ func Init(elevatorName string, isFirstProcess bool) {
 	go elevio.PollStopButton(drv_stop)
 	go elevio.MontitorMotorActivity(drv_motorActivity, 3.0)
 	go immobility.Immobility(drv_obstr_immob, drv_motorActivity, immob)
-	go fsm.FsmMakeCheckpointGo()
+	go fsm.MakeCheckpointGo()
 	// TODO: Add polling for direction and behaviour
 
 	// initial hinderance states
