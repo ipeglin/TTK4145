@@ -14,23 +14,13 @@ type ElevCheckpoint struct {
 	Timestamp time.Time
 }
 
-func toJSON(checkpoint ElevCheckpoint) ([]byte, error) {
-	return json.MarshalIndent(checkpoint, "", "  ")
-}
-
-func fromJSON(data []byte) ElevCheckpoint {
-	var checkpoint ElevCheckpoint
-	json.Unmarshal(data, &checkpoint)
-	return checkpoint
-}
-
 func SaveElevCheckpoint(e elev.Elevator, fileName string) error {
 	checkpoint :=
 		ElevCheckpoint{
 			e,
 			time.Now(),
 		}
-	jsonCP, err := toJSON(checkpoint)
+	jsonCP, err := json.MarshalIndent(checkpoint, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -43,6 +33,8 @@ func LoadElevCheckpoint(fileName string) (elev.Elevator, time.Time, error) {
 	if err != nil {
 		return elev.Elevator{}, time.Time{}, err
 	}
-	checkpoint := fromJSON(jsonCp)
+
+	var checkpoint ElevCheckpoint
+	json.Unmarshal(jsonCp, &checkpoint)
 	return checkpoint.State, checkpoint.Timestamp, nil
 }
