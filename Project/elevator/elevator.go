@@ -8,6 +8,7 @@ import (
 	"elevator/immobility"
 	"elevator/timer"
 	"time"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -65,11 +66,11 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			if immobile {
 				// BUG: THis occurs very late
 				checkpoint.RemoveDysfunctionalElevatorFromJSON(elevatorStateFile, elevatorName)
-				//we need to remove the request// clear them if we dont want to comlete orders twice. 
+				//we need to remove the request// clear them if we dont want to comlete orders twice.
 				//it is up to uss and we have functionality to do so
 			} else {
 				fsm.FsmRebootJSON(elevatorName, elevatorStateFile)
-				
+
 			}
 
 		case btnEvent := <-drv_buttons:
@@ -79,8 +80,8 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			print("hjelp noe må funke")
 			fsm.FsmRequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
 			fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
-			
-			fsm.FsmRequestButtonPressV3(elevatorStateFile, elevatorName)
+
+			fsm.RequestButtonPressV3(elevatorStateFile, elevatorName)
 			fsm.FsmUpdateJSON(elevatorName, elevatorStateFile)
 
 		case floor := <-drv_floors:

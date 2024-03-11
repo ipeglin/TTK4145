@@ -202,7 +202,7 @@ func FsmRequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName strin
 // etter denne func broadcaster vi.
 // så assigner vi
 // så kaller vi denne
-func FsmRequestButtonPressV3(filename string, elevatorName string) {
+func RequestButtonPressV3(filename string, elevatorName string) {
 	switch elevator.CurrentBehaviour {
 	case elev.EBIdle:
 		pair := requests.RequestsChooseDirection(elevator)
