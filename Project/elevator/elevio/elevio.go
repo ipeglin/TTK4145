@@ -170,18 +170,18 @@ func PollObstructionSwitch(receiver chan<- bool) {
 
 func MontitorMotorActivity(receiver chan<- bool, duration float64) {
 	timerActive := true
-	timerEndTimer := timer.GetWallTime() + duration
+	timerEndTimer := timer.GetCurrentTimeAsFloat() + duration
 	for {
 		time.Sleep(hwelevio.PollRate)
 		v := RequestFloor()
 		if v != -1 {
-			timerEndTimer = timer.GetWallTime() + duration
+			timerEndTimer = timer.GetCurrentTimeAsFloat() + duration
 			if !timerActive {
 				timerActive = true
 				receiver <- true
 			}
 		} else {
-			if timer.GetWallTime() > timerEndTimer {
+			if timer.GetCurrentTimeAsFloat() > timerEndTimer {
 				if timerActive {
 					timerActive = false
 					receiver <- false

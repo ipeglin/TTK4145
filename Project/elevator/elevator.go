@@ -93,7 +93,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			if timer.TimerTimedOut() { // Check for timeout only if no obstruction
 				logrus.Debug("Elevator timeout")
 				fsm.UpdateJSON(elevatorName, elevatorStateFile)
-				timer.TimerStop()
+				timer.Stop()
 				fsm.DoorTimeout(elevatorStateFile, elevatorName)
 				fsm.UpdateJSON(elevatorName, elevatorStateFile)
 			}
