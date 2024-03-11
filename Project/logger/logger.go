@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"fmt"
 	"io"
 	"logger/logfile"
 	"os"
@@ -59,11 +58,9 @@ func Setup() {
 	log.AddHook(&WriterHook{ // Send info and trace logs to stdout
 		Writer: os.Stdout,
 		LogLevels: []log.Level{
-			log.PanicLevel,
 			log.FatalLevel,
 			log.ErrorLevel,
 			log.InfoLevel,
-			log.TraceLevel,
 		},
 	})
 }
