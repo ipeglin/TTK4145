@@ -61,6 +61,7 @@ func Setup() {
 			log.FatalLevel,
 			log.ErrorLevel,
 			log.InfoLevel,
+			log.WarnLevel,
 		},
 	})
 }

@@ -67,14 +67,14 @@ func Init(elevatorName string, isFirstProcess bool) {
 			if immobile {
 				// BUG: THis occurs very late
 				checkpoint.RemoveDysfunctionalElevatorFromJSON(elevatorStateFile, elevatorName)
-				//we need to remove the request// clear them if we dont want to comlete orders twice. 
+				//we need to remove the request// clear them if we dont want to comlete orders twice.
 				//it is up to uss and we have functionality to do so
 			} else {
 				fsm.RebootJSON(elevatorName, elevatorStateFile)
 			}
 
 		case btnEvent := <-drv_buttons:
-			logrus.Info("Button press detected: ", btnEvent)
+			logrus.Debug("Button press detected: ", btnEvent)
 			fsm.UpdateJSON(elevatorName, elevatorStateFile)
 			//trenger ikke være her. assign kun ved innkomende mld da heis offline ikke skal assigne
 			fsm.RequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
