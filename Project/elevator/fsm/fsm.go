@@ -120,7 +120,6 @@ func MakeCheckpoint() {
 		checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 		time.Sleep(50 * time.Millisecond)
 	}
-
 }
 
 func ResumeAtLatestCheckpoint(floor int) {
@@ -134,10 +133,6 @@ func ResumeAtLatestCheckpoint(floor int) {
 		timer.Start(elev.DoorOpenDurationSConfig)
 		outputDevice.DoorLight(true)
 	}
-}
-
-func LoadLatestCheckpoint() {
-	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
 }
 
 // Json fra her
