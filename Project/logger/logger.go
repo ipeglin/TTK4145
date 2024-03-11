@@ -36,7 +36,7 @@ func Setup() {
 
 	file := logfile.CreateLogFile()
 
-	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE, 0755)
+	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
 	if err != nil {
 		log.Fatal("Failed to create log file. ", err)
 	}

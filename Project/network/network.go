@@ -25,7 +25,7 @@ type Message struct {
 func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan Message, responseChannel chan<- Message, onlineStatusChannel chan<- bool, ipChannel chan<- string) {
 	nodeIP, err := local.GetIP()
 	if err != nil {
-		logrus.Warn("ERROR: Unable to get the IP address")
+		logrus.Debug("Unable to get the IP address")
 	}
 
 	ipChannel <- nodeIP // pass the IP address to main process
