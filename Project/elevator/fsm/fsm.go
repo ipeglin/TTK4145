@@ -115,16 +115,12 @@ func ToggleObstruction() {
 	}
 }
 
-func MakeCheckpointGo() {
+func MakeCheckpoint() {
 	for {
 		checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 		time.Sleep(50 * time.Millisecond)
 	}
 
-}
-
-func MakeCheckpoint() {
-	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
 func ResumeAtLatestCheckpoint(floor int) {
