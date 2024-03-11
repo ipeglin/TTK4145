@@ -153,8 +153,8 @@ func UpdateJSON(elevatorName string, filename string) {
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
-func UpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
-	checkpoint.UpdateJSONWhenNewOrderOccurs(filename, elevatorName, btnFloor, btn, &elevator)
+func UpdateJSONOnNewOrder(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
+	checkpoint.UpdateJSONOnNewOrder(filename, elevatorName, btnFloor, btn, &elevator)
 }
 
 func JSONOrderAssigner(filename string, elevatorName string) {
@@ -167,7 +167,7 @@ func RequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, 
 	} else {
 		//elevator.Requests[btnFloor][btn] = true
 		//trenger å sjekke at alt dette er riktig
-		UpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
+		UpdateJSONOnNewOrder(btnFloor, btnType, elevatorName, filename)
 		//JSONOrderAssigner(filename, elevatorName)
 	}
 }
@@ -181,6 +181,7 @@ func RequestButtonPressV3(filename string, elevatorName string) {
 		pair := requests.RequestsChooseDirection(elevator)
 		elevator.Dirn = pair.Dirn
 		elevator.CurrentBehaviour = pair.Behaviour
+
 		switch pair.Behaviour {
 		case elev.EBDoorOpen:
 			outputDevice.DoorLight(true)

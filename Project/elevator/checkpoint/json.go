@@ -86,7 +86,7 @@ func UpdateJSONWhenHallOrderIsComplete(el elev.Elevator, filename string, elevat
 	SaveCombinedInput(combinedInput, filename)
 }
 
-func UpdateJSONWhenNewOrderOccurs(filename string, elevatorName string, btnFloor int, btn elevio.Button, el *elev.Elevator) {
+func UpdateJSONOnNewOrder(filename string, elevatorName string, btnFloor int, btn elevio.Button, el *elev.Elevator) {
 	combinedInput, _ := LoadCombinedInput(filename)
 	combinedInput.CyclicCounter = updateCyclicCounterWhenNewOrderOccurs(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
 	combinedInput.HRAInput = updateHRAInputWhenNewOrderOccurs(combinedInput.HRAInput, elevatorName, btnFloor, btn, el)
