@@ -27,7 +27,7 @@ func UnlockFile(file *os.File) error {
 	return closeErr
 }
 
-func SaveCheckpoint(data []byte, fileName string) error {
+func WriteToFile(data []byte, fileName string) error {
 
 	osFile, err := LockFile(fileName)
 	if err != nil {
@@ -43,7 +43,7 @@ func SaveCheckpoint(data []byte, fileName string) error {
 	return nil
 }
 
-func LoadCheckpoint(fileName string) ([]byte, error) {
+func ReadFromFile(fileName string) ([]byte, error) {
 	osFile, err := LockFile(fileName) // Lock the file for reading
 	if err != nil {
 		return nil, err

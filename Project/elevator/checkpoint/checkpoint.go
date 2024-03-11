@@ -34,12 +34,12 @@ func SaveElevCheckpoint(e elev.Elevator, fileName string) error {
 	if err != nil {
 		return err
 	}
-	filehandler.SaveCheckpoint(jsonCP, fileName)
+	filehandler.WriteToFile(jsonCP, fileName)
 	return nil
 }
 
 func LoadElevCheckpoint(fileName string) (elev.Elevator, time.Time, error) {
-	jsonCp, err := filehandler.LoadCheckpoint(fileName)
+	jsonCp, err := filehandler.ReadFromFile(fileName)
 	if err != nil {
 		return elev.Elevator{}, time.Time{}, err
 	}
