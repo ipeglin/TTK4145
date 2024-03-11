@@ -30,15 +30,15 @@ func CreateLogFile() string {
 
 	timestamp := getCurrentTimeStamp()
 	filename := fmt.Sprintf("runtime_%s.log", timestamp)
-	filePath := fmt.Sprintf("%s/runtime_log/%s", rootPath, filename)
+	path := fmt.Sprintf("%s/runtime_log/%s", rootPath, filename)
 
-	os.MkdirAll(filepath.Dir(filePath), 0755)
-	file, err := os.Create(filePath)
+	os.MkdirAll(filepath.Dir(path), 0755)
+	file, err := os.Create(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
 	log.Info("Created log file: ", filename)
 
-	return filename
+	return path
 }
