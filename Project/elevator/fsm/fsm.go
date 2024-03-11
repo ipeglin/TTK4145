@@ -108,7 +108,7 @@ func DoorTimeout(filename string, elevatorName string) {
 }
 
 func ToggleObstruction() {
-	if !timer.TimerInf {
+	if !timer.IsInfinite {
 		timer.StartInfiniteTimer()
 		if elevator.CurrentBehaviour == elev.EBIdle {
 			outputDevice.DoorLight(true)

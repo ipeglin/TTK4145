@@ -13,7 +13,7 @@ func GetCurrentTimeAsFloat() float64 {
 
 var endTime float64
 var isActive bool
-var isInfinite bool
+var IsInfinite bool
 
 func Start(duration float64) {
 	endTime = GetCurrentTimeAsFloat() + duration
@@ -21,12 +21,12 @@ func Start(duration float64) {
 }
 
 func StartInfiniteTimer() {
-	isInfinite = true
+	IsInfinite = true
 	isActive = true
 }
 
 func StopInfiniteTimer() {
-	isInfinite = false
+	IsInfinite = false
 	isActive = false
 }
 
@@ -35,5 +35,5 @@ func Stop() {
 }
 
 func TimerTimedOut() bool {
-	return (!isInfinite && isActive && GetCurrentTimeAsFloat() > endTime)
+	return (!IsInfinite && isActive && GetCurrentTimeAsFloat() > endTime)
 }
