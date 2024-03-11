@@ -150,7 +150,7 @@ func LoadLatestCheckpoint() {
 }
 
 // Json fra her
-func FsmInitJson(filename string, ElevatorName string) {
+func InitJson(filename string, ElevatorName string) {
 	// Gjør endringer på combinedInput her
 	print(filename)
 	err := os.Remove(filename)

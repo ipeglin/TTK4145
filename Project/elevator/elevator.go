@@ -22,7 +22,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			// elevator initialised between floors
 			fsm.MoveDownToFloor()
 		}
-		fsm.FsmInitJson(elevatorStateFile, elevatorName)
+		fsm.InitJson(elevatorStateFile, elevatorName)
 	} else {
 		floor := elevio.InputDevice.FloorSensor()
 		fsm.ResumeAtLatestCheckpoint(floor)
