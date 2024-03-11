@@ -145,7 +145,7 @@ func ResumeAtLatestCheckpoint(floor int) {
 	}
 }
 
-func FsmLoadLatestCheckpoint() {
+func LoadLatestCheckpoint() {
 	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
 }
 
