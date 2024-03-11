@@ -15,7 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func initNode(isPrimaryProcess bool) {
+func initNode(isFirstProcess bool) {
 	var lostNodes []string
 	var localStateFile string
 
@@ -34,7 +34,7 @@ func initNode(isPrimaryProcess bool) {
 	localIP := <-ipChannel
 	localStateFile = localIP + ".json"
 
-	go elevator.Init(localIP, isPrimaryProcess)
+	go elevator.Init(localIP, isFirstProcess)
 
 	// broadcast state
 	go func() {
@@ -50,16 +50,16 @@ func initNode(isPrimaryProcess bool) {
 	for {
 		select {
 		case reg := <-nodeOverviewChannel:
-			//hvis du går fra å være offline til online legges du ikke til. 
-			// må fikses 
-			
+			//hvis du går fra å være offline til online legges du ikke til.
+			// må fikses
+
 			logrus.Info("Known nodes:", reg.Nodes)
 			if len(reg.Lost) <= 0 {
 				logrus.Info("No lost nodes")
 				lostNodes = []string{}
 				continue
 			}
-			
+
 			logrus.Warn("Lost nodes:", reg.Lost)
 
 			// extract ip from node names
