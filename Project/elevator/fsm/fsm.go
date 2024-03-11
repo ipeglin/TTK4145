@@ -23,7 +23,7 @@ func init() {
 	outputDevice = elevio.ElevioGetOutputDevice()
 
 	localStateFile = elevatorName + ".json"
-
+	FsmInitJson(localStateFile, elevatorName) 
 	//Burde dette gå et annet sted?
 	setAllLights()
 	elevio.RequestDoorOpenLamp(false)
@@ -130,7 +130,6 @@ func ResumeAtLatestCheckpoint(floor int) {
 // TODO! JSON code should be a separate module or package. NOT split between fsm and checkpoint packages
 func InitJson(filename string, ElevatorName string) {
 	// Gjør endringer på combinedInput her
-	print(filename)
 	err := os.Remove(filename)
 	if err != nil {
 		logrus.Error("Failed to remove file:", err)
@@ -149,6 +148,12 @@ func UpdateJSON(elevatorName string, filename string) {
 	checkpoint.SetElevatorCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
+// TODO: Improve func name
+func RebootJSON(elevatorName string, filename string) {
+	checkpoint.RebootJSON(elevator, filename, elevatorName)
+	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
+}
+
 // TODO! Could just use checkpoint func directly
 func UpdateJSONOnNewOrder(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
 	checkpoint.UpdateJSONOnNewOrder(filename, elevatorName, btnFloor, btn, &elevator)
@@ -160,11 +165,15 @@ func JSONOrderAssigner(filename string, elevatorName string) {
 }
 
 // TODO! Rewrite func name. This makes no sense
-func RequestButtonPressV2(btnFloor int, btnType elevio.Button, elevatorName string, filename string) {
-	if requests.RequestsShouldClearImmediately(elevator, btnFloor, btnType) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
+// TODO: Change btn to btnType
+func RequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
+	if requests.RequestsShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
 		timer.Start(elevator.Config.DoorOpenDurationS)
 	} else {
-		UpdateJSONOnNewOrder(btnFloor, btnType, elevatorName, filename)
+		UpdateJSONOnNewOrder(btnFloor, btn, elevatorName, filename)
+		if btn == elevio.BCab {
+			elevator.Requests[btnFloor][btn] = true
+		}
 	}
 }
 

@@ -22,7 +22,7 @@ func Init(elevatorName string, isFirstProcess bool) {
 			// elevator initialised between floors
 			fsm.MoveDownToFloor()
 		}
-		fsm.InitJson(elevatorStateFile, elevatorName)
+		// fsm.InitJson(elevatorStateFile, elevatorName)
 	} else {
 		floor := elevio.InputDevice.FloorSensor()
 		fsm.ResumeAtLatestCheckpoint(floor)
@@ -66,15 +66,16 @@ func Init(elevatorName string, isFirstProcess bool) {
 				// BUG: THis occurs very late
 				checkpoint.RemoveDysfunctionalElevatorFromJSON(elevatorStateFile, elevatorName)
 			} else {
-				fsm.UpdateJSON(elevatorName, elevatorStateFile)
+				fsm.RebootJSON(elevatorName, elevatorStateFile)
 			}
 
 		case btnEvent := <-drv_buttons:
-			logrus.Debug("Button press detected: ", btnEvent)
+			logrus.Info("Button press detected: ", btnEvent)
 			fsm.UpdateJSON(elevatorName, elevatorStateFile)
 			//trenger ikke være her. assign kun ved innkomende mld da heis offline ikke skal assigne
 			fsm.RequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
 			fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
+
 			fsm.RequestButtonPressV3(elevatorStateFile, elevatorName)
 			fsm.UpdateJSON(elevatorName, elevatorStateFile)
 

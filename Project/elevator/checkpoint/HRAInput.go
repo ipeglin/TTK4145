@@ -46,9 +46,8 @@ func updateHRAInput(hraInput HRAInput, el elev.Elevator, elevatorName string) HR
 		hraInput.HallRequests[f][0] = hraInput.HallRequests[f][0] || el.Requests[f][elevio.BHallUp]
 		hraInput.HallRequests[f][1] = hraInput.HallRequests[f][1] || el.Requests[f][elevio.BHallDown]
 	}
-
+	
 	behavior, direction, cabRequests := convertLocalElevatorState(el)
-
 	hraInput.States[elevatorName] = HRAElevState{
 		Behavior:    behavior,
 		Floor:       el.CurrentFloor,
@@ -56,7 +55,8 @@ func updateHRAInput(hraInput HRAInput, el elev.Elevator, elevatorName string) HR
 		CabRequests: cabRequests,
 	}
 	return hraInput
-}
+	}
+
 
 func updateHRAInputWhenOrderIsComplete(hraInput HRAInput, el elev.Elevator, elevatorName string, btn_floor int, btn_type elevio.Button) HRAInput {
 	switch btn_type {
@@ -119,7 +119,7 @@ func updateHRAInputWhenNewOrderOccurs(hraInput HRAInput, elevatorName string, bt
 	case elevio.BCab:
 		hraInput.States[elevatorName].CabRequests[btnFloor] = true
 		//denne burde ikke endres inne i her, men krever ellers så mange if setninger i kode. tenk smart løsning
-		localElevator.Requests[btnFloor][btn] = true
+		//localElevator.Requests[btnFloor][btn] = true
 	}
 	return hraInput
 }

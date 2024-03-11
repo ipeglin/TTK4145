@@ -89,6 +89,8 @@ func initNode(isPrimaryProcess bool) {
 			}
 
 		case online := <-onlineStatusChannel:
+			//fsm.FsmJSONOrderAssigner(localStateFile, localIP)
+			//fsm.FsmRequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
 			logrus.Warn("Updated online status:", online)
 		}
 	}

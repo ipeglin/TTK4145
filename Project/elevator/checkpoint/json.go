@@ -70,6 +70,16 @@ func LoadCombinedInput(filename string) (CombinedInput, error) {
 
 func UpdateJSON(el elev.Elevator, filename string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(filename)
+	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
+		combinedInput.HRAInput = updateHRAInput(combinedInput.HRAInput, el, elevatorName)
+	}
+	combinedInput.CyclicCounter = updateCyclicCounterInput(combinedInput.CyclicCounter, elevatorName)
+	SaveCombinedInput(combinedInput, filename)
+}
+
+// TODO: Improve func name
+func RebootJSON(el elev.Elevator, filename string, elevatorName string) {
+	combinedInput, _ := LoadCombinedInput(filename)
 	combinedInput.HRAInput = updateHRAInput(combinedInput.HRAInput, el, elevatorName)
 	combinedInput.CyclicCounter = updateCyclicCounterInput(combinedInput.CyclicCounter, elevatorName)
 	SaveCombinedInput(combinedInput, filename)
@@ -77,44 +87,58 @@ func UpdateJSON(el elev.Elevator, filename string, elevatorName string) {
 
 func UpdateJSONOnCompleteHallOrder(el elev.Elevator, filename string, elevatorName string, btn_floor int, btn_type elevio.Button) {
 	combinedInput, _ := LoadCombinedInput(filename)
+	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
 	combinedInput.HRAInput = updateHRAInputWhenOrderIsComplete(combinedInput.HRAInput, el, elevatorName, btn_floor, btn_type)
 	combinedInput.CyclicCounter = updateCyclicCounterWhenOrderIsComplete(combinedInput.CyclicCounter, elevatorName, btn_floor, btn_type)
+	}
 	SaveCombinedInput(combinedInput, filename)
 }
 
 func UpdateJSONOnNewOrder(filename string, elevatorName string, btnFloor int, btn elevio.Button, el *elev.Elevator) {
 	combinedInput, _ := LoadCombinedInput(filename)
-	combinedInput.CyclicCounter = updateCyclicCounterWhenNewOrderOccurs(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
-	combinedInput.HRAInput = updateHRAInputWhenNewOrderOccurs(combinedInput.HRAInput, elevatorName, btnFloor, btn, el)
+	
+	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
+		combinedInput.CyclicCounter = updateCyclicCounterWhenNewOrderOccurs(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
+		combinedInput.HRAInput = updateHRAInputWhenNewOrderOccurs(combinedInput.HRAInput, elevatorName, btnFloor, btn, el)
+	}
 	SaveCombinedInput(combinedInput, filename)
 }
 
 func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) {
-	combinedInput, _ := LoadCombinedInput(filename)
-
-	jsonBytes, err := json.Marshal(combinedInput.HRAInput)
+	combinedInput, err := LoadCombinedInput(filename)
 	if err != nil {
-		fmt.Printf("Failed to marshal HRAInput: %v\n", err)
+		fmt.Printf("Failed to load combined input: %v\n", err)
 		return
 	}
 
-	ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
-	if err != nil {
-		fmt.Println("exec.Command error: ", err)
-		fmt.Println(string(ret))
-		return
-	}
+	// Check if HRAInput.States is not empty
+	if len(combinedInput.HRAInput.States) > 0 {
+		jsonBytes, err := json.Marshal(combinedInput.HRAInput)
+		if err != nil {
+			fmt.Printf("Failed to marshal HRAInput: %v\n", err)
+			return
+		}
 
-	output := new(map[string][][2]bool)
-	err = json.Unmarshal(ret, output)
-	if err != nil {
-		fmt.Println("json.Unmarshal error: ", err)
-		return
-	}
+		ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
+		if err != nil {
+			fmt.Printf("exec.Command error: %v\nOutput: %s\n", err, string(ret))
+			return
+		}
 
-	for floor := 0; floor < elevio.NFloors; floor++ {
-		el.Requests[floor][elevio.BHallUp] = (*output)[elevatorName][floor][0]
-		el.Requests[floor][elevio.BHallDown] = (*output)[elevatorName][floor][1]
+		output := make(map[string][][2]bool) // Changed from using new to make for clarity
+		if err := json.Unmarshal(ret, &output); err != nil {
+			fmt.Printf("json.Unmarshal error: %v\n", err)
+			return
+		}
+
+		for floor := 0; floor < elevio.NFloors; floor++ {
+			if orders, ok := output[elevatorName]; ok && floor < len(orders) {
+				el.Requests[floor][elevio.BHallUp] = orders[floor][0]
+				el.Requests[floor][elevio.BHallDown] = orders[floor][1]
+			}
+		}
+	} else {
+		fmt.Println("HRAInput.States is empty, skipping order assignment")
 	}
 }
 
