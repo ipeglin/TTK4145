@@ -28,7 +28,6 @@ func UnlockFile(file *os.File) error {
 }
 
 func WriteToFile(data []byte, fileName string) error {
-
 	osFile, err := LockFile(fileName)
 	if err != nil {
 		return err
