@@ -15,7 +15,7 @@ type NetworkNodeRegistry struct {
 }
 
 const interval = 150 * time.Millisecond
-const timeout = 5000 * time.Millisecond
+const timeout = 500 * time.Millisecond // should be at least 2*interval
 
 func Sender(port int, id string, enableTransmit <-chan bool) {
 	conn := conn.DialBroadcastUDP(port)
