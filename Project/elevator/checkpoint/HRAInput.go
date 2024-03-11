@@ -20,7 +20,6 @@ type HRAInput struct {
 }
 
 func initializeHRAInput(el elev.Elevator, elevatorName string) HRAInput {
-	// Create a default HRAInput. Modify this according to your requirements.
 	hraInput := HRAInput{
 		HallRequests: make([][2]bool, elevio.NFloors),
 		States:       make(map[string]HRAElevState),
@@ -57,6 +56,17 @@ func updateHRAInput(hraInput HRAInput, el elev.Elevator, elevatorName string) HR
 	return hraInput
 	}
 
+func rebootHRAInput(hraInput HRAInput, el elev.Elevator, elevatorName string) HRAInput {
+	behavior, direction, cabRequests := convertLocalElevatorState(el)
+	hraInput.States[elevatorName] = HRAElevState{
+		Behavior:    behavior,
+		Floor:       el.CurrentFloor,
+		Direction:   direction,
+		CabRequests: cabRequests,
+	}
+	return hraInput
+}
+
 
 func updateHRAInputWhenOrderIsComplete(hraInput HRAInput, el elev.Elevator, elevatorName string, btn_floor int, btn_type elevio.Button) HRAInput {
 	switch btn_type {
@@ -79,6 +89,7 @@ func updateHRAInputWhenOrderIsComplete(hraInput HRAInput, el elev.Elevator, elev
 	return hraInput
 }
 
+//HAR SIMEN FUNC FOR DETTE ALLERDE? 
 func convertLocalElevatorState(localElevator elev.Elevator) (string, string, []bool) {
 	// Convert behavior
 	var behavior string
@@ -118,8 +129,6 @@ func updateHRAInputWhenNewOrderOccurs(hraInput HRAInput, elevatorName string, bt
 		hraInput.HallRequests[btnFloor][1] = true
 	case elevio.BCab:
 		hraInput.States[elevatorName].CabRequests[btnFloor] = true
-		//denne burde ikke endres inne i her, men krever ellers så mange if setninger i kode. tenk smart løsning
-		//localElevator.Requests[btnFloor][btn] = true
 	}
 	return hraInput
 }

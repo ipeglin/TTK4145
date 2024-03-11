@@ -8,6 +8,7 @@ import (
 	"elevator/timer"
 	"network/local"
 	"os"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -111,16 +112,25 @@ func ToggleObstruction() {
 	}
 }
 
+func MakeCheckpointGo() {
+	for {
+		checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
+		time.Sleep(50 * time.Millisecond)
+	}
+}
+
 func MakeCheckpoint() {
-	checkpoint.SetElevatorCheckpoint(elevator, checkpoint.FilenameCheckpoint)
+	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
 func ResumeAtLatestCheckpoint(floor int) {
 	logrus.Debug("Resuming at last checkpoint at floor: ", floor)
 	elevator, _, _ = checkpoint.LoadElevatorCheckpoint(checkpoint.FilenameCheckpoint)
 	setAllLights()
-	outputDevice.MotorDirection(elevator.Dirn)
-
+	//fmt.Print(elevator.Dirn)
+	if elevator.Dirn != elevio.DirStop && floor == -1 {
+		outputDevice.MotorDirection(elevator.Dirn)
+	}
 	if floor != -1 {
 		timer.Start(elev.DoorOpenDurationSConfig)
 		outputDevice.DoorLight(true)

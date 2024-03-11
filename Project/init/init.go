@@ -50,11 +50,15 @@ func initNode(isPrimaryProcess bool) {
 	for {
 		select {
 		case reg := <-nodeOverviewChannel:
+			//hvis du går fra å være offline til online legges du ikke til. 
+			// må fikses 
+			
 			logrus.Info("Known nodes:", reg.Nodes)
 			if len(reg.Lost) <= 0 {
 				lostNodes = []string{}
 				continue
 			}
+			
 			logrus.Warn("Lost nodes:", reg.Lost)
 
 			// extract ip from node names
@@ -75,21 +79,27 @@ func initNode(isPrimaryProcess bool) {
 			// TODO: handle incoming messages
 			logrus.Debug("Received message from ", msg.SenderId, ": ", msg.Payload)
 
-			externalStateFile := msg.SenderId + ".json"
 			incomingState := msg.Payload
-
 			// TODO: Reassign orders
 
 			// update and remove list nodes
 			if !checkpoint.IncomingDataIsCorrupt(incomingState) {
+<<<<<<< HEAD
 				checkpoint.IncomingJSONHandeling(localStateFile, externalStateFile, incomingState, lostNodes)
 				fsm.JSONOrderAssigner(localStateFile, localIP)
 				fsm.RequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
+=======
+				//checkpoint.SaveCombinedInput(incomingState, incomingFileName)
+				checkpoint.IncomingJSONHandling(localStateFile, incomingState, msg.SenderId)
+				fsm.JSONOrderAssigner(localStateFile, localIP)
+				fsm.RequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
+>>>>>>> sundag
 			}
 
 		case online := <-onlineStatusChannel:
-			//fsm.FsmJSONOrderAssigner(localStateFile, localIP)
-			//fsm.FsmRequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
+			fsm.RebootJSON(localIP, localStateFile)
+			fsm.JSONOrderAssigner(localStateFile, localIP)
+			fsm.RequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
 			logrus.Warn("Updated online status:", online)
 		}
 	}
