@@ -149,12 +149,12 @@ func RequestsClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName 
 		default:
 			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
 			e.Requests[e.CurrentFloor][elevio.BHallDown] = false
-			
-	}
+
+		}
 	}
 	for btn, wasPressed := range beforeClear {
 		if wasPressed && !e.Requests[e.CurrentFloor][btn] {
-			checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,btn)
+			checkpoint.UpdateJSONOnCompletedHallOrder(e, filename, elevatorName, e.CurrentFloor, btn)
 		}
 	}
 	return e

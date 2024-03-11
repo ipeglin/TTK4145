@@ -88,7 +88,7 @@ func RebootJSON(el elev.Elevator, filename string, elevatorName string) {
 	SaveCombinedInput(combinedInput, filename)
 }
 
-func UpdateJSONWhenHallOrderIsComplete(el elev.Elevator, filename string, elevatorName string, btn_floor int, btn_type elevio.Button) {
+func UpdateJSONOnCompletedHallOrder(el elev.Elevator, filename string, elevatorName string, btn_floor int, btn_type elevio.Button) {
 	combinedInput, _ := LoadCombinedInput(filename)
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
 		combinedInput.HRAInput = updateHRAInputWhenOrderIsComplete(combinedInput.HRAInput, el, elevatorName, btn_floor, btn_type)
