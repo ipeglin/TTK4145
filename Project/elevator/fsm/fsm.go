@@ -171,7 +171,7 @@ func FsmUpdateJSON(elevatorName string, filename string) {
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
-func FsmRebootJSON(elevatorName string, filename string) {
+func RebootJSON(elevatorName string, filename string) {
 	checkpoint.RebootJSON(elevator, filename, elevatorName)
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
@@ -202,7 +202,7 @@ func FsmRequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName strin
 // etter denne func broadcaster vi.
 // så assigner vi
 // så kaller vi denne
-func FsmRequestButtonPressV3(filename string, elevatorName string) {
+func RequestButtonPressV3(filename string, elevatorName string) {
 	switch elevator.CurrentBehaviour {
 	case elev.EBIdle:
 		pair := requests.RequestsChooseDirection(elevator)
