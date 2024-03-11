@@ -97,7 +97,7 @@ func UpdateJSONOnCompletedHallOrder(el elev.Elevator, filename string, elevatorN
 	SaveCombinedInput(combinedInput, filename)
 }
 
-func UpdateJSONWhenNewOrderOccurs(filename string, elevatorName string, btnFloor int, btn elevio.Button, el *elev.Elevator) {
+func UpdateJSONOnNewOrder(filename string, elevatorName string, btnFloor int, btn elevio.Button, el *elev.Elevator) {
 	combinedInput, _ := LoadCombinedInput(filename)
 
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {

@@ -171,13 +171,13 @@ func FsmUpdateJSON(elevatorName string, filename string) {
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
-func RebootJSON(elevatorName string, filename string) {
+func FsmRebootJSON(elevatorName string, filename string) {
 	checkpoint.RebootJSON(elevator, filename, elevatorName)
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
-func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
-	checkpoint.UpdateJSONWhenNewOrderOccurs(filename, elevatorName, btnFloor, btn, &elevator)
+func UpdateJSONOnNewOrder(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
+	checkpoint.UpdateJSONOnNewOrder(filename, elevatorName, btnFloor, btn, &elevator)
 }
 
 func JSONOrderAssigner(filename string, elevatorName string) {
@@ -190,7 +190,7 @@ func FsmRequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName strin
 	} else {
 		//elevator.Requests[btnFloor][btn] = true
 		//trenger å sjekke at alt dette er riktig
-		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
+		UpdateJSONOnNewOrder(btnFloor, btn, elevatorName, filename)
 		print("funksjonskall funker")
 		if btn == elevio.BCab {
 			print("hei")
@@ -202,7 +202,7 @@ func FsmRequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName strin
 // etter denne func broadcaster vi.
 // så assigner vi
 // så kaller vi denne
-func RequestButtonPressV3(filename string, elevatorName string) {
+func FsmRequestButtonPressV3(filename string, elevatorName string) {
 	switch elevator.CurrentBehaviour {
 	case elev.EBIdle:
 		pair := requests.RequestsChooseDirection(elevator)
