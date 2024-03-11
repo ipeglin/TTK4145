@@ -2,6 +2,7 @@ package checkpoint
 
 import (
 	"elevator/elev"
+	"elevator/filehandler"
 	"encoding/json"
 	"time"
 )
@@ -35,12 +36,12 @@ func SetElevatorCheckpoint(e elev.Elevator, fileName string) error {
 	if err != nil {
 		return err
 	}
-	filehandler.writeToFile(jsonCP, fileName)
+	filehandler.WriteToFile(jsonCP, fileName)
 	return nil
 }
 
 func LoadElevatorCheckpoint(fileName string) (elev.Elevator, time.Time, error) {
-	jsonCp, err := filehandler.readFromFile(fileName)
+	jsonCp, err := filehandler.ReadFromFile(fileName)
 	if err != nil {
 		return elev.Elevator{}, time.Time{}, err
 	}
