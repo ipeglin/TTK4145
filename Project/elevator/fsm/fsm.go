@@ -171,7 +171,7 @@ func FsmUpdateJSON(elevatorName string, filename string) {
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
-func FsmRebootJSON(elevatorName string, filename string) {
+func RebootJSON(elevatorName string, filename string) {
 	checkpoint.RebootJSON(elevator, filename, elevatorName)
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
