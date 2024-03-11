@@ -120,7 +120,7 @@ func ToggleObstruction() {
 	}
 }
 
-func FsmMakeCheckpointGo() {
+func MakeCheckpointGo() {
 	for {
 		checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 		time.Sleep(50 * time.Millisecond)
@@ -128,7 +128,7 @@ func FsmMakeCheckpointGo() {
 
 }
 
-func FsmMakeCheckpoint() {
+func MakeCheckpoint() {
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
