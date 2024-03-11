@@ -69,6 +69,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 				//it is up to uss and we have functionality to do so
 			} else {
 				fsm.FsmRebootJSON(elevatorName, elevatorStateFile)
+				fsm.FsmJSONOrderAssigner(elevatorStateFile, elevatorName)
 				
 			}
 
