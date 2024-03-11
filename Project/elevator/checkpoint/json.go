@@ -9,6 +9,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 // CombinedInput kombinerer HRAInput og CyclicCounterInput.
@@ -88,15 +90,15 @@ func RebootJSON(el elev.Elevator, filename string, elevatorName string) {
 func UpdateJSONOnCompleteHallOrder(el elev.Elevator, filename string, elevatorName string, btn_floor int, btn_type elevio.Button) {
 	combinedInput, _ := LoadCombinedInput(filename)
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
-	combinedInput.HRAInput = updateHRAInputWhenOrderIsComplete(combinedInput.HRAInput, el, elevatorName, btn_floor, btn_type)
-	combinedInput.CyclicCounter = updateCyclicCounterWhenOrderIsComplete(combinedInput.CyclicCounter, elevatorName, btn_floor, btn_type)
+		combinedInput.HRAInput = updateHRAInputWhenOrderIsComplete(combinedInput.HRAInput, el, elevatorName, btn_floor, btn_type)
+		combinedInput.CyclicCounter = updateCyclicCounterWhenOrderIsComplete(combinedInput.CyclicCounter, elevatorName, btn_floor, btn_type)
 	}
 	SaveCombinedInput(combinedInput, filename)
 }
 
 func UpdateJSONOnNewOrder(filename string, elevatorName string, btnFloor int, btn elevio.Button, el *elev.Elevator) {
 	combinedInput, _ := LoadCombinedInput(filename)
-	
+
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
 		combinedInput.CyclicCounter = updateCyclicCounterWhenNewOrderOccurs(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
 		combinedInput.HRAInput = updateHRAInputWhenNewOrderOccurs(combinedInput.HRAInput, elevatorName, btnFloor, btn, el)
@@ -107,7 +109,7 @@ func UpdateJSONOnNewOrder(filename string, elevatorName string, btnFloor int, bt
 func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) {
 	combinedInput, err := LoadCombinedInput(filename)
 	if err != nil {
-		fmt.Printf("Failed to load combined input: %v\n", err)
+		logrus.Error(fmt.Sprintf("Failed to load combined input: %v\n", err))
 		return
 	}
 
@@ -115,19 +117,19 @@ func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) 
 	if len(combinedInput.HRAInput.States) > 0 {
 		jsonBytes, err := json.Marshal(combinedInput.HRAInput)
 		if err != nil {
-			fmt.Printf("Failed to marshal HRAInput: %v\n", err)
+			logrus.Error(fmt.Sprintf("Failed to marshal HRAInput: %v\n", err))
 			return
 		}
 
 		ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
 		if err != nil {
-			fmt.Printf("exec.Command error: %v\nOutput: %s\n", err, string(ret))
+			logrus.Error(fmt.Sprintf("exec.Command error: %v\nOutput: %s\n", err, string(ret)))
 			return
 		}
 
 		output := make(map[string][][2]bool) // Changed from using new to make for clarity
 		if err := json.Unmarshal(ret, &output); err != nil {
-			fmt.Printf("json.Unmarshal error: %v\n", err)
+			logrus.Error(fmt.Sprintf("json.Unmarshal error: %v\n", err))
 			return
 		}
 
@@ -138,7 +140,7 @@ func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) 
 			}
 		}
 	} else {
-		fmt.Println("HRAInput.States is empty, skipping order assignment")
+		logrus.Debug("HRAInput.States is empty, skipping order assignment")
 	}
 }
 
@@ -200,17 +202,17 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 func IncomingJSONHandeling(localFilename string, incomingFilname string, incomingCombinedInput CombinedInput, inactiveElevatorIDs []string) {
 	err := os.Remove(incomingFilname)
 	if err != nil {
-		fmt.Println("Feil ved fjerning:", err)
+		logrus.Error("Failed to remove file:", err)
 	}
 	SaveCombinedInput(incomingCombinedInput, incomingFilname)
 	UpdateLocalJSON(localFilename, incomingFilname)
 	inactiveElevatorIDs = DysfunctionalElevatorDetection(incomingFilname, incomingCombinedInput, inactiveElevatorIDs)
 	if len(inactiveElevatorIDs) > 0 {
 		for _, id := range inactiveElevatorIDs {
-			fmt.Println(id) // Using fmt.Println for printing each ID on a new line
+			logrus.Warn("Node registered as inactive: ", id)
 		}
 	}
-	
+
 	DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs, localFilename)
 }
 

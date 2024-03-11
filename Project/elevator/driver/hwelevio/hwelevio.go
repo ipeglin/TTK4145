@@ -1,10 +1,11 @@
 package hwelevio
 
 import (
-	"fmt"
 	"net"
 	"sync"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 const PollRate = 20 * time.Millisecond
@@ -32,7 +33,7 @@ const (
 
 func Init(addr string, numFloors int) {
 	if _initialized {
-		fmt.Println("Driver already initialized!")
+		logrus.Info("Driver already initialized!")
 		return
 	}
 	_numFloors = numFloors
@@ -46,7 +47,6 @@ func Init(addr string, numFloors int) {
 }
 
 func SetMotorDirection(dir HWMotorDirection) {
-	//fmt.Println("Setting motordirection")
 	write([4]byte{1, byte(dir), 0, 0})
 }
 

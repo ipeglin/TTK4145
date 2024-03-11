@@ -3,8 +3,9 @@ package elevio
 import (
 	"elevator/driver/hwelevio"
 	"elevator/timer"
-	"fmt"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 var InputDevice ElevInputDevice
@@ -24,7 +25,7 @@ func castElevDirToMotorDirection(d ElevDir) hwelevio.HWMotorDirection {
 	case DirStop:
 		return hwelevio.MD_Stop
 	default:
-		fmt.Printf("Noe har gått feil i CastMotorDirection")
+		logrus.Error("Something went wrong!")
 		return hwelevio.MD_Down //HELT FEIL MÅ FIKSES
 	}
 }
@@ -38,7 +39,7 @@ func castButtonToHWButtonType(btn Button) hwelevio.HWButtonType {
 	case BCab:
 		return hwelevio.BCab
 	default:
-		fmt.Print("Noe har gptt feil i castButtonToHWButtonType ")
+		logrus.Error("Something went wrong!")
 		return hwelevio.BHallUp //Hvordan løse dette?
 	}
 }
@@ -80,7 +81,6 @@ func RequestStop() bool {
 
 func MotorDirection(d ElevDir) {
 	// Implementation using the actual hardware library.
-	//fmt.Println("Motordirection to be sat: ", ElevDirToString(d))
 	hwelevio.SetMotorDirection(castElevDirToMotorDirection(d))
 }
 

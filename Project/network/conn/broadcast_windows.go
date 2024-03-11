@@ -48,6 +48,8 @@ import (
 	"fmt"
 	"net"
 	"syscall"
+
+	"github.com/sirupsen/logrus"
 )
 
 func DialBroadcastUDP(port int) net.PacketConn {
@@ -61,7 +63,7 @@ func DialBroadcastUDP(port int) net.PacketConn {
 
 	conn, err := config.ListenPacket(context.Background(), "udp4", fmt.Sprintf(":%d", port))
 	if err != nil {
-		fmt.Println("Error: net.ListenConfig.ListenPacket:", err)
+		logrus.Error("Error: net.ListenConfig.ListenPacket:", err)
 	}
 
 	return conn

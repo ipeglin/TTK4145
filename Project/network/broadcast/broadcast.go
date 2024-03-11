@@ -61,7 +61,7 @@ func Receiver(ownIp string, port int, chans ...interface{}) {
 	for {
 		n, addr, e := conn.ReadFrom(buf[0:])
 		if e != nil {
-			fmt.Printf("bcast.Receiver(%d, ...):ReadFrom() failed: \"%+v\"\n", port, e)
+			logrus.Error(fmt.Sprintf("bcast.Receiver(%d, ...):ReadFrom() failed: \"%+v\"\n", port, e))
 		}
 
 		localIP, err := local.GetIP()
