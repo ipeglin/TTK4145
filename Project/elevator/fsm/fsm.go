@@ -72,8 +72,6 @@ func FloorArrival(newFloor int, elevatorName string, filename string) {
 			elevator.CurrentBehaviour = elev.EBDoorOpen
 		}
 	}
-	//fmt.Println("New state:")
-	//elev.ElevatorPrint(elevator)
 }
 
 func DoorTimeout(filename string, elevatorName string) {
@@ -98,8 +96,6 @@ func DoorTimeout(filename string, elevatorName string) {
 		}
 
 	}
-	//fmt.Println("New State: ")
-	//elev.ElevatorPrint(elevator)
 }
 
 func ToggleObstruction() {
@@ -131,7 +127,7 @@ func ResumeAtLatestCheckpoint(floor int) {
 	}
 }
 
-// Json fra her
+// TODO! JSON code should be a separate module or package. NOT split between fsm and checkpoint packages
 func InitJson(filename string, ElevatorName string) {
 	// Gjør endringer på combinedInput her
 	print(filename)
@@ -153,10 +149,12 @@ func UpdateJSON(elevatorName string, filename string) {
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
+// TODO! Could just use checkpoint func directly
 func UpdateJSONOnNewOrder(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
 	checkpoint.UpdateJSONOnNewOrder(filename, elevatorName, btnFloor, btn, &elevator)
 }
 
+// TODO! Could just use checkpoint func directly
 func JSONOrderAssigner(filename string, elevatorName string) {
 	checkpoint.JSONOrderAssigner(&elevator, filename, elevatorName)
 }
@@ -166,16 +164,14 @@ func RequestButtonPressV2(btnFloor int, btnType elevio.Button, elevatorName stri
 	if requests.RequestsShouldClearImmediately(elevator, btnFloor, btnType) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
 		timer.Start(elevator.Config.DoorOpenDurationS)
 	} else {
-		//elevator.Requests[btnFloor][btn] = true
-		//trenger å sjekke at alt dette er riktig
 		UpdateJSONOnNewOrder(btnFloor, btnType, elevatorName, filename)
-		//JSONOrderAssigner(filename, elevatorName)
 	}
 }
 
 // etter denne func broadcaster vi.
 // så assigner vi
 // så kaller vi denne
+// TODO! Rewrite func name. This makes no sense
 func RequestButtonPressV3(filename string, elevatorName string) {
 	switch elevator.CurrentBehaviour {
 	case elev.EBIdle:
@@ -190,11 +186,9 @@ func RequestButtonPressV3(filename string, elevatorName string) {
 			elevator = requests.RequestsClearAtCurrentFloor(elevator, filename, elevatorName)
 
 		case elev.EBMoving:
-			//fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevator.Dirn), " in FsmRequestButtonPress")
+			logrus.Debug("Calling MotorDirection: ", elevio.ElevDirToString(elevator.Dirn))
 			outputDevice.MotorDirection(elevator.Dirn)
 		}
 	}
 	setAllLights()
-	//fmt.Printf("New state: \n")
-	//elev.ElevatorPrint(elevator)
 }
