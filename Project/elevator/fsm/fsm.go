@@ -23,7 +23,7 @@ func init() {
 	outputDevice = elevio.ElevioGetOutputDevice()
 
 	localStateFile = elevatorName + ".json"
-	FsmInitJson(localStateFile, elevatorName) 
+	InitJson(localStateFile, elevatorName) 
 	//Burde dette gå et annet sted?
 	setAllLights()
 	elevio.RequestDoorOpenLamp(false)
@@ -151,7 +151,7 @@ func UpdateJSON(elevatorName string, filename string) {
 // TODO: Improve func name
 func RebootJSON(elevatorName string, filename string) {
 	checkpoint.RebootJSON(elevator, filename, elevatorName)
-	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
+	checkpoint.SetElevatorCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
 // TODO! Could just use checkpoint func directly
