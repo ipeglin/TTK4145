@@ -78,8 +78,8 @@ func FloorArrival(newFloor int, elevatorName string, filename string) {
 	//elev.ElevatorPrint(elevator)
 }
 
-func FsmDoorTimeout(filename string, elevatorName string) {
-	//fmt.Printf("\n\n%s()\n", "FsmDoorTimeout")
+func DoorTimeout(filename string, elevatorName string) {
+	//fmt.Printf("\n\n%s()\n", "DoorTimeout")
 	//elev.ElevatorPrint(elevator)
 	//Hvorfor switch
 	switch elevator.CurrentBehaviour {
@@ -96,7 +96,7 @@ func FsmDoorTimeout(filename string, elevatorName string) {
 
 		case elev.EBMoving:
 			outputDevice.DoorLight(false)
-			//fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevio.DirStop), " in FsmDoorTimeout")
+			//fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevio.DirStop), " in DoorTimeout")
 			outputDevice.MotorDirection(elevator.Dirn)
 		case elev.EBIdle:
 			outputDevice.DoorLight(false)

@@ -94,7 +94,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 				logrus.Debug("Elevator timeout")
 				fsm.UpdateJSON(elevatorName, elevatorStateFile)
 				timer.TimerStop()
-				fsm.FsmDoorTimeout(elevatorStateFile, elevatorName)
+				fsm.DoorTimeout(elevatorStateFile, elevatorName)
 				fsm.UpdateJSON(elevatorName, elevatorStateFile)
 			}
 			time.Sleep(50 * time.Millisecond)
