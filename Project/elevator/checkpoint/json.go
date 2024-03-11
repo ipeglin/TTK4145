@@ -147,8 +147,8 @@ func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) 
 	}
 }
 
-func IncomingJSONHandling(localFilname string, otherCombinedInput CombinedInput, incomingElevatorName string) {
-	localCombinedInput, _ := LoadCombinedInput(localFilname)
+func IncomingJSONHandling(localFilename string, otherCombinedInput CombinedInput, incomingElevatorName string) {
+	localCombinedInput, _ := LoadCombinedInput(localFilename)
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
 			if otherCombinedInput.CyclicCounter.HallRequests[f][i] > localCombinedInput.CyclicCounter.HallRequests[f][i] {
@@ -181,24 +181,24 @@ func IncomingJSONHandling(localFilname string, otherCombinedInput CombinedInput,
 			delete(localCombinedInput.CyclicCounter.States, incomingElevatorName)
 		}
 	}
-	localElevatorName := strings.TrimSuffix(localFilname, ".json")
+	localElevatorName := strings.TrimSuffix(localFilename, ".json")
 	if _, exists := otherCombinedInput.CyclicCounter.States[localElevatorName]; exists {
 		if otherCombinedInput.CyclicCounter.States[localElevatorName] > localCombinedInput.CyclicCounter.States[localElevatorName] {
 			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] + 1
 		}
 	}
-	SaveCombinedInput(localCombinedInput, localFilname)
+	SaveCombinedInput(localCombinedInput, localFilename)
 }
 
-func RemoveDysfunctionalElevatorFromJSON(localFilname string, elevatorName string) {
-	combinedInput, _ := LoadCombinedInput(localFilname)
+func RemoveDysfunctionalElevatorFromJSON(localFilename string, elevatorName string) {
+	combinedInput, _ := LoadCombinedInput(localFilename)
 	for id := range combinedInput.HRAInput.States {
 		if id == elevatorName {
 			delete(combinedInput.HRAInput.States, id)
 			delete(combinedInput.CyclicCounter.States, id)
 		}
 	}
-	SaveCombinedInput(combinedInput, localFilname)
+	SaveCombinedInput(combinedInput, localFilename)
 }
 
 // denne brukes en gang i main. kan vi gjøre den over komatibel
@@ -271,8 +271,8 @@ func IncomingDataIsCorrupt(incomingCombinedInput CombinedInput) bool {
 	return false // Data er gyldig
 }
 
-func JSONsetAllLights(localFilname string, elevatorName string) {
-	combinedInput, _ := LoadCombinedInput(localFilname)
+func JSONsetAllLights(localFilename string, elevatorName string) {
+	combinedInput, _ := LoadCombinedInput(localFilename)
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
 		for floor := 0; floor < elevio.NFloors; floor++ {
 			elevio.RequestButtonLight(floor, elevio.BHallUp, combinedInput.HRAInput.HallRequests[floor][0])

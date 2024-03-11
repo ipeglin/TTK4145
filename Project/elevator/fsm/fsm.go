@@ -77,7 +77,6 @@ func FloorArrival(newFloor int, elevatorName string, filename string) {
 }
 
 func DoorTimeout(filename string, elevatorName string) {
-
 	//Hvorfor switch
 	switch elevator.CurrentBehaviour {
 	case elev.EBDoorOpen:
