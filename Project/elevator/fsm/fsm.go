@@ -135,11 +135,6 @@ func ResumeAtLatestCheckpoint(floor int) {
 	}
 }
 
-// TODO! Never used
-func LoadLatestCheckpoint() {
-	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
-}
-
 // Json fra her
 func InitJson(filename string, ElevatorName string) {
 	// Gjør endringer på combinedInput her
