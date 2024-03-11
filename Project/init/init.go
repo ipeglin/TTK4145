@@ -52,7 +52,6 @@ func initNode(isPrimaryProcess bool) {
 		case reg := <-nodeOverviewChannel:
 			logrus.Info("Known nodes:", reg.Nodes)
 			if len(reg.Lost) <= 0 {
-				logrus.Info("No lost nodes")
 				lostNodes = []string{}
 				continue
 			}
@@ -74,7 +73,7 @@ func initNode(isPrimaryProcess bool) {
 
 		case msg := <-messageReceiveChannel:
 			// TODO: handle incoming messages
-			logrus.Info("Received message from ", msg.SenderId, ": ", msg.Payload)
+			logrus.Debug("Received message from ", msg.SenderId, ": ", msg.Payload)
 
 			externalStateFile := msg.SenderId + ".json"
 			incomingState := msg.Payload
