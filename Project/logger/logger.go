@@ -33,6 +33,8 @@ func (hook *WriterHook) Levels() []log.Level {
 }
 
 func Setup() {
+	log.SetReportCaller(true)
+
 	file := logfile.CreateLogFile()
 	fmt.Println("HERE:", file)
 
@@ -40,7 +42,6 @@ func Setup() {
 	if err != nil {
 		log.Fatal("Failed to create log file. ", err)
 	}
-	defer f.Close()
 
 	log.SetOutput(io.Discard) // Send all logs to nowhere by default
 	log.AddHook(&WriterHook{  // Send logs with level higher than warning to log file
