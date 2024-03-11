@@ -161,8 +161,9 @@ func JSONOrderAssigner(filename string, elevatorName string) {
 	checkpoint.JSONOrderAssigner(&elevator, filename, elevatorName)
 }
 
-func RequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
-	if requests.RequestsShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
+// TODO! Rewrite func name. This makes no sense
+func RequestButtonPressV2(btnFloor int, btnType elevio.Button, elevatorName string, filename string) {
+	if requests.RequestsShouldClearImmediately(elevator, btnFloor, btnType) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
 		timer.Start(elevator.Config.DoorOpenDurationS)
 	} else {
 		//elevator.Requests[btnFloor][btn] = true
