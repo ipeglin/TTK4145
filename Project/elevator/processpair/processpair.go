@@ -47,7 +47,7 @@ func monitorMainProcessAndTakeOver(mainFunc TFunc) {
 }
 
 func isMainAlive() bool {
-	_, checkpointTime, _ := checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
+	_, checkpointTime, _ := checkpoint.LoadElevatorCheckpoint(checkpoint.FilenameCheckpoint)
 	timeSinceCheckpoint := time.Since(checkpointTime)
 	return timeLimitOnline >= timeSinceCheckpoint
 }

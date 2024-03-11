@@ -26,7 +26,7 @@ func fromJSON(data []byte) ElevCheckpoint {
 	return checkpoint
 }
 
-func saveCheckpoint(data []byte, fileName string) error {
+func writeToFile(data []byte, fileName string) error {
 
 	osFile, err := filehandeling.LockFile(fileName)
 	if err != nil {
@@ -42,7 +42,7 @@ func saveCheckpoint(data []byte, fileName string) error {
 	return nil
 }
 
-func loadCheckpoint(fileName string) ([]byte, error) {
+func readFromFile(fileName string) ([]byte, error) {
 	osFile, err := filehandeling.LockFile(fileName) // Lock the file for reading
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func loadCheckpoint(fileName string) ([]byte, error) {
 	return data, nil
 }
 
-func SaveElevCheckpoint(e elev.Elevator, fileName string) error {
+func SetElevatorCheckpoint(e elev.Elevator, fileName string) error {
 	checkpoint :=
 		ElevCheckpoint{
 			e,
@@ -66,12 +66,12 @@ func SaveElevCheckpoint(e elev.Elevator, fileName string) error {
 	if err != nil {
 		return err
 	}
-	saveCheckpoint(jsonCP, fileName)
+	writeToFile(jsonCP, fileName)
 	return nil
 }
 
-func LoadElevCheckpoint(fileName string) (elev.Elevator, time.Time, error) {
-	jsonCp, err := loadCheckpoint(fileName)
+func LoadElevatorCheckpoint(fileName string) (elev.Elevator, time.Time, error) {
+	jsonCp, err := readFromFile(fileName)
 	if err != nil {
 		return elev.Elevator{}, time.Time{}, err
 	}

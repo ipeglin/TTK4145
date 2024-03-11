@@ -112,12 +112,12 @@ func ToggleObstruction() {
 }
 
 func MakeCheckpoint() {
-	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
+	checkpoint.SetElevatorCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
 func ResumeAtLatestCheckpoint(floor int) {
 	logrus.Debug("Resuming at last checkpoint at floor: ", floor)
-	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
+	elevator, _, _ = checkpoint.LoadElevatorCheckpoint(checkpoint.FilenameCheckpoint)
 	setAllLights()
 	outputDevice.MotorDirection(elevator.Dirn)
 
@@ -146,7 +146,7 @@ func InitJson(filename string, ElevatorName string) {
 
 func UpdateJSON(elevatorName string, filename string) {
 	checkpoint.UpdateJSON(elevator, filename, elevatorName)
-	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
+	checkpoint.SetElevatorCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
 // TODO! Could just use checkpoint func directly
