@@ -57,54 +57,6 @@ func MoveDownToFloor() {
 	elevator.CurrentBehaviour = elev.EBMoving
 }
 
-//temp testing
-/*
-func FsmRequestButtonPress(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
-
-	//fmt.Printf("\n\n%s(%d, %s)\n", "FsmRequestButtonPress", btnFloor, elevio.ButtonToString(btn))
-	//elev.ElevatorPrint(elevator)
-
-	switch elevator.CurrentBehaviour {
-	case elev.EBDoorOpen:
-		if requests.RequestsShouldClearImmediately(elevator, btnFloor, btn) {
-			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-		} else {
-			//elevator.Requests[btnFloor][btn] = true
-			//trenger å sjekke at alt dette er riktig
-			fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
-			fsmJSONOrderAssigner(filename, elevatorName)
-		}
-
-	case elev.EBMoving:
-		//elevator.Requests[btnFloor][btn] = true
-		//trenger å sjekke at alt dette er riktig
-		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
-		fsmJSONOrderAssigner(filename, elevatorName)
-
-	case elev.EBIdle:
-		//elevator.Requests[btnFloor][btn] = true
-		//trenger å sjekke at alt dette er riktig
-		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
-		fsmJSONOrderAssigner(filename, elevatorName)
-		pair := requests.RequestsChooseDirection(elevator)
-		elevator.Dirn = pair.Dirn
-		elevator.CurrentBehaviour = pair.Behaviour
-		switch pair.Behaviour {
-		case elev.EBDoorOpen:
-			outputDevice.DoorLight(true)
-			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-			elevator = requests.RequestsClearAtCurrentFloor(elevator)
-
-		case elev.EBMoving:
-			//fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevator.Dirn), " in FsmRequestButtonPress")
-			outputDevice.MotorDirection(elevator.Dirn)
-		}
-	}
-	setAllLights()
-	//fmt.Printf("New state: \n")
-	//elev.ElevatorPrint(elevator)
-}
-*/
 func FloorArrival(newFloor int, elevatorName string, filename string) {
 	logrus.Warn("Arrived at new floor: ", newFloor)
 	//elev.ElevatorPrint(elevator)

@@ -145,54 +145,6 @@ func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) 
 	}
 }
 
-/*
-func UpdateLocalJSON(localFilname string, otherCombinedInput CombinedInput, incomingFilename string) {
-	localCombinedInput, _ := LoadCombinedInput(localFilname)
-	//otherCombinedInput, _ := LoadCombinedInput(incomingFilename)
-
-	for f := 0; f < elevio.NFloors; f++ {
-		for i := 0; i < 2; i++ {
-			if otherCombinedInput.CyclicCounter.HallRequests[f][i] > localCombinedInput.CyclicCounter.HallRequests[f][i] {
-				localCombinedInput.CyclicCounter.HallRequests[f][i] = otherCombinedInput.CyclicCounter.HallRequests[f][i]
-				localCombinedInput.HRAInput.HallRequests[f][i] = otherCombinedInput.HRAInput.HallRequests[f][i]
-			}
-		}
-	}
-	incommigElevatorName := strings.TrimSuffix(incomingFilename, ".json")
-	if _, exists := otherCombinedInput.CyclicCounter.States[incommigElevatorName]; exists{
-		if _, exists := localCombinedInput.CyclicCounter.States[incommigElevatorName]; !exists {
-			localCombinedInput.HRAInput.States[incommigElevatorName] = otherCombinedInput.HRAInput.States[incommigElevatorName]
-			localCombinedInput.CyclicCounter.States[incommigElevatorName] = otherCombinedInput.CyclicCounter.States[incommigElevatorName]
-		} else {
-			if otherCombinedInput.CyclicCounter.States[incommigElevatorName] > localCombinedInput.CyclicCounter.States[incommigElevatorName] {
-				localCombinedInput.HRAInput.States[incommigElevatorName] = otherCombinedInput.HRAInput.States[incommigElevatorName]
-				localCombinedInput.CyclicCounter.States[incommigElevatorName] = otherCombinedInput.CyclicCounter.States[incommigElevatorName]
-
-			}
-		}
-	}
-
-	//legg kunn til deres local elevator 
-	/*
-	for i, state := range otherCombinedInput.HRAInput.States {
-		if _, exists := localCombinedInput.CyclicCounter.States[i]; !exists {
-			localCombinedInput.HRAInput.States[i] = state
-			localCombinedInput.CyclicCounter.States[i] = otherCombinedInput.CyclicCounter.States[i]
-		} else {
-			if otherCombinedInput.CyclicCounter.States[i] > localCombinedInput.CyclicCounter.States[i] {
-				localCombinedInput.HRAInput.States[i] = state
-				localCombinedInput.CyclicCounter.States[i] = otherCombinedInput.CyclicCounter.States[i]
-			}
-		}
-	}
-
-
-	SaveCombinedInput(localCombinedInput, localFilname)
-}
-*/
-
-
-
 func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInput, incomingElevatorName string) {
 	localCombinedInput, _ := LoadCombinedInput(localFilname)
 	for f := 0; f < elevio.NFloors; f++ {
@@ -278,22 +230,7 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 	return nil
 }
 
-
-
-/*
-func DysfunctionalElevatorDetection(incomingFilename string, incomingCombinedInput CombinedInput) []string {
-	incomingElevatorName := strings.TrimSuffix(incomingFilename, ".json")
-	var inactiveElevatorIDs []string
-	if _, exists := incomingCombinedInput.HRAInput.States[incomingElevatorName]; !exists {
-		println(incomingElevatorName)
-		inactiveElevatorIDs = append(inactiveElevatorIDs, incomingElevatorName)
-	}
-	return inactiveElevatorIDs
-}
-*/
-
-// Antagelser om strukturer og hjelpefunksjoner fra tidligere eksempel ...
-// IsValidBehavior sjekker om oppgitt atferd er gyldig
+//SIMEN HEVDER DETTE ER DOBBELT OPP AV FUNKSJONER
 func IsValidBehavior(behavior string) bool {
 	switch behavior {
 	case "idle", "moving", "doorOpen":

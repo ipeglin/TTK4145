@@ -119,52 +119,7 @@ func RequestsShouldClearImmediately(e elev.Elevator, btn_floor int, btn_type ele
 		return false
 	}
 }
-/*
-func RequestsClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName string) elev.Elevator {
-	//fmt.Print("RequestsClearAtCurrentFloor: ")
-	switch e.Config.ClearRequestVariant {
-	case elev.CRVAll:
-		//fmt.Print("CRVAll, RequestsClearAtCurrentFloor")
-		for btn := 0; btn < elevio.NButtons; btn++ {
-			e.Requests[e.CurrentFloor][btn] = false
-		}
 
-	case elev.CRVInDirn:
-		//fmt.Print("CRVInDirn, RequestsClearAtCurrentFloor")
-		e.Requests[e.CurrentFloor][elevio.BCab] = false
-		//checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor, elevio.BCab)
-		switch e.Dirn {
-		case elevio.DirUp:
-			if !requestsAbove(e) && !e.Requests[e.CurrentFloor][elevio.BHallUp] {
-				e.Requests[e.CurrentFloor][elevio.BHallDown] = false
-				//checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor, elevio.BHallDown)
-			}
-			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
-			//checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallUp)
-
-		case elevio.DirDown:
-			if !requestsBelow(e) && !e.Requests[e.CurrentFloor][elevio.BHallDown] {
-				e.Requests[e.CurrentFloor][elevio.BHallUp] = false
-				//checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallUp)
-			}
-			//elevio.BHallDown]
-			e.Requests[e.CurrentFloor][elevio.BHallDown] = false
-			//checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallDown)
-
-		default:
-			print("deult ble kallet")
-			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
-			//checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallUp)
-			e.Requests[e.CurrentFloor][elevio.BHallDown] = false
-			//checkpoint.UpdateJSONWhenHallOrderIsComplete(e, filename, elevatorName, e.CurrentFloor,elevio.BHallDown)
-			
-		}
-	default:
-
-	}
-	return e
-}
-*/
 func RequestsClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName string) elev.Elevator {
 
 	beforeClear := make(map[elevio.Button]bool)
