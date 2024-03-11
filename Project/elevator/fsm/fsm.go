@@ -132,7 +132,7 @@ func MakeCheckpoint() {
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
-func FsmResumeAtLatestCheckpoint(floor int) {
+func ResumeAtLatestCheckpoint(floor int) {
 	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
 	setAllLights()
 	//fmt.Print(elevator.Dirn)

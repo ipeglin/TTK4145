@@ -25,7 +25,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 		fsm.FsmInitJson(elevatorStateFile, elevatorName)
 	} else {
 		floor := elevio.InputDevice.FloorSensor()
-		fsm.FsmResumeAtLatestCheckpoint(floor)
+		fsm.ResumeAtLatestCheckpoint(floor)
 	}
 
 	drv_buttons := make(chan elevio.ButtonEvent)
