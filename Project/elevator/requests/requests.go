@@ -72,7 +72,7 @@ func decideDirectionStop(e elev.Elevator) DirnBehaviourPair {
 	return DirnBehaviourPair{elevio.DirStop, elev.EBIdle}
 }
 
-func RequestsChooseDirection(e elev.Elevator) DirnBehaviourPair {
+func ChooseDirection(e elev.Elevator) DirnBehaviourPair {
 	switch e.Dirn {
 	case elevio.DirUp:
 		return decideDirectionUp(e)
@@ -88,7 +88,7 @@ func RequestsChooseDirection(e elev.Elevator) DirnBehaviourPair {
 	}
 }
 
-func RequestsShouldStop(e elev.Elevator) bool {
+func ShouldStop(e elev.Elevator) bool {
 	switch e.Dirn {
 	case elevio.DirDown:
 		return e.Requests[e.CurrentFloor][elevio.BHallDown] ||
@@ -103,13 +103,13 @@ func RequestsShouldStop(e elev.Elevator) bool {
 	}
 }
 
-func RequestsShouldClearImmediately(e elev.Elevator, btn_floor int, btn_type elevio.Button) bool {
+func ShouldClearImmediately(e elev.Elevator, btn_floor int, btn_type elevio.Button) bool {
 	switch e.Config.ClearRequestVariant {
 	case elev.CRVAll:
-		//fmt.Print("CRVAll, RequestsShouldClearImmediately")
+		//fmt.Print("CRVAll, ShouldClearImmediately")
 		return e.CurrentFloor == btn_floor
 	case elev.CRVInDirn:
-		//fmt.Print("CRVInDirn, RequestsShouldClearImmediately")
+		//fmt.Print("CRVInDirn, ShouldClearImmediately")
 		return e.CurrentFloor == btn_floor &&
 			((e.Dirn == elevio.DirUp && btn_type == elevio.BHallUp) ||
 				(e.Dirn == elevio.DirDown && btn_type == elevio.BHallDown) ||
@@ -120,7 +120,7 @@ func RequestsShouldClearImmediately(e elev.Elevator, btn_floor int, btn_type ele
 	}
 }
 
-func RequestsClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName string) elev.Elevator {
+func ClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName string) elev.Elevator {
 
 	beforeClear := make(map[elevio.Button]bool)
 	for btn := 0; btn < elevio.NButtons; btn++ {
@@ -160,7 +160,7 @@ func RequestsClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName 
 	return e
 }
 
-func RequestsClearAll(e *elev.Elevator) {
+func ClearAll(e *elev.Elevator) {
 	for f := 0; f < elevio.NFloors; f++ {
 		for btn := 0; btn < elevio.NButtons; btn++ {
 			e.Requests[f][btn] = false

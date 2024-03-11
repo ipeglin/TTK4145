@@ -65,10 +65,10 @@ func FloorArrival(newFloor int, elevatorName string, filename string) {
 	//Helt unødvendig med switch her?
 	switch elevator.CurrentBehaviour {
 	case elev.EBMoving:
-		if requests.RequestsShouldStop(elevator) {
+		if requests.ShouldStop(elevator) {
 			outputDevice.MotorDirection(elevio.DirStop)
 			outputDevice.DoorLight(true)
-			elevator = requests.RequestsClearAtCurrentFloor(elevator, filename, elevatorName)
+			elevator = requests.ClearAtCurrentFloor(elevator, filename, elevatorName)
 			timer.TimerStart(elevator.Config.DoorOpenDurationS)
 			setAllLights()
 			elevator.CurrentBehaviour = elev.EBDoorOpen
@@ -84,14 +84,14 @@ func DoorTimeout(filename string, elevatorName string) {
 	//Hvorfor switch
 	switch elevator.CurrentBehaviour {
 	case elev.EBDoorOpen:
-		pair := requests.RequestsChooseDirection(elevator)
+		pair := requests.ChooseDirection(elevator)
 		elevator.Dirn = pair.Dirn
 		elevator.CurrentBehaviour = pair.Behaviour
 
 		switch elevator.CurrentBehaviour {
 		case elev.EBDoorOpen:
 			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-			elevator = requests.RequestsClearAtCurrentFloor(elevator, filename, elevatorName)
+			elevator = requests.ClearAtCurrentFloor(elevator, filename, elevatorName)
 			setAllLights()
 
 		case elev.EBMoving:
@@ -185,7 +185,7 @@ func JSONOrderAssigner(filename string, elevatorName string) {
 }
 
 func RequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
-	if requests.RequestsShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
+	if requests.ShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
 		timer.TimerStart(elevator.Config.DoorOpenDurationS)
 	} else {
 		//elevator.Requests[btnFloor][btn] = true
@@ -205,14 +205,14 @@ func RequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, 
 func RequestButtonPressV3(filename string, elevatorName string) {
 	switch elevator.CurrentBehaviour {
 	case elev.EBIdle:
-		pair := requests.RequestsChooseDirection(elevator)
+		pair := requests.ChooseDirection(elevator)
 		elevator.Dirn = pair.Dirn
 		elevator.CurrentBehaviour = pair.Behaviour
 		switch pair.Behaviour {
 		case elev.EBDoorOpen:
 			outputDevice.DoorLight(true)
 			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-			elevator = requests.RequestsClearAtCurrentFloor(elevator, filename, elevatorName)
+			elevator = requests.ClearAtCurrentFloor(elevator, filename, elevatorName)
 
 		case elev.EBMoving:
 			//fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevator.Dirn), " in FsmRequestButtonPress")
