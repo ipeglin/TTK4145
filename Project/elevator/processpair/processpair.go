@@ -6,6 +6,8 @@ import (
 	"os"
 	"os/exec"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 var timeLimitOnline time.Duration = time.Duration(3 * time.Second)
@@ -13,7 +15,7 @@ var timeLimitOnline time.Duration = time.Duration(3 * time.Second)
 type TFunc func(bool)
 
 func startMainProcess(mainFunc TFunc, firstProcsess bool) {
-	print("Im main bitch")
+	logrus.Info("Main process initiated...")
 	go mainFunc(firstProcsess)
 	startBackupProcess()
 
@@ -45,7 +47,7 @@ func isMainAlive() bool {
 
 func ProcessPairHandler(mainFunc TFunc) {
 	if len(os.Args) > 1 && os.Args[1] == "backup" {
-		print("Im backup")
+		logrus.Info("Initiated as backup process. Listening for main process to terminate...")
 		monitorMainProcessAndTakeOver(mainFunc)
 	} else {
 		startMainProcess(mainFunc, true)

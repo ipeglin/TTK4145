@@ -77,7 +77,6 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			logrus.Debug("Button press detected: ", btnEvent)
 			fsm.UpdateJSON(elevatorName, elevatorStateFile)
 			//trenger ikke være her. assign kun ved innkomende mld da heis offline ikke skal assigne
-			print("hjelp noe må funke")
 			fsm.RequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
 			fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
 

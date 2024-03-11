@@ -106,10 +106,9 @@ func ShouldStop(e elev.Elevator) bool {
 func ShouldClearImmediately(e elev.Elevator, btn_floor int, btn_type elevio.Button) bool {
 	switch e.Config.ClearRequestVariant {
 	case elev.CRVAll:
-		//fmt.Print("CRVAll, ShouldClearImmediately")
 		return e.CurrentFloor == btn_floor
+
 	case elev.CRVInDirn:
-		//fmt.Print("CRVInDirn, ShouldClearImmediately")
 		return e.CurrentFloor == btn_floor &&
 			((e.Dirn == elevio.DirUp && btn_type == elevio.BHallUp) ||
 				(e.Dirn == elevio.DirDown && btn_type == elevio.BHallDown) ||

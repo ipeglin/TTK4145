@@ -64,7 +64,6 @@ func Receiver(port int, updateChannel chan<- NetworkNodeRegistry) {
 		for k, v := range lastSeen {
 			if time.Now().Sub(v) > timeout {
 				updated = true
-				//print(k)
 				reg.Lost = append(reg.Lost, k)
 				delete(lastSeen, k)
 			}

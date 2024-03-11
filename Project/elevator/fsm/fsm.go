@@ -6,7 +6,6 @@ import (
 	"elevator/elevio"
 	"elevator/requests"
 	"elevator/timer"
-	"fmt"
 	"network/local"
 	"os"
 	"time"
@@ -59,7 +58,7 @@ func MoveDownToFloor() {
 
 func FloorArrival(newFloor int, elevatorName string, filename string) {
 	logrus.Warn("Arrived at new floor: ", newFloor)
-	//elev.ElevatorPrint(elevator)
+
 	elevator.CurrentFloor = newFloor
 	outputDevice.FloorIndicator(elevator.CurrentFloor)
 	//Helt unødvendig med switch her?
@@ -74,13 +73,11 @@ func FloorArrival(newFloor int, elevatorName string, filename string) {
 			elevator.CurrentBehaviour = elev.EBDoorOpen
 		}
 	}
-	//fmt.Println("New state:")
-	//elev.ElevatorPrint(elevator)
+
 }
 
 func DoorTimeout(filename string, elevatorName string) {
-	//fmt.Printf("\n\n%s()\n", "DoorTimeout")
-	//elev.ElevatorPrint(elevator)
+
 	//Hvorfor switch
 	switch elevator.CurrentBehaviour {
 	case elev.EBDoorOpen:
@@ -96,15 +93,13 @@ func DoorTimeout(filename string, elevatorName string) {
 
 		case elev.EBMoving:
 			outputDevice.DoorLight(false)
-			//fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevio.DirStop), " in DoorTimeout")
+
 			outputDevice.MotorDirection(elevator.Dirn)
 		case elev.EBIdle:
 			outputDevice.DoorLight(false)
 		}
 
 	}
-	//fmt.Println("New State: ")
-	//elev.ElevatorPrint(elevator)
 }
 
 func ToggleObstruction() {
@@ -135,7 +130,7 @@ func MakeCheckpoint() {
 func ResumeAtLatestCheckpoint(floor int) {
 	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
 	setAllLights()
-	//fmt.Print(elevator.Dirn)
+
 	if elevator.Dirn != elevio.DirStop && floor == -1 {
 		outputDevice.MotorDirection(elevator.Dirn)
 	}
@@ -152,17 +147,16 @@ func LoadLatestCheckpoint() {
 // Json fra her
 func InitJson(filename string, ElevatorName string) {
 	// Gjør endringer på combinedInput her
-	print(filename)
 	err := os.Remove(filename)
 	if err != nil {
-		fmt.Println("Feil ved fjerning:", err)
+		logrus.Error("Failed to remove:", err)
 	}
 	combinedInput := checkpoint.InitializeCombinedInput(elevator, ElevatorName)
 
 	// If the file was successfully deleted, return nil
 	err = checkpoint.SaveCombinedInput(combinedInput, filename)
 	if err != nil {
-		fmt.Println("Feil ved lagring:", err)
+		logrus.Error("Failed to save checkpoint:", err)
 	}
 }
 
@@ -191,9 +185,7 @@ func RequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, 
 		//elevator.Requests[btnFloor][btn] = true
 		//trenger å sjekke at alt dette er riktig
 		UpdateJSONOnNewOrder(btnFloor, btn, elevatorName, filename)
-		print("funksjonskall funker")
 		if btn == elevio.BCab {
-			print("hei")
 			elevator.Requests[btnFloor][btn] = true
 		}
 	}
@@ -208,6 +200,7 @@ func RequestButtonPressV3(filename string, elevatorName string) {
 		pair := requests.ChooseDirection(elevator)
 		elevator.Dirn = pair.Dirn
 		elevator.CurrentBehaviour = pair.Behaviour
+
 		switch pair.Behaviour {
 		case elev.EBDoorOpen:
 			outputDevice.DoorLight(true)
@@ -215,11 +208,8 @@ func RequestButtonPressV3(filename string, elevatorName string) {
 			elevator = requests.ClearAtCurrentFloor(elevator, filename, elevatorName)
 
 		case elev.EBMoving:
-			//fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevator.Dirn), " in FsmRequestButtonPress")
 			outputDevice.MotorDirection(elevator.Dirn)
 		}
 	}
 	setAllLights()
-	//fmt.Printf("New state: \n")
-	//elev.ElevatorPrint(elevator)
 }

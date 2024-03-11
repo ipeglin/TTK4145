@@ -9,6 +9,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 //const JSONFile = "JSONFile.json"
@@ -141,7 +143,7 @@ func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) 
 			}
 		}
 	} else {
-		fmt.Println("HRAInput.States is empty, skipping order assignment")
+		logrus.Debug("HRAInput.States is empty, skipping order assignment")
 	}
 }
 
