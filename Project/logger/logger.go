@@ -36,7 +36,6 @@ func Setup() {
 	log.SetReportCaller(true)
 
 	file := logfile.CreateLogFile()
-	fmt.Println("HERE:", file)
 
 	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {
