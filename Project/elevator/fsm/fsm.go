@@ -127,7 +127,6 @@ func ResumeAtLatestCheckpoint(floor int) {
 	logrus.Debug("Resuming at last checkpoint at floor: ", floor)
 	elevator, _, _ = checkpoint.LoadElevatorCheckpoint(checkpoint.FilenameCheckpoint)
 	setAllLights()
-	//fmt.Print(elevator.Dirn)
 	if elevator.Dirn != elevio.DirStop && floor == -1 {
 		outputDevice.MotorDirection(elevator.Dirn)
 	}

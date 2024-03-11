@@ -29,7 +29,6 @@ func updateCyclicCounterWhenOrderIsComplete(cyclicCounter CyclicCounterInput, el
 	case elevio.BHallDown:
 		cyclicCounter.HallRequests[btn_floor][1] += 1
 	}
-	print("ferdig func call")
 	cyclicCounter.States[elevatorName] += 1
 	return cyclicCounter
 }
