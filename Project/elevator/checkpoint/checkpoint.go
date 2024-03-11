@@ -13,10 +13,12 @@ type ElevCheckpoint struct {
 	Timestamp time.Time
 }
 
+// TODO! Just a wrapper. Can be omitted
 func toJSON(checkpoint ElevCheckpoint) ([]byte, error) {
 	return json.MarshalIndent(checkpoint, "", "  ")
 }
 
+// TODO! Just a wrapper. Can be omitted
 func fromJSON(data []byte) ElevCheckpoint {
 	var checkpoint ElevCheckpoint
 	json.Unmarshal(data, &checkpoint)
