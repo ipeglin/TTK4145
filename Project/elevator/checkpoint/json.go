@@ -94,7 +94,7 @@ func UpdateJSONOnCompletedHallOrder(el elev.Elevator, filename string, elevatorN
 	combinedInput, _ := LoadCombinedInput(filename)
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
 		combinedInput.HRAInput = updateHRAInputWhenOrderIsComplete(combinedInput.HRAInput, el, elevatorName, btn_floor, btn_type)
-		combinedInput.CyclicCounter = updateCyclicCounterWhenOrderIsComplete(combinedInput.CyclicCounter, elevatorName, btn_floor, btn_type)
+		combinedInput.CyclicCounter = updateCyclicCounterOnCompleteOrder(combinedInput.CyclicCounter, elevatorName, btn_floor, btn_type)
 	}
 	SaveCombinedInput(combinedInput, filename)
 }
@@ -103,7 +103,7 @@ func UpdateJSONOnNewOrder(filename string, elevatorName string, btnFloor int, bt
 	combinedInput, _ := LoadCombinedInput(filename)
 
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
-		combinedInput.CyclicCounter = updateCyclicCounterWhenNewOrderOccurs(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
+		combinedInput.CyclicCounter = updateCyclicCounterOnNewOrder(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
 		combinedInput.HRAInput = updateHRAInputWhenNewOrderOccurs(combinedInput.HRAInput, elevatorName, btnFloor, btn, el)
 	}
 	SaveCombinedInput(combinedInput, filename)

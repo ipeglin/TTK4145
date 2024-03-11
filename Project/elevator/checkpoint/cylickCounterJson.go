@@ -21,7 +21,7 @@ func InitializeCyclicCounterInput(ElevatorName string) CyclicCounterInput {
 	return cyclicCounter
 }
 
-func updateCyclicCounterWhenOrderIsComplete(cyclicCounter CyclicCounterInput, elevatorName string, btn_floor int, btn_type elevio.Button) CyclicCounterInput {
+func updateCyclicCounterOnCompleteOrder(cyclicCounter CyclicCounterInput, elevatorName string, btn_floor int, btn_type elevio.Button) CyclicCounterInput {
 	switch btn_type {
 	case elevio.BHallUp:
 		cyclicCounter.HallRequests[btn_floor][0] += 1
@@ -37,7 +37,7 @@ func updateCyclicCounterInput(cyclicCounter CyclicCounterInput, elevatorName str
 	return cyclicCounter
 }
 
-func updateCyclicCounterWhenNewOrderOccurs(cyclicCounter CyclicCounterInput, hraInput HRAInput, elevatorName string, btnFloor int, btn elevio.Button) CyclicCounterInput {
+func updateCyclicCounterOnNewOrder(cyclicCounter CyclicCounterInput, hraInput HRAInput, elevatorName string, btnFloor int, btn elevio.Button) CyclicCounterInput {
 	switch btn {
 	case elevio.BHallUp:
 		if !hraInput.HallRequests[btnFloor][0] {
