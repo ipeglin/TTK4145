@@ -36,7 +36,7 @@ func CreateLogFile() string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	file.Close()
+	defer file.Close()
 	log.Info("Created log file: ", filename)
 
 	return filename
