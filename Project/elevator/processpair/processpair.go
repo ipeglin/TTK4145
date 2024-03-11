@@ -19,15 +19,6 @@ func startMainProcess(mainFunc TFunc, firstProcsess bool) {
 
 }
 
-/*func startBackupProcess() {
-	cmd := exec.Command(os.Args[0], "backup")
-	if err := cmd.Start(); err != nil {
-		fmt.Printf("Failed to start backup process: %s\n", err)
-	} else {
-		fmt.Println("Backup process started successfully")
-	}
-}*/
-
 func startBackupProcess() {
 	cmd := exec.Command("gnome-terminal", "--", "./elevator", "backup")
 	if err := cmd.Start(); err != nil {
