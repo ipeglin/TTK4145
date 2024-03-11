@@ -1,10 +1,10 @@
 package logger
 
 import (
+	"fmt"
 	"io"
 	"logger/logfile"
 	"os"
-	"fmt"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -51,12 +51,17 @@ func Setup() {
 			log.ErrorLevel,
 			log.WarnLevel,
 			log.DebugLevel,
+			log.InfoLevel,
+			log.TraceLevel,
 		},
 	})
 
 	log.AddHook(&WriterHook{ // Send info and trace logs to stdout
 		Writer: os.Stdout,
 		LogLevels: []log.Level{
+			log.PanicLevel,
+			log.FatalLevel,
+			log.ErrorLevel,
 			log.InfoLevel,
 			log.TraceLevel,
 		},
