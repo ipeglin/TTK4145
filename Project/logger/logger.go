@@ -1,10 +1,10 @@
 package logger
 
 import (
+	"fmt"
 	"io"
 	"logger/logfile"
 	"os"
-	"fmt"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -40,7 +40,6 @@ func Setup() {
 	if err != nil {
 		log.Fatal("Failed to create log file. ", err)
 	}
-	defer f.Close()
 
 	log.SetOutput(io.Discard) // Send all logs to nowhere by default
 	log.AddHook(&WriterHook{  // Send logs with level higher than warning to log file
