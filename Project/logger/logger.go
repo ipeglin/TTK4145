@@ -32,7 +32,7 @@ func (hook *WriterHook) Levels() []log.Level {
 }
 
 func Setup() {
-	// log.SetReportCaller(true)
+	log.SetReportCaller(true)
 
 	file := logfile.CreateLogFile()
 
