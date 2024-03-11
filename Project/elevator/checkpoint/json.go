@@ -99,7 +99,7 @@ func UpdateJSONWhenHallOrderIsComplete(el elev.Elevator, filename string, elevat
 
 func UpdateJSONWhenNewOrderOccurs(filename string, elevatorName string, btnFloor int, btn elevio.Button, el *elev.Elevator) {
 	combinedInput, _ := LoadCombinedInput(filename)
-	
+
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
 		combinedInput.CyclicCounter = updateCyclicCounterWhenNewOrderOccurs(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
 		combinedInput.HRAInput = updateHRAInputWhenNewOrderOccurs(combinedInput.HRAInput, elevatorName, btnFloor, btn, el)
@@ -145,7 +145,7 @@ func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) 
 	}
 }
 
-func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInput, incomingElevatorName string) {
+func IncomingJSONHandling(localFilname string, otherCombinedInput CombinedInput, incomingElevatorName string) {
 	localCombinedInput, _ := LoadCombinedInput(localFilname)
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
@@ -153,13 +153,13 @@ func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInp
 				localCombinedInput.CyclicCounter.HallRequests[f][i] = otherCombinedInput.CyclicCounter.HallRequests[f][i]
 				localCombinedInput.HRAInput.HallRequests[f][i] = otherCombinedInput.HRAInput.HallRequests[f][i]
 			}
-			if (otherCombinedInput.CyclicCounter.HallRequests[f][i] == localCombinedInput.CyclicCounter.HallRequests[f][i]){ 
-			 	if (localCombinedInput.HRAInput.HallRequests[f][i] != otherCombinedInput.HRAInput.HallRequests[f][i]){
-					//midliertilig konflikt logikk dersom den ene er true og den andre er false 
+			if otherCombinedInput.CyclicCounter.HallRequests[f][i] == localCombinedInput.CyclicCounter.HallRequests[f][i] {
+				if localCombinedInput.HRAInput.HallRequests[f][i] != otherCombinedInput.HRAInput.HallRequests[f][i] {
+					//midliertilig konflikt logikk dersom den ene er true og den andre er false
 					//oppstår ved motostop og bostruksjoner etc dersom den har selv claimet en orde som blir utført ila den har motorstop
-					//Tenk om dette er beste løsning  
+					//Tenk om dette er beste løsning
 					localCombinedInput.HRAInput.HallRequests[f][i] = false
-				} 
+				}
 			}
 		}
 	}
@@ -173,7 +173,7 @@ func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInp
 				localCombinedInput.CyclicCounter.States[incomingElevatorName] = otherCombinedInput.CyclicCounter.States[incomingElevatorName]
 			}
 		}
-	}else{
+	} else {
 		if _, exists := localCombinedInput.HRAInput.States[incomingElevatorName]; exists {
 			delete(localCombinedInput.HRAInput.States, incomingElevatorName)
 			delete(localCombinedInput.CyclicCounter.States, incomingElevatorName)
@@ -182,12 +182,11 @@ func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInp
 	localElevatorName := strings.TrimSuffix(localFilname, ".json")
 	if _, exists := otherCombinedInput.CyclicCounter.States[localElevatorName]; exists {
 		if otherCombinedInput.CyclicCounter.States[localElevatorName] > localCombinedInput.CyclicCounter.States[localElevatorName] {
-			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] +1 
+			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] + 1
 		}
 	}
 	SaveCombinedInput(localCombinedInput, localFilname)
 }
-
 
 func RemoveDysfunctionalElevatorFromJSON(localFilname string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(localFilname)
@@ -199,7 +198,8 @@ func RemoveDysfunctionalElevatorFromJSON(localFilname string, elevatorName strin
 	}
 	SaveCombinedInput(combinedInput, localFilname)
 }
-// denne brukes en gang i main. kan vi gjøre den over komatibel 
+
+// denne brukes en gang i main. kan vi gjøre den over komatibel
 func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename string) error {
 	localCombinedInput, err := LoadCombinedInput(localFilename)
 	if err != nil {
@@ -230,7 +230,7 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 	return nil
 }
 
-//SIMEN HEVDER DETTE ER DOBBELT OPP AV FUNKSJONER
+// SIMEN HEVDER DETTE ER DOBBELT OPP AV FUNKSJONER
 func IsValidBehavior(behavior string) bool {
 	switch behavior {
 	case "idle", "moving", "doorOpen":
