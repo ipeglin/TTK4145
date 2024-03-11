@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"fmt"
 	"io"
 	"logger/logfile"
 	"os"
@@ -33,8 +32,9 @@ func (hook *WriterHook) Levels() []log.Level {
 }
 
 func Setup() {
+	log.SetReportCaller(true)
+
 	file := logfile.CreateLogFile()
-	fmt.Println("HERE:", file)
 
 	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {
@@ -50,14 +50,18 @@ func Setup() {
 			log.ErrorLevel,
 			log.WarnLevel,
 			log.DebugLevel,
+			log.InfoLevel,
+			log.TraceLevel,
 		},
 	})
 
 	log.AddHook(&WriterHook{ // Send info and trace logs to stdout
 		Writer: os.Stdout,
 		LogLevels: []log.Level{
+			log.FatalLevel,
+			log.ErrorLevel,
 			log.InfoLevel,
-			log.TraceLevel,
+			log.WarnLevel,
 		},
 	})
 }
