@@ -5,7 +5,7 @@ func Immobility(obstCh chan bool, motorActivityCh chan bool, immob chan<- bool) 
 	for {
 		select {
 		case obst := <-obstCh:
-			if obst {
+			if obst{ // && door.open()
 				// TODO
 				immob <- true
 			} else {
