@@ -2,10 +2,8 @@ package checkpoint
 
 import (
 	"elevator/elev"
-	"elevator/filehandeling"
+	"elevator/filehandler"
 	"encoding/json"
-	"fmt"
-	"os"
 	"time"
 )
 
@@ -26,36 +24,6 @@ func fromJSON(data []byte) ElevCheckpoint {
 	return checkpoint
 }
 
-func saveCheckpoint(data []byte, fileName string) error {
-
-	osFile, err := filehandeling.LockFile(fileName)
-	if err != nil {
-		return err
-
-	}
-	defer filehandeling.UnlockFile(osFile) // Ensure file is unlocked after reading
-
-	err = os.WriteFile(fileName, data, 0644)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func loadCheckpoint(fileName string) ([]byte, error) {
-	osFile, err := filehandeling.LockFile(fileName) // Lock the file for reading
-	if err != nil {
-		return nil, err
-	}
-	defer filehandeling.UnlockFile(osFile) // Ensure file is unlocked after reading
-
-	data, err := os.ReadFile(fileName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read checkpoint file: %v", err)
-	}
-	return data, nil
-}
-
 func SaveElevCheckpoint(e elev.Elevator, fileName string) error {
 	checkpoint :=
 		ElevCheckpoint{
@@ -66,12 +34,12 @@ func SaveElevCheckpoint(e elev.Elevator, fileName string) error {
 	if err != nil {
 		return err
 	}
-	saveCheckpoint(jsonCP, fileName)
+	filehandler.SaveCheckpoint(jsonCP, fileName)
 	return nil
 }
 
 func LoadElevCheckpoint(fileName string) (elev.Elevator, time.Time, error) {
-	jsonCp, err := loadCheckpoint(fileName)
+	jsonCp, err := filehandler.LoadCheckpoint(fileName)
 	if err != nil {
 		return elev.Elevator{}, time.Time{}, err
 	}

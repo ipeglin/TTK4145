@@ -3,7 +3,7 @@ package checkpoint
 import (
 	"elevator/elev"
 	"elevator/elevio"
-	"elevator/filehandeling"
+	"elevator/filehandler"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -30,12 +30,12 @@ func InitializeCombinedInput(el elev.Elevator, ElevatorName string) CombinedInpu
 
 // SaveCombinedInput serialiserer CombinedInput til JSON og lagrer det i en fil.
 func SaveCombinedInput(combinedInput CombinedInput, filename string) error {
-	osFile, err := filehandeling.LockFile(filename)
+	osFile, err := filehandler.LockFile(filename)
 	if err != nil {
 		return err
 
 	}
-	defer filehandeling.UnlockFile(osFile) // Ensure file is unlocked after reading
+	defer filehandler.UnlockFile(osFile) // Ensure file is unlocked after reading
 
 	data, err := json.MarshalIndent(combinedInput, "", "  ")
 	if err != nil {
@@ -53,11 +53,11 @@ func SaveCombinedInput(combinedInput CombinedInput, filename string) error {
 // LoadCombinedInput deserialiserer CombinedInput fra en JSON-fil.
 func LoadCombinedInput(filename string) (CombinedInput, error) {
 	var combinedInput CombinedInput
-	osFile, err := filehandeling.LockFile(filename) // Lock the file for reading
+	osFile, err := filehandler.LockFile(filename) // Lock the file for reading
 	if err != nil {
 		return combinedInput, err
 	}
-	defer filehandeling.UnlockFile(osFile) // Ensure file is unlocked after reading
+	defer filehandler.UnlockFile(osFile) // Ensure file is unlocked after reading
 
 	data, err := os.ReadFile(filename)
 	if err != nil {
