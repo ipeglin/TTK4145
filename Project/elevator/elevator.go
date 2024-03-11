@@ -57,7 +57,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			drv_obstr_immob <- drv_obst
 			if drv_obst == !obst { // If obstruction detected and it's a new obstruction
 				logrus.Debug("New obstruction detected: ", drv_obst)
-				fsm.FsmObstruction()
+				fsm.ToggleObstruction()
 			}
 			obst = drv_obst
 

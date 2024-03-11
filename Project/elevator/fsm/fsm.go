@@ -107,7 +107,7 @@ func FsmDoorTimeout(filename string, elevatorName string) {
 	//elev.ElevatorPrint(elevator)
 }
 
-func FsmObstruction() {
+func ToggleObstruction() {
 	if !timer.TimerInf {
 		timer.TimerStartInf()
 		if elevator.CurrentBehaviour == elev.EBIdle {
