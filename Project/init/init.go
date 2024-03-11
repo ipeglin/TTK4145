@@ -83,7 +83,7 @@ func initNode(isPrimaryProcess bool) {
 
 			// update and remove list nodes
 			if !checkpoint.IncomingDataIsCorrupt(incomingState) {
-				checkpoint.InncommingJSONHandeling(localStateFile, externalStateFile, incomingState, lostNodes)
+				checkpoint.IncomingJSONHandeling(localStateFile, externalStateFile, incomingState, lostNodes)
 				fsm.JSONOrderAssigner(localStateFile, localIP)
 				fsm.RequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
 			}

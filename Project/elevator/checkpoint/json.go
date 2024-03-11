@@ -11,10 +11,6 @@ import (
 	"strings"
 )
 
-//const JSONFile = "JSONFile.json"
-
-// const ElevatorName = "one"
-
 // CombinedInput kombinerer HRAInput og CyclicCounterInput.
 type CombinedInput struct {
 	HRAInput      HRAInput
@@ -122,8 +118,8 @@ func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) 
 	}
 }
 
-func UpdateLocalJSON(localFilname string, incomingFilename string) {
-	localCombinedInput, _ := LoadCombinedInput(localFilname)
+func UpdateLocalJSON(localFilename string, incomingFilename string) {
+	localCombinedInput, _ := LoadCombinedInput(localFilename)
 	otherCombinedInput, _ := LoadCombinedInput(incomingFilename)
 
 	for f := 0; f < elevio.NFloors; f++ {
@@ -145,7 +141,7 @@ func UpdateLocalJSON(localFilname string, incomingFilename string) {
 			}
 		}
 	}
-	SaveCombinedInput(localCombinedInput, localFilname)
+	SaveCombinedInput(localCombinedInput, localFilename)
 }
 
 func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename string) error {
@@ -177,32 +173,32 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 	return nil
 }
 
-func InncommingJSONHandeling(localFilname string, incommigFilname string, inncommingCombinedInput CombinedInput, inactiveElevatorIDs []string) {
-	err := os.Remove(incommigFilname)
+func IncomingJSONHandeling(localFilename string, incomingFilname string, incomingCombinedInput CombinedInput, inactiveElevatorIDs []string) {
+	err := os.Remove(incomingFilname)
 	if err != nil {
 		fmt.Println("Feil ved fjerning:", err)
 	}
-	SaveCombinedInput(inncommingCombinedInput, incommigFilname)
-	UpdateLocalJSON(localFilname, incommigFilname)
-	inactiveElevatorIDs = DysfunctionalElevatorDetection(incommigFilname, inncommingCombinedInput, inactiveElevatorIDs)
+	SaveCombinedInput(incomingCombinedInput, incomingFilname)
+	UpdateLocalJSON(localFilename, incomingFilname)
+	inactiveElevatorIDs = DysfunctionalElevatorDetection(incomingFilname, incomingCombinedInput, inactiveElevatorIDs)
 	if len(inactiveElevatorIDs) > 0 {
 		for _, id := range inactiveElevatorIDs {
 			fmt.Println(id) // Using fmt.Println for printing each ID on a new line
 		}
 	}
 	
-	DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs, localFilname)
+	DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs, localFilename)
 }
 
-func RemoveDysfunctionalElevatorFromJSON(localFilname string, elevatorName string) {
-	combinedInput, _ := LoadCombinedInput(localFilname)
+func RemoveDysfunctionalElevatorFromJSON(localFilename string, elevatorName string) {
+	combinedInput, _ := LoadCombinedInput(localFilename)
 	for id := range combinedInput.HRAInput.States {
 		if id == elevatorName {
 			delete(combinedInput.HRAInput.States, id)
 			delete(combinedInput.CyclicCounter.States, id)
 		}
 	}
-	SaveCombinedInput(combinedInput, localFilname)
+	SaveCombinedInput(combinedInput, localFilename)
 }
 
 func DysfunctionalElevatorDetection(incomingFilename string, incomingCombinedInput CombinedInput, inactiveElevatorIDs []string) []string {
@@ -211,10 +207,10 @@ func DysfunctionalElevatorDetection(incomingFilename string, incomingCombinedInp
 		inactiveElevatorsMap[id] = struct{}{}
 	}
 
-	incommigElevatorName := strings.TrimSuffix(incomingFilename, ".json")
-	if _, exists := incomingCombinedInput.HRAInput.States[incommigElevatorName]; !exists {
-		print(incommigElevatorName)
-		inactiveElevatorIDs = append(inactiveElevatorIDs, incommigElevatorName)
+	incomingElevatorName := strings.TrimSuffix(incomingFilename, ".json")
+	if _, exists := incomingCombinedInput.HRAInput.States[incomingElevatorName]; !exists {
+		print(incomingElevatorName)
+		inactiveElevatorIDs = append(inactiveElevatorIDs, incomingElevatorName)
 	}
 
 	return inactiveElevatorIDs
@@ -260,8 +256,8 @@ func IncomingDataIsCorrupt(incomingCombinedInput CombinedInput) bool {
 	return false // Data er gyldig
 }
 
-func JSONsetAllLights(localFilname string, elevatorName string) {
-	combinedInput, _ := LoadCombinedInput(localFilname)
+func JSONsetAllLights(localFilename string, elevatorName string) {
+	combinedInput, _ := LoadCombinedInput(localFilename)
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
 		for floor := 0; floor < elevio.NFloors; floor++ {
 			elevio.RequestButtonLight(floor, elevio.BHallUp, combinedInput.HRAInput.HallRequests[floor][0])
