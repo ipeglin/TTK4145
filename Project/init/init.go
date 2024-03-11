@@ -78,7 +78,7 @@ func initNode(isFirstProcess bool) {
 
 		case msg := <-messageReceiveChannel:
 			// TODO: handle incoming messages
-			logrus.Info("Received message from ", msg.SenderId, ": ", msg.Payload)
+			logrus.Debug("Received message from ", msg.SenderId)
 
 			incomingState := msg.Payload
 			// TODO: Reassign orders
