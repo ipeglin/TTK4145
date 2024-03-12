@@ -70,7 +70,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 				//it is up to uss and we have functionality to do so
 			} else {
 				fsm.HandleStateOnReboot(elevatorName, elevatorStateFile)
-				//fsm.RequestButtonPressV3(elevatorStateFile, elevatorName)
+				//fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
 				//fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
 			}
 
@@ -82,7 +82,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			fsm.HandleButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
 			//fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
 			
-			fsm.RequestButtonPressV3(elevatorStateFile, elevatorName)
+			fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
 
 		case floor := <-drv_floors:
