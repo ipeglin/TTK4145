@@ -99,7 +99,8 @@ func UpdateJSONWhenHallOrderIsComplete(el elev.Elevator, filename string, elevat
 
 func UpdateJSONWhenNewOrderOccurs(filename string, elevatorName string, btnFloor int, btn elevio.Button) {
 	combinedInput, _ := LoadCombinedInput(filename)
-	
+	//ønsker vi ikke legge til nye ordere/ ta ordere mens vi er offline? 
+	//hvis vi øssker, fjern denne if setningen. 
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
 		combinedInput.CyclicCounter = updateCyclicCounterWhenNewOrderOccurs(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
 		combinedInput.HRAInput = updateHRAInputWhenNewOrderOccurs(combinedInput.HRAInput, elevatorName, btnFloor, btn)

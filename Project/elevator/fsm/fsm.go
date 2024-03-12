@@ -272,7 +272,7 @@ func InncommingJSONHandeling(localFilname string, localElevatorName string, othe
 			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] +1 
 		}
 	}
-	if allValuesEqual {
+		if allValuesEqual {
 		// Execute further actions here
 		checkpoint.JSONsetAllLights(localFilname, localElevatorName)
 		checkpoint.JSONOrderAssigner(& elevator, localFilname, localElevatorName)
