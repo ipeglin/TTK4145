@@ -89,17 +89,17 @@ func DoorTimeout(filename string, elevatorName string) {
 	}
 }
 
-func ToggleObstruction() {
-	if !timer.IsInfinite {
+func RequestObstruction() {
+	if elevator.CurrentBehaviour == elev.EBDoorOpen {
 		timer.StartInfiniteTimer()
-		if elevator.CurrentBehaviour == elev.EBIdle {
-			outputDevice.DoorLight(true)
-			elevator.CurrentBehaviour = elev.EBDoorOpen
-		}
-	} else {
-		timer.StopInfiniteTimer()
-		timer.Start(elevator.Config.DoorOpenDurationS)
+		jsonhandler.RemoveDysfunctionalElevatorFromJSON(localStateFile, elevatorName)
 	}
+}
+
+func StopObstruction() {
+	timer.StopInfiniteTimer()
+	timer.Start(elevator.Config.DoorOpenDurationS)
+	HandleStateOnReboot(elevatorName, localStateFile)
 }
 
 func CreateCheckpoint() {
@@ -249,7 +249,7 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 		jsonhandler.JSONsetAllLights(localFilename, localElevatorName)
 		jsonhandler.JSONOrderAssigner(&elevator, localFilename, localElevatorName)
 
-		//oppdater localliste av godetatte hallcalls. 
+		//oppdater localliste av godetatte hallcalls.
 		//fsm.MoveOnActiveOrders(localFilename, localElevatorName) // ! Only have one version
 	}
 	MoveOnActiveOrders(localFilename, localElevatorName)
@@ -261,15 +261,15 @@ func OnlyElevatorOnlie(localFilename string, localElevatorName string) bool {
 	if len(localCombinedInput.HRAInput.States) == 1 {
 		if _, exists := localCombinedInput.HRAInput.States[localElevatorName]; exists {
 			return true
-			}
 		}
+	}
 	return false
 }
 
 /*
 func OflineHandeling(){
-	//ikke skru lys av. Finn ut hvor det skjer. 
-	//Sett alle konfirmed hallcalls til denne lokale heisen 
-	//move 
+	//ikke skru lys av. Finn ut hvor det skjer.
+	//Sett alle konfirmed hallcalls til denne lokale heisen
+	//move
 }
 */
