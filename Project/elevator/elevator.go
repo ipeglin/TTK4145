@@ -77,9 +77,6 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 				fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
 				jsonhandler.JSONsetAllLights(elevatorStateFile, elevatorName)
 			}
-			if obst {
-				jsonhandler.RemoveDysfunctionalElevatorFromJSON(elevatorStateFile, elevatorName)
-			}
 			fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
 		//TODO: Alle UpdateElevatorState should be in the fsm functions beeing called
@@ -90,6 +87,9 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			if fsm.OnlyElevatorOnlie(elevatorStateFile, elevatorName) {
 				//fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
 				jsonhandler.JSONsetAllLights(elevatorStateFile, elevatorName)
+			}
+			if obst {
+				jsonhandler.RemoveDysfunctionalElevatorFromJSON(elevatorStateFile, elevatorName)
 			}
 
 		default:
