@@ -34,6 +34,6 @@ func Stop() {
 	isActive = false
 }
 
-func TimerTimedOut() bool {
+func TimedOut() bool {
 	return (!IsInfinite && isActive && GetCurrentTimeAsFloat() > endTime)
 }

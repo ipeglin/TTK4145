@@ -91,7 +91,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
 
 		default:
-			if timer.TimerTimedOut() { // Check for timeout only if no obstruction
+			if timer.TimedOut() { // Check for timeout only if no obstruction
 				logrus.Debug("Elevator timeout")
 				fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
 				timer.Stop()
