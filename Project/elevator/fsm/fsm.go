@@ -160,6 +160,8 @@ func HandleStateOnReboot(elevatorName string, filename string) {
 	checkpoint.SetCheckpoint(elevator, checkpoint.CheckpointFilename)
 }
 
+
+// TODO: Doesn't look like this is used; it is used!
 func updateStateOnNewOrder(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
 	jsonhandler.UpdateJSONOnNewOrder(filename, elevatorName, btnFloor, btn)
 }
@@ -178,6 +180,7 @@ func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string, fil
 		//trenger å sjekke at alt dette er riktig
 		updateStateOnNewOrder(btnFloor, btn, elevatorName, filename)
 
+		//TODO: This variable just makes it complicated
 		isCabCall := btn == elevio.BCab
 		if isCabCall {
 			elevator.Requests[btnFloor][btn] = true
@@ -208,7 +211,6 @@ func MoveOnActiveOrders(filename string, elevatorName string) {
 	setAllLights()
 }
 
-
 func HandleIncomingJSON(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput, incomingElevatorName string) {
 	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
 	allValuesEqual := true
@@ -227,13 +229,13 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 				localCombinedInput.CyclicCounter.HallRequests[f][i] = otherCombinedInput.CyclicCounter.HallRequests[f][i]
 				localCombinedInput.HRAInput.HallRequests[f][i] = otherCombinedInput.HRAInput.HallRequests[f][i]
 			}
-			if (otherCombinedInput.CyclicCounter.HallRequests[f][i] == localCombinedInput.CyclicCounter.HallRequests[f][i]){ 
-			 	if (localCombinedInput.HRAInput.HallRequests[f][i] != otherCombinedInput.HRAInput.HallRequests[f][i]){
-					//midliertilig konflikt logikk dersom den ene er true og den andre er false 
+			if otherCombinedInput.CyclicCounter.HallRequests[f][i] == localCombinedInput.CyclicCounter.HallRequests[f][i] {
+				if localCombinedInput.HRAInput.HallRequests[f][i] != otherCombinedInput.HRAInput.HallRequests[f][i] {
+					//midliertilig konflikt logikk dersom den ene er true og den andre er false
 					//oppstår ved motostop og bostruksjoner etc dersom den har selv claimet en orde som blir utført ila den har motorstop
-					//Tenk om dette er beste løsning  
+					//Tenk om dette er beste løsning
 					localCombinedInput.HRAInput.HallRequests[f][i] = false
-				} 
+				}
 			}
 		}
 	}
@@ -247,7 +249,7 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 				localCombinedInput.CyclicCounter.States[incomingElevatorName] = otherCombinedInput.CyclicCounter.States[incomingElevatorName]
 			}
 		}
-	}else{
+	} else {
 		if _, exists := localCombinedInput.HRAInput.States[incomingElevatorName]; exists {
 			delete(localCombinedInput.HRAInput.States, incomingElevatorName)
 			delete(localCombinedInput.CyclicCounter.States, incomingElevatorName)
@@ -255,13 +257,13 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 	}
 	if _, exists := otherCombinedInput.CyclicCounter.States[localElevatorName]; exists {
 		if otherCombinedInput.CyclicCounter.States[localElevatorName] > localCombinedInput.CyclicCounter.States[localElevatorName] {
-			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] +1 
+			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] + 1
 		}
 	}
-		if allValuesEqual {
+	if allValuesEqual {
 		// Execute further actions here
 		jsonhandler.JSONsetAllLights(localFilename, localElevatorName)
-		jsonhandler.JSONOrderAssigner(& elevator, localFilename, localElevatorName)
+		jsonhandler.JSONOrderAssigner(&elevator, localFilename, localElevatorName)
 		//fsm.MoveOnActiveOrders(localFilename, localElevatorName) // ! Only have one version
 	}
 	MoveOnActiveOrders(localFilename, localElevatorName)

@@ -15,18 +15,17 @@ func init() {
 	InputDevice = ElevioGetInputDevice()
 }
 
-// Liker ikke dene løsningen
 func castElevDirToMotorDirection(d ElevDir) hwelevio.HWMotorDirection {
 	switch d {
 	case DirDown:
-		return hwelevio.MD_Down
+		return hwelevio.MDDown
 	case DirUp:
-		return hwelevio.MD_Up
+		return hwelevio.MDUp
 	case DirStop:
-		return hwelevio.MD_Stop
+		return hwelevio.MDStop
 	default:
 		logrus.Error("Something went wrong!")
-		return hwelevio.MD_Down //HELT FEIL MÅ FIKSES
+		return hwelevio.MDDown
 	}
 }
 
@@ -40,7 +39,7 @@ func castButtonToHWButtonType(btn Button) hwelevio.HWButtonType {
 		return hwelevio.BCab
 	default:
 		logrus.Error("Something went wrong!")
-		return hwelevio.BHallUp //Hvordan løse dette?
+		return hwelevio.BHallUp
 	}
 }
 
@@ -100,19 +99,6 @@ func ElevioGetOutputDevice() ElevOutputDevice {
 		DoorLight:          RequestDoorOpenLamp,
 		StopButtonLight:    RequestStopLamp,
 		MotorDirection:     MotorDirection,
-	}
-}
-
-func ElevDirToString(d ElevDir) string {
-	switch d {
-	case DirDown:
-		return "down"
-	case DirStop:
-		return "stop"
-	case DirUp:
-		return "up"
-	default:
-		return "DirUnknown"
 	}
 }
 
@@ -191,6 +177,7 @@ func MontitorMotorActivity(receiver chan<- bool, duration float64) {
 	}
 }
 
+// TODO: Gustav should use these
 func ButtonToString(b Button) string {
 	switch b {
 	case BHallUp:
@@ -201,5 +188,18 @@ func ButtonToString(b Button) string {
 		return "BCab"
 	default:
 		return "Button Unknown"
+	}
+}
+
+func ElevDirToString(d ElevDir) string {
+	switch d {
+	case DirDown:
+		return "down"
+	case DirStop:
+		return "stop"
+	case DirUp:
+		return "up"
+	default:
+		return "DirUnknown"
 	}
 }

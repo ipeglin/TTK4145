@@ -9,17 +9,19 @@ import (
 
 const PollRate = 20 * time.Millisecond
 
-var _initialized bool = false
-var _numFloors int = 4
-var _mtx sync.Mutex
-var _conn net.Conn
+// TODO: refactor these to be in line with camelCase
+var initialized bool = false
+var nFloors int = 4
+var mtx sync.Mutex
+var conn net.Conn
 
 type HWMotorDirection int
 
+// TODO: refactor these to be in line with camelCase
 const (
-	MD_Down HWMotorDirection = iota - 1
-	MD_Stop
-	MD_Up
+	MDDown HWMotorDirection = iota - 1
+	MDStop
+	MDUp
 )
 
 type HWButtonType int
@@ -31,18 +33,18 @@ const (
 )
 
 func Init(addr string, numFloors int) {
-	if _initialized {
+	if initialized {
 		fmt.Println("Driver already initialized!")
 		return
 	}
-	_numFloors = numFloors
-	_mtx = sync.Mutex{}
+	nFloors = numFloors
+	mtx = sync.Mutex{}
 	var err error
-	_conn, err = net.Dial("tcp", addr)
+	conn, err = net.Dial("tcp", addr)
 	if err != nil {
 		panic(err.Error())
 	}
-	_initialized = true
+	initialized = true
 }
 
 func SetMotorDirection(dir HWMotorDirection) {
@@ -91,16 +93,16 @@ func GetObstruction() bool {
 }
 
 func read(in [4]byte) [4]byte {
-	_mtx.Lock()
-	defer _mtx.Unlock()
+	mtx.Lock()
+	defer mtx.Unlock()
 
-	_, err := _conn.Write(in[:])
+	_, err := conn.Write(in[:])
 	if err != nil {
 		panic("Lost connection to Elevator Server")
 	}
 
 	var out [4]byte
-	_, err = _conn.Read(out[:])
+	_, err = conn.Read(out[:])
 	if err != nil {
 		panic("Lost connection to Elevator Server")
 	}
@@ -109,10 +111,10 @@ func read(in [4]byte) [4]byte {
 }
 
 func write(in [4]byte) {
-	_mtx.Lock()
-	defer _mtx.Unlock()
+	mtx.Lock()
+	defer mtx.Unlock()
 
-	_, err := _conn.Write(in[:])
+	_, err := conn.Write(in[:])
 	if err != nil {
 		panic("Lost connection to Elevator Server")
 	}
