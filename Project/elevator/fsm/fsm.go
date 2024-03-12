@@ -149,7 +149,7 @@ func HandleStateOnReboot(elevatorName string, filename string) {
 	checkpoint.SetCheckpoint(elevator, checkpoint.CheckpointFilename)
 }
 
-// TODO: Doesn't look like this is used; it is used!
+// TODO: Doesn't look like this is used;
 func updateStateOnNewOrder(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
 	jsonhandler.UpdateJSONOnNewOrder(filename, elevatorName, btnFloor, btn)
 }
@@ -165,7 +165,8 @@ func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string, fil
 		timer.Start(elevator.Config.DoorOpenDurationS)
 	} else {
 		// TODO: Check if this is correct
-		updateStateOnNewOrder(btnFloor, btn, elevatorName, filename)
+		//updateStateOnNewOrder(btnFloor, btn, elevatorName, filename)
+		jsonhandler.UpdateJSONOnNewOrder(filename, elevatorName, btnFloor, btn)
 
 		//TODO: This variable just makes it complicated
 		isCabCall := btn == elevio.BCab
@@ -245,11 +246,30 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 		}
 	}
 	if allValuesEqual {
-		// Execute further actions here
 		jsonhandler.JSONsetAllLights(localFilename, localElevatorName)
 		jsonhandler.JSONOrderAssigner(&elevator, localFilename, localElevatorName)
+
+		//oppdater localliste av godetatte hallcalls. 
 		//fsm.MoveOnActiveOrders(localFilename, localElevatorName) // ! Only have one version
 	}
 	MoveOnActiveOrders(localFilename, localElevatorName)
 	jsonhandler.SaveCombinedInput(localCombinedInput, localFilename)
 }
+
+func OnlyElevatorOnlie(localFilename string, localElevatorName string) bool {
+	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
+	if len(localCombinedInput.HRAInput.States) == 1 {
+		if _, exists := localCombinedInput.HRAInput.States[localElevatorName]; exists {
+			return true
+			}
+		}
+	return false
+}
+
+/*
+func OflineHandeling(){
+	//ikke skru lys av. Finn ut hvor det skjer. 
+	//Sett alle konfirmed hallcalls til denne lokale heisen 
+	//move 
+}
+*/

@@ -68,6 +68,8 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 				//it is up to uss and we have functionality to do so
 			} else {
 				fsm.HandleStateOnReboot(elevatorName, elevatorStateFile)
+				//lurer på om vi må ha en movebutton her men idk
+
 				//fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
 				//fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
 			}
@@ -75,11 +77,11 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 		case btnEvent := <-drv_buttons:
 			logrus.Debug("Button press detected: ", btnEvent)
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
-			//trenger ikke være her. assign kun ved innkomende mld da heis offline ikke skal assigne
-			//print("hjelp noe må funke")
 			fsm.HandleButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
-			//fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
-
+			if fsm.OnlyElevatorOnlie(elevatorStateFile, elevatorName) {
+				fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
+				jsonhandler.JSONsetAllLights(elevatorStateFile, elevatorName)
+			}
 			fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
 		//TODO: Alle UpdateElevatorState should be in the fsm functions beeing called
@@ -87,6 +89,10 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			logrus.Debug("Floor sensor triggered: ", floor)
 			fsm.FloorArrival(floor, elevatorName, elevatorStateFile)
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
+			if fsm.OnlyElevatorOnlie(elevatorStateFile, elevatorName) {
+				//fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
+				jsonhandler.JSONsetAllLights(elevatorStateFile, elevatorName)
+			}
 
 		default:
 			if timer.TimedOut() { // Check for timeout only if no obstruction

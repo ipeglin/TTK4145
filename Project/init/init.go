@@ -68,8 +68,8 @@ func initNode(isFirstProcess bool) {
 			jsonhandler.DeleteInactiveElevatorsFromJSON(lostNodeAddresses, localStateFile)
 			//skal vi reasigne her? nei? 
 			//dersom vi ikke og den er enset igjen online så vil den ta alle den har blitt assignet (kan være mer enn en og fuløre dem)
-			fsm.JSONOrderAssigner(localStateFile, localIP)
-			fsm.MoveOnActiveOrders(localStateFile, localIP)
+			//fsm.JSONOrderAssigner(localStateFile, localIP)
+			//fsm.MoveOnActiveOrders(localStateFile, localIP)
 
 		case msg := <-messageReceiveChannel:
 			// TODO: handle incoming messages
@@ -88,12 +88,14 @@ func initNode(isFirstProcess bool) {
 			}
 
 		case online := <-onlineStatusChannel:
-			//dersom eneste oline ønsker vi ikke dette? 
+			//ViErOnline = True 
 			fsm.HandleStateOnReboot(localIP, localStateFile) // Deprecated: fsm.RebootJSON()
 			//fsm.JSONOrderAssigner(localStateFile, localIP)
 			//fsm.MoveOnActiveOrders(localStateFile, localIP) // ! Only have one version
 			logrus.Warn("Updated online status:", online)
 		}
+		//case ofline :=<- 
+		//ViErOnline = False
 	}
 
 }
