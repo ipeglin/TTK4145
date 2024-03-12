@@ -16,7 +16,6 @@ import (
 )
 
 func initNode(isFirstProcess bool) {
-	var lostNodes []string
 	var localStateFile string
 
 	logger.Setup()
@@ -54,13 +53,9 @@ func initNode(isFirstProcess bool) {
 			// må fikses
 
 			logrus.Info("Known nodes:", reg.Nodes)
-			if len(reg.Lost) <= 0 {
-				logrus.Info("No lost nodes")
-				lostNodes = []string{}
-				continue
-			}
-
-			logrus.Warn("Lost nodes:", reg.Lost)
+			if len(reg.Lost) > 0 {
+				logrus.Warn("Lost nodes:", reg.Lost)
+			}			
 
 			// extract ip from node names
 			var lostNodeAddresses []string
@@ -70,9 +65,9 @@ func initNode(isFirstProcess bool) {
 			}
 			logrus.Debug("Removing lost IPs: ", lostNodeAddresses)
 
-			lostNodes = lostNodeAddresses // Update the lostNodes
-
-			checkpoint.DeleteInactiveElevatorsFromJSON(lostNodes, localStateFile)
+			checkpoint.DeleteInactiveElevatorsFromJSON(lostNodeAddresses, localStateFile)
+			//skal vi reasigne her? nei? 
+			//dersom vi ikke og den er enset igjen online så vil den ta alle den har blitt assignet (kan være mer enn en og fuløre dem)
 			fsm.JSONOrderAssigner(localStateFile, localIP)
 			fsm.RequestButtonPressV3(localStateFile, localIP)
 
@@ -85,16 +80,18 @@ func initNode(isFirstProcess bool) {
 
 			// update and remove list nodes
 			if !checkpoint.IncomingDataIsCorrupt(incomingState) {
-				//checkpoint.SaveCombinedInput(incomingState, incomingFileName)
-				checkpoint.IncomingJSONHandling(localStateFile, incomingState, msg.SenderId)
-				fsm.JSONOrderAssigner(localStateFile, localIP)
-				fsm.RequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
+				fsm.HandleIncomingJSON(localStateFile, localIP, msg.Payload, msg.SenderId)
+				//fsm.HandleIncomingJSON(localStateFile, incomingState, msg.SenderId)
+				//checkpoint.JSONsetAllLights(localStateFile, msg.SenderId)
+				//fsm.JSONOrderAssigner(localStateFile, localIP)
+				 // TODO: Only have one version
 			}
 
 		case online := <-onlineStatusChannel:
+			//dersom eneste oline ønsker vi ikke dette? 
 			fsm.RebootJSON(localIP, localStateFile)
-			fsm.JSONOrderAssigner(localStateFile, localIP)
-			fsm.RequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
+			//fsm.JSONOrderAssigner(localStateFile, localIP)
+			//fsm.RequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
 			logrus.Warn("Updated online status:", online)
 		}
 	}

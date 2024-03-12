@@ -8,9 +8,13 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+<<<<<<< HEAD
 	"strings"
 
 	"github.com/sirupsen/logrus"
+=======
+	//"strings"
+>>>>>>> sundag
 )
 
 //const JSONFile = "JSONFile.json"
@@ -99,12 +103,13 @@ func UpdateJSONOnCompletedHallOrder(el elev.Elevator, filename string, elevatorN
 	SaveCombinedInput(combinedInput, filename)
 }
 
-func UpdateJSONOnNewOrder(filename string, elevatorName string, btnFloor int, btn elevio.Button, el *elev.Elevator) {
+func UpdateJSONOnNewOrder(filename string, elevatorName string, btnFloor int, btn elevio.Button) {
 	combinedInput, _ := LoadCombinedInput(filename)
-
+	//ønsker vi ikke legge til nye ordere/ ta ordere mens vi er offline? 
+	//hvis vi øssker, fjern denne if setningen. 
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
-		combinedInput.CyclicCounter = updateCyclicCounterOnNewOrder(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
-		combinedInput.HRAInput = updateHRAInputWhenNewOrderOccurs(combinedInput.HRAInput, elevatorName, btnFloor, btn, el)
+		combinedInput.CyclicCounter = updateCyclicCounterWhenNewOrderOccurs(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
+		combinedInput.HRAInput = updateHRAInputWhenNewOrderOccurs(combinedInput.HRAInput, elevatorName, btnFloor, btn)
 	}
 	SaveCombinedInput(combinedInput, filename)
 }
@@ -146,8 +151,8 @@ func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) 
 		logrus.Debug("HRAInput.States is empty, skipping order assignment")
 	}
 }
-
-func IncomingJSONHandling(localFilename string, otherCombinedInput CombinedInput, incomingElevatorName string) {
+/*
+func HandleIncomingJSON(el elev.Elevator,localFilename string, localElevatorName string, otherCombinedInput CombinedInput, incomingElevatorName string) {
 	localCombinedInput, _ := LoadCombinedInput(localFilename)
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
@@ -181,15 +186,29 @@ func IncomingJSONHandling(localFilename string, otherCombinedInput CombinedInput
 			delete(localCombinedInput.CyclicCounter.States, incomingElevatorName)
 		}
 	}
-	localElevatorName := strings.TrimSuffix(localFilename, ".json")
 	if _, exists := otherCombinedInput.CyclicCounter.States[localElevatorName]; exists {
 		if otherCombinedInput.CyclicCounter.States[localElevatorName] > localCombinedInput.CyclicCounter.States[localElevatorName] {
 			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] + 1
 		}
 	}
 	SaveCombinedInput(localCombinedInput, localFilename)
+	allValuesGreater := true
+	for f := 0; f < elevio.NFloors; f++ {
+		for i := 0; i < 2; i++ {
+			if otherCombinedInput.CyclicCounter.HallRequests[f][i] < localCombinedInput.CyclicCounter.HallRequests[f][i] {
+				allValuesGreater = false
+				break
+			}
+		}
+	}
+	if allValuesGreater {
+		// Execute further actions here
+		JSONsetAllLights(localFilename, localElevatorName)
+		JSONOrderAssigner(& el, localFilename, localElevatorName)
+		//fsm.RequestButtonPressV3(localFilename, localElevatorName) // TODO: Only have one version
+	}
 }
-
+*/
 func RemoveDysfunctionalElevatorFromJSON(localFilename string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(localFilename)
 	for id := range combinedInput.HRAInput.States {
@@ -273,10 +292,10 @@ func IncomingDataIsCorrupt(incomingCombinedInput CombinedInput) bool {
 
 func JSONsetAllLights(localFilename string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(localFilename)
-	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
-		for floor := 0; floor < elevio.NFloors; floor++ {
-			elevio.RequestButtonLight(floor, elevio.BHallUp, combinedInput.HRAInput.HallRequests[floor][0])
-			elevio.RequestButtonLight(floor, elevio.BHallDown, combinedInput.HRAInput.HallRequests[floor][1])
-		}
+	//if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
+	for floor := 0; floor < elevio.NFloors; floor++ {
+		elevio.RequestButtonLight(floor, elevio.BHallUp, combinedInput.HRAInput.HallRequests[floor][0])
+		elevio.RequestButtonLight(floor, elevio.BHallDown, combinedInput.HRAInput.HallRequests[floor][1])
+	
 	}
 }

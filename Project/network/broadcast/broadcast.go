@@ -11,7 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const bufferSize = 1024
+const bufferSize = 4 * 1024
 
 // Encodes received values from `chans` into type-tagged JSON, then broadcasts
 // it on `port`

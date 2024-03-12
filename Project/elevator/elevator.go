@@ -70,16 +70,18 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 				//it is up to uss and we have functionality to do so
 			} else {
 				fsm.RebootJSON(elevatorName, elevatorStateFile)
-
+				//fsm.RequestButtonPressV3(elevatorStateFile, elevatorName)
+				//fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
 			}
 
 		case btnEvent := <-drv_buttons:
 			logrus.Debug("Button press detected: ", btnEvent)
 			fsm.UpdateJSON(elevatorName, elevatorStateFile)
 			//trenger ikke være her. assign kun ved innkomende mld da heis offline ikke skal assigne
+			//print("hjelp noe må funke")
 			fsm.RequestButtonPressV2(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
-			fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
-
+			//fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
+			
 			fsm.RequestButtonPressV3(elevatorStateFile, elevatorName)
 			fsm.UpdateJSON(elevatorName, elevatorStateFile)
 
