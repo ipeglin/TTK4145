@@ -114,13 +114,13 @@ func ToggleObstruction() {
 
 func MakeCheckpoint() {
 	for {
-		checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
+		checkpoint.SetCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 		time.Sleep(50 * time.Millisecond)
 	}
 }
 
 func ResumeAtLatestCheckpoint(floor int) {
-	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
+	elevator, _, _ = checkpoint.LoadCheckpoint(checkpoint.FilenameCheckpoint)
 	setAllLights()
 
 	if elevator.Dirn != elevio.DirStop && floor == -1 {
@@ -151,13 +151,13 @@ func CreateLocalStateFile(filename string, ElevatorName string) {
 // This was UpdateJSON()
 func UpdateElevatorState(elevatorName string, filename string) {
 	jsonhandler.UpdateJSON(elevator, filename, elevatorName)
-	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
+	checkpoint.SetCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
 // This was RebootJSON()
 func HandleStateOnReboot(elevatorName string, filename string) {
 	jsonhandler.UpdateJSONOnReboot(elevator, filename, elevatorName) // Deprecated: json.RebootJSON()
-	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
+	checkpoint.SetCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
 // TODO: Doesn't look like this is used

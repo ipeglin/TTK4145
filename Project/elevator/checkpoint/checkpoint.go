@@ -14,7 +14,7 @@ type ElevCheckpoint struct {
 	Timestamp time.Time
 }
 
-func SaveElevCheckpoint(e elev.Elevator, fileName string) error {
+func SetCheckpoint(e elev.Elevator, filename string) error {
 	checkpoint :=
 		ElevCheckpoint{
 			e,
@@ -24,12 +24,12 @@ func SaveElevCheckpoint(e elev.Elevator, fileName string) error {
 	if err != nil {
 		return err
 	}
-	filehandler.WriteToFile(jsonCP, fileName)
+	filehandler.WriteToFile(jsonCP, filename)
 	return nil
 }
 
-func LoadElevCheckpoint(fileName string) (elev.Elevator, time.Time, error) {
-	jsonCp, err := filehandler.ReadFromFile(fileName)
+func LoadCheckpoint(filename string) (elev.Elevator, time.Time, error) {
+	jsonCp, err := filehandler.ReadFromFile(filename)
 	if err != nil {
 		return elev.Elevator{}, time.Time{}, err
 	}
