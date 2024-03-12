@@ -2,9 +2,10 @@ package requests
 
 import (
 	//"fmt"
-	"elevator/checkpoint"
+
 	"elevator/elev"
 	"elevator/elevio"
+	"elevator/jsonhandler"
 )
 
 func requestsAbove(e elev.Elevator) bool {
@@ -153,7 +154,7 @@ func ClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName string) 
 	}
 	for btn, wasPressed := range beforeClear {
 		if wasPressed && !e.Requests[e.CurrentFloor][btn] {
-			checkpoint.UpdateJSONOnCompletedHallOrder(e, filename, elevatorName, e.CurrentFloor, btn)
+			jsonhandler.UpdateJSONOnCompletedHallOrder(e, filename, elevatorName, e.CurrentFloor, btn)
 		}
 	}
 	return e

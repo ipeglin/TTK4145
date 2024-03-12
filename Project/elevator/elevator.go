@@ -1,11 +1,11 @@
 package elevator
 
 import (
-	"elevator/checkpoint"
 	"elevator/driver/hwelevio"
 	"elevator/elevio"
 	"elevator/fsm"
 	"elevator/immobility"
+	"elevator/jsonhandler"
 	"elevator/timer"
 	"time"
 
@@ -65,7 +65,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			logrus.Warn("Immobile state changed: ", immobile)
 			if immobile {
 				// BUG: THis occurs very late
-				checkpoint.RemoveDysfunctionalElevatorFromJSON(elevatorStateFile, elevatorName)
+				jsonhandler.RemoveDysfunctionalElevatorFromJSON(elevatorStateFile, elevatorName)
 				//we need to remove the request// clear them if we dont want to comlete orders twice.
 				//it is up to uss and we have functionality to do so
 			} else {

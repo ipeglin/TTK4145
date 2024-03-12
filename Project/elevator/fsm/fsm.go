@@ -150,22 +150,22 @@ func InitJson(filename string, ElevatorName string) {
 
 // This was UpdateJSON()
 func UpdateElevatorState(elevatorName string, filename string) {
-	checkpoint.UpdateJSON(elevator, filename, elevatorName)
+	jsonhandler.UpdateJSON(elevator, filename, elevatorName)
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
 // This was RebootJSON()
 func HandleStateOnReboot(elevatorName string, filename string) {
-	checkpoint.UpdateJSONOnReboot(elevator, filename, elevatorName) // Deprecated: json.RebootJSON()
+	jsonhandler.UpdateJSONOnReboot(elevator, filename, elevatorName) // Deprecated: json.RebootJSON()
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
 func UpdateJSONOnNewOrder(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
-	checkpoint.UpdateJSONOnNewOrder(filename, elevatorName, btnFloor, btn)
+	jsonhandler.UpdateJSONOnNewOrder(filename, elevatorName, btnFloor, btn)
 }
 
 func JSONOrderAssigner(filename string, elevatorName string) {
-	checkpoint.JSONOrderAssigner(&elevator, filename, elevatorName)
+	jsonhandler.JSONOrderAssigner(&elevator, filename, elevatorName)
 }
 
 func RequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
@@ -205,7 +205,7 @@ func RequestButtonPressV3(filename string, elevatorName string) {
 }
 
 
-func HandleIncomingJSON(localFilename string, localElevatorName string, otherCombinedInput checkpoint.CombinedInput, incomingElevatorName string) {
+func HandleIncomingJSON(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput, incomingElevatorName string) {
 	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
 	allValuesEqual := true
 	for f := 0; f < elevio.NFloors; f++ {
@@ -256,8 +256,8 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 	}
 		if allValuesEqual {
 		// Execute further actions here
-		checkpoint.JSONsetAllLights(localFilename, localElevatorName)
-		checkpoint.JSONOrderAssigner(& elevator, localFilename, localElevatorName)
+		jsonhandler.JSONsetAllLights(localFilename, localElevatorName)
+		jsonhandler.JSONOrderAssigner(& elevator, localFilename, localElevatorName)
 		//fsm.RequestButtonPressV3(localFilename, localElevatorName) // TODO: Only have one version
 	}
 	RequestButtonPressV3(localFilename, localElevatorName)
