@@ -2,8 +2,8 @@ package main
 
 import (
 	"elevator"
-	"elevator/checkpoint"
 	"elevator/fsm"
+	"elevator/jsonhandler"
 	"elevator/processpair"
 	"logger"
 	"network"
@@ -39,7 +39,7 @@ func initNode(isFirstProcess bool) {
 	go func() {
 		for {
 			// TODO: If invalid json, do not broadcast, so ther nodes will think it is offline
-			elv, _ := checkpoint.LoadCombinedInput(localStateFile)
+			elv, _ := jsonhandler.LoadCombinedInput(localStateFile)
 			messageTransmitterChannel <- network.Message{Payload: elv}
 			time.Sleep(500 * time.Millisecond)
 		}
@@ -65,7 +65,7 @@ func initNode(isFirstProcess bool) {
 			}
 			logrus.Debug("Removing lost IPs: ", lostNodeAddresses)
 
-			checkpoint.DeleteInactiveElevatorsFromJSON(lostNodeAddresses, localStateFile)
+			jsonhandler.DeleteInactiveElevatorsFromJSON(lostNodeAddresses, localStateFile)
 			//skal vi reasigne her? nei? 
 			//dersom vi ikke og den er enset igjen online så vil den ta alle den har blitt assignet (kan være mer enn en og fuløre dem)
 			fsm.JSONOrderAssigner(localStateFile, localIP)
@@ -79,7 +79,7 @@ func initNode(isFirstProcess bool) {
 			// TODO: Reassign orders
 
 			// update and remove list nodes
-			if !checkpoint.IncomingDataIsCorrupt(incomingState) {
+			if !jsonhandler.IncomingDataIsCorrupt(incomingState) {
 				fsm.HandleIncomingJSON(localStateFile, localIP, msg.Payload, msg.SenderId)
 				//fsm.HandleIncomingJSON(localStateFile, incomingState, msg.SenderId)
 				//checkpoint.JSONsetAllLights(localStateFile, msg.SenderId)

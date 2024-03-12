@@ -4,6 +4,7 @@ import (
 	"elevator/checkpoint"
 	"elevator/elev"
 	"elevator/elevio"
+	"elevator/jsonhandler"
 	"elevator/requests"
 	"elevator/timer"
 	"network/local"
@@ -138,10 +139,10 @@ func InitJson(filename string, ElevatorName string) {
 	if err != nil {
 		logrus.Error("Failed to remove:", err)
 	}
-	combinedInput := checkpoint.InitializeCombinedInput(elevator, ElevatorName)
+	combinedInput := jsonhandler.InitializeCombinedInput(elevator, ElevatorName)
 
 	// If the file was successfully deleted, return nil
-	err = checkpoint.SaveCombinedInput(combinedInput, filename)
+	err = jsonhandler.SaveCombinedInput(combinedInput, filename)
 	if err != nil {
 		logrus.Error("Failed to save checkpoint:", err)
 	}
@@ -205,7 +206,7 @@ func RequestButtonPressV3(filename string, elevatorName string) {
 
 
 func HandleIncomingJSON(localFilename string, localElevatorName string, otherCombinedInput checkpoint.CombinedInput, incomingElevatorName string) {
-	localCombinedInput, _ := checkpoint.LoadCombinedInput(localFilename)
+	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
 	allValuesEqual := true
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
@@ -260,5 +261,5 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 		//fsm.RequestButtonPressV3(localFilename, localElevatorName) // TODO: Only have one version
 	}
 	RequestButtonPressV3(localFilename, localElevatorName)
-	checkpoint.SaveCombinedInput(localCombinedInput, localFilename)
+	jsonhandler.SaveCombinedInput(localCombinedInput, localFilename)
 }

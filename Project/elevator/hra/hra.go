@@ -1,4 +1,4 @@
-package checkpoint
+package hra
 
 import (
 	"elevator/elev"
@@ -19,7 +19,7 @@ type HRAInput struct {
 	States       map[string]HRAElevState `json:"states"`
 }
 
-func initializeHRAInput(el elev.Elevator, elevatorName string) HRAInput {
+func InitializeHRAInput(el elev.Elevator, elevatorName string) HRAInput {
 	hraInput := HRAInput{
 		HallRequests: make([][2]bool, elevio.NFloors),
 		States:       make(map[string]HRAElevState),
@@ -40,7 +40,7 @@ func initializeHRAInput(el elev.Elevator, elevatorName string) HRAInput {
 	return hraInput
 }
 
-func updateHRAInput(hraInput HRAInput, el elev.Elevator, elevatorName string) HRAInput {
+func UpdateHRAInput(hraInput HRAInput, el elev.Elevator, elevatorName string) HRAInput {
 	for f := 0; f < elevio.NFloors; f++ {
 		hraInput.HallRequests[f][0] = hraInput.HallRequests[f][0] || el.Requests[f][elevio.BHallUp]
 		hraInput.HallRequests[f][1] = hraInput.HallRequests[f][1] || el.Requests[f][elevio.BHallDown]
@@ -56,7 +56,7 @@ func updateHRAInput(hraInput HRAInput, el elev.Elevator, elevatorName string) HR
 	return hraInput
 	}
 
-func rebootHRAInput(hraInput HRAInput, el elev.Elevator, elevatorName string) HRAInput {
+func RebootHRAInput(hraInput HRAInput, el elev.Elevator, elevatorName string) HRAInput {
 	behavior, direction, cabRequests := convertLocalElevatorState(el)
 	hraInput.States[elevatorName] = HRAElevState{
 		Behavior:    behavior,
@@ -68,7 +68,7 @@ func rebootHRAInput(hraInput HRAInput, el elev.Elevator, elevatorName string) HR
 }
 
 
-func updateHRAInputWhenOrderIsComplete(hraInput HRAInput, el elev.Elevator, elevatorName string, btn_floor int, btn_type elevio.Button) HRAInput {
+func UpdateHRAInputOnCompletedOrder(hraInput HRAInput, el elev.Elevator, elevatorName string, btn_floor int, btn_type elevio.Button) HRAInput {
 	switch btn_type {
 	case elevio.BHallUp:
 		hraInput.HallRequests[btn_floor][0] = false
@@ -121,7 +121,7 @@ func convertLocalElevatorState(localElevator elev.Elevator) (string, string, []b
 	return behavior, direction, cabRequests
 }
 
-func updateHRAInputWhenNewOrderOccurs(hraInput HRAInput, elevatorName string, btnFloor int, btn elevio.Button) HRAInput {
+func UpdateHRAInputWhenNewOrderOccurs(hraInput HRAInput, elevatorName string, btnFloor int, btn elevio.Button) HRAInput {
 	switch btn {
 	case elevio.BHallUp:
 		hraInput.HallRequests[btnFloor][0] = true
