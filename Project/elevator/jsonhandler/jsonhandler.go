@@ -39,17 +39,6 @@ func SaveCombinedInput(combinedInput CombinedInput, filename string) error {
 
 // LoadCombinedInput deserialiserer CombinedInput fra en JSON-fil.
 func LoadCombinedInput(filename string) (CombinedInput, error) {
-	// TODO: Use filehandler.ReadFromFile(). This replaces both use of LockFile() and ReadFromFile()
-	// osFile, err := filehandler.LockFile(filename) // Lock the file for reading
-	// if err != nil {
-	// 	return combinedInput, err
-	// }
-	// defer filehandler.UnlockFile(osFile) // Ensure file is unlocked after reading
-
-	// data, err := os.ReadFile(filename)
-	// if err != nil {
-	// 	return combinedInput, fmt.Errorf("kunne ikke lese fil: %v", err)
-	// }
 	var combinedInput CombinedInput
 	
 	data, err := filehandler.ReadFromFile(filename)
