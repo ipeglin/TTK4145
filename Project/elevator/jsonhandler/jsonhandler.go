@@ -1,7 +1,7 @@
 package jsonhandler
 
 import (
-	cc "elevator/cycliccounter"
+	ccounter "elevator/cycliccounter"
 	"elevator/elev"
 	"elevator/elevio"
 	"elevator/filehandler"
@@ -19,13 +19,13 @@ import (
 // CombinedInput kombinerer HRAInput og CyclicCounterInput.
 type CombinedInput struct {
 	HRAInput      hra.HRAInput
-	CyclicCounter cc.CyclicCounterInput
+	CyclicCounter ccounter.CyclicCounterInput
 }
 
 func InitializeCombinedInput(el elev.Elevator, ElevatorName string) CombinedInput {
 	return CombinedInput{
 		HRAInput:      hra.InitializeHRAInput(el, ElevatorName),       // Anta at denne funksjonen initialiserer HRAInput
-		CyclicCounter: cc.InitializeCyclicCounterInput(ElevatorName), // Bruker eksisterende initialiseringsfunksjon
+		CyclicCounter: ccounter.InitializeCyclicCounterInput(ElevatorName), // Bruker eksisterende initialiseringsfunksjon
 	}
 }
 
@@ -77,7 +77,7 @@ func UpdateJSON(el elev.Elevator, filename string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(filename)
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
 		combinedInput.HRAInput = hra.UpdateHRAInput(combinedInput.HRAInput, el, elevatorName)
-		combinedInput.CyclicCounter = cc.UpdateCyclicCounterInput(combinedInput.CyclicCounter, elevatorName)
+		combinedInput.CyclicCounter = ccounter.UpdateInput(combinedInput.CyclicCounter, elevatorName)
 	}
 	SaveCombinedInput(combinedInput, filename)
 }
@@ -86,7 +86,7 @@ func UpdateJSON(el elev.Elevator, filename string, elevatorName string) {
 func UpdateJSONOnReboot(el elev.Elevator, filename string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(filename)
 	combinedInput.HRAInput = hra.RebootHRAInput(combinedInput.HRAInput, el, elevatorName)
-	combinedInput.CyclicCounter = cc.UpdateCyclicCounterInput(combinedInput.CyclicCounter, elevatorName)
+	combinedInput.CyclicCounter = ccounter.UpdateInput(combinedInput.CyclicCounter, elevatorName)
 	SaveCombinedInput(combinedInput, filename)
 }
 
@@ -94,7 +94,7 @@ func UpdateJSONOnCompletedHallOrder(el elev.Elevator, filename string, elevatorN
 	combinedInput, _ := LoadCombinedInput(filename)
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
 		combinedInput.HRAInput = hra.UpdateHRAInputOnCompletedOrder(combinedInput.HRAInput, el, elevatorName, btn_floor, btn_type)
-		combinedInput.CyclicCounter = cc.UpdateCyclicCounterOnCompletedOrder(combinedInput.CyclicCounter, elevatorName, btn_floor, btn_type)
+		combinedInput.CyclicCounter = ccounter.UpdateOnCompletedOrder(combinedInput.CyclicCounter, elevatorName, btn_floor, btn_type)
 	}
 	SaveCombinedInput(combinedInput, filename)
 }
@@ -104,7 +104,7 @@ func UpdateJSONOnNewOrder(filename string, elevatorName string, btnFloor int, bt
 	//ønsker vi ikke legge til nye ordere/ ta ordere mens vi er offline? 
 	//hvis vi øssker, fjern denne if setningen. 
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
-		combinedInput.CyclicCounter = cc.UpdateCyclicCounterOnNewOrder(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
+		combinedInput.CyclicCounter = ccounter.UpdateOnNewOrder(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
 		combinedInput.HRAInput = hra.UpdateHRAInputWhenNewOrderOccurs(combinedInput.HRAInput, elevatorName, btnFloor, btn)
 	}
 	SaveCombinedInput(combinedInput, filename)
