@@ -94,7 +94,7 @@ func initNode(isFirstProcess bool) {
 
 				//fsm.HandleIncomingJSON(localStateFile, incomingState, msg.SenderId)
 				//checkpoint.JSONsetAllLights(localStateFile, msg.SenderId)
-				//fsm.JSONOrderAssigner(localStateFile, localIP)
+				fsm.JSONOrderAssigner(localStateFile, localIP)
 				// ! Only have one version
 			}
 

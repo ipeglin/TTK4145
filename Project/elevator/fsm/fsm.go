@@ -235,7 +235,6 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] + 1
 		}
 	}
-
 	jsonhandler.SaveCombinedInput(localCombinedInput, localFilename)
 }
 

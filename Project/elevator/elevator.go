@@ -75,6 +75,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
 			fsm.HandleButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
 			if fsm.OnlyElevatorOnlie(elevatorStateFile, elevatorName) {
+				print("jeg er eneste onlibe")
 				fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
 				jsonhandler.JSONsetAllLights(elevatorStateFile, elevatorName)
 			}
