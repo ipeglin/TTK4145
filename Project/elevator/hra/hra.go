@@ -133,7 +133,7 @@ func UpdateHRAInputWhenNewOrderOccurs(hraInput HRAInput, elevatorName string, bt
 	return hraInput
 }
 
-
+/*
 func synchronizeLocalHRAWithIncoming(localCombinedInput *jsonhandler.CombinedInput, otherCombinedInput jsonhandler.CombinedInput, incomingElevatorName string, localElevatorName string) {
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
@@ -166,3 +166,4 @@ func synchronizeLocalHRAWithIncoming(localCombinedInput *jsonhandler.CombinedInp
 		}
 	}
 }
+*/
