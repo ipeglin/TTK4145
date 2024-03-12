@@ -13,6 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// TODO: Change to ElevatorState or similar
 // CombinedInput kombinerer HRAInput og CyclicCounterInput.
 type CombinedInput struct {
 	HRAInput      hra.HRAInput
