@@ -3,7 +3,6 @@ package elevio
 import (
 	"elevator/driver/hwelevio"
 	"elevator/timer"
-	"fmt"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -26,7 +25,7 @@ func castElevDirToMotorDirection(d ElevDir) hwelevio.HWMotorDirection {
 	case DirStop:
 		return hwelevio.MD_Stop
 	default:
-		fmt.Printf("Noe har gått feil i CastMotorDirection")
+		logrus.Error("Something went wrong!")
 		return hwelevio.MD_Down //HELT FEIL MÅ FIKSES
 	}
 }
