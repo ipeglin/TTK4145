@@ -121,7 +121,7 @@ func convertLocalElevatorState(localElevator elev.Elevator) (string, string, []b
 	return behavior, direction, cabRequests
 }
 
-func updateHRAInputWhenNewOrderOccurs(hraInput HRAInput, elevatorName string, btnFloor int, btn elevio.Button, localElevator *elev.Elevator) HRAInput {
+func updateHRAInputWhenNewOrderOccurs(hraInput HRAInput, elevatorName string, btnFloor int, btn elevio.Button) HRAInput {
 	switch btn {
 	case elevio.BHallUp:
 		hraInput.HallRequests[btnFloor][0] = true

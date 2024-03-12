@@ -44,7 +44,7 @@ func SetElevator(f int, cb elev.ElevatorBehaviour, dirn elevio.ElevDir, r [elevi
 func setAllLights() {
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
-			checkpoint.JSONsetAllLights(localStateFile, elevatorName)
+			//checkpoint.JSONsetAllLights(localStateFile, elevatorName)
 			outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
 		}
 	}
@@ -177,7 +177,7 @@ func FsmRebootJSON(elevatorName string, filename string) {
 }
 
 func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
-	checkpoint.UpdateJSONWhenNewOrderOccurs(filename, elevatorName, btnFloor, btn, &elevator)
+	checkpoint.UpdateJSONWhenNewOrderOccurs(filename, elevatorName, btnFloor, btn)
 }
 
 func FsmJSONOrderAssigner(filename string, elevatorName string) {
@@ -223,4 +223,63 @@ func FsmRequestButtonPressV3(filename string, elevatorName string) {
 	setAllLights()
 	//fmt.Printf("New state: \n")
 	//elev.ElevatorPrint(elevator)
+}
+
+
+func InncommingJSONHandeling(localFilname string, localElevatorName string, otherCombinedInput checkpoint.CombinedInput, incomingElevatorName string) {
+	localCombinedInput, _ := checkpoint.LoadCombinedInput(localFilname)
+	for f := 0; f < elevio.NFloors; f++ {
+		for i := 0; i < 2; i++ {
+			if otherCombinedInput.CyclicCounter.HallRequests[f][i] > localCombinedInput.CyclicCounter.HallRequests[f][i] {
+				localCombinedInput.CyclicCounter.HallRequests[f][i] = otherCombinedInput.CyclicCounter.HallRequests[f][i]
+				localCombinedInput.HRAInput.HallRequests[f][i] = otherCombinedInput.HRAInput.HallRequests[f][i]
+			}
+			if (otherCombinedInput.CyclicCounter.HallRequests[f][i] == localCombinedInput.CyclicCounter.HallRequests[f][i]){ 
+			 	if (localCombinedInput.HRAInput.HallRequests[f][i] != otherCombinedInput.HRAInput.HallRequests[f][i]){
+					//midliertilig konflikt logikk dersom den ene er true og den andre er false 
+					//oppstår ved motostop og bostruksjoner etc dersom den har selv claimet en orde som blir utført ila den har motorstop
+					//Tenk om dette er beste løsning  
+					localCombinedInput.HRAInput.HallRequests[f][i] = false
+				} 
+			}
+		}
+	}
+	if _, exists := otherCombinedInput.HRAInput.States[incomingElevatorName]; exists {
+		if _, exists := localCombinedInput.HRAInput.States[incomingElevatorName]; !exists {
+			localCombinedInput.HRAInput.States[incomingElevatorName] = otherCombinedInput.HRAInput.States[incomingElevatorName]
+			localCombinedInput.CyclicCounter.States[incomingElevatorName] = otherCombinedInput.CyclicCounter.States[incomingElevatorName]
+		} else {
+			if otherCombinedInput.CyclicCounter.States[incomingElevatorName] > localCombinedInput.CyclicCounter.States[incomingElevatorName] {
+				localCombinedInput.HRAInput.States[incomingElevatorName] = otherCombinedInput.HRAInput.States[incomingElevatorName]
+				localCombinedInput.CyclicCounter.States[incomingElevatorName] = otherCombinedInput.CyclicCounter.States[incomingElevatorName]
+			}
+		}
+	}else{
+		if _, exists := localCombinedInput.HRAInput.States[incomingElevatorName]; exists {
+			delete(localCombinedInput.HRAInput.States, incomingElevatorName)
+			delete(localCombinedInput.CyclicCounter.States, incomingElevatorName)
+		}
+	}
+	if _, exists := otherCombinedInput.CyclicCounter.States[localElevatorName]; exists {
+		if otherCombinedInput.CyclicCounter.States[localElevatorName] > localCombinedInput.CyclicCounter.States[localElevatorName] {
+			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] +1 
+		}
+	}
+	checkpoint.SaveCombinedInput(localCombinedInput, localFilname)
+	allValuesGreater := true
+	for f := 0; f < elevio.NFloors; f++ {
+		for i := 0; i < 2; i++ {
+			if otherCombinedInput.CyclicCounter.HallRequests[f][i] < localCombinedInput.CyclicCounter.HallRequests[f][i] {
+				allValuesGreater = false
+				break
+			}
+		}
+	}
+	if allValuesGreater {
+		// Execute further actions here
+		checkpoint.JSONsetAllLights(localFilname, localElevatorName)
+		checkpoint.JSONOrderAssigner(& elevator, localFilname, localElevatorName)
+		//fsm.FsmRequestButtonPressV3(localFilname, localElevatorName) // TODO: Only have one version
+	}
+	FsmRequestButtonPressV3(localFilname, localElevatorName)
 }

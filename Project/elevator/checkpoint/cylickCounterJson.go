@@ -4,6 +4,8 @@ import (
 	"elevator/elevio"
 )
 
+
+
 type CyclicCounterInput struct {
 	HallRequests [][2]int                            `json:"hallRequests"`
 	States       map[string]int       `json:"states"`
@@ -20,6 +22,8 @@ func InitializeCyclicCounterInput(ElevatorName string) CyclicCounterInput {
 
 	return cyclicCounter
 }
+
+
 
 
 func updateCyclicCounterWhenOrderIsComplete(cyclicCounter CyclicCounterInput, elevatorName string, btn_floor int, btn_type elevio.Button) CyclicCounterInput{

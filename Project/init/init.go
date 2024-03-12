@@ -85,16 +85,18 @@ func initNode(isPrimaryProcess bool) {
 
 			// update and remove list nodes
 			if !checkpoint.IncomingDataIsCorrupt(incomingState) {
-				//checkpoint.SaveCombinedInput(incomingState, incomingFileName)
-				checkpoint.InncommingJSONHandeling(localStateFile, incomingState, msg.SenderId)
-				fsm.FsmJSONOrderAssigner(localStateFile, localIP)
-				fsm.FsmRequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
+				fsm.InncommingJSONHandeling(localStateFile, localIP, msg.Payload, msg.SenderId)
+				//fsm.InncommingJSONHandeling(localStateFile, incomingState, msg.SenderId)
+				//checkpoint.JSONsetAllLights(localStateFile, msg.SenderId)
+				//fsm.FsmJSONOrderAssigner(localStateFile, localIP)
+				 // TODO: Only have one version
 			}
 
 		case online := <-onlineStatusChannel:
-			fsm.FsmRebootJSON(localIP, localStateFile)
-			fsm.FsmJSONOrderAssigner(localStateFile, localIP)
-			fsm.FsmRequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
+			//dersom eneste oline ønsker vi ikke dette? 
+			//fsm.FsmRebootJSON(localIP, localStateFile)
+			//fsm.FsmJSONOrderAssigner(localStateFile, localIP)
+			//fsm.FsmRequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
 			logrus.Warn("Updated online status:", online)
 		}
 	}

@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
+	//"strings"
 )
 
 //const JSONFile = "JSONFile.json"
@@ -97,12 +97,12 @@ func UpdateJSONWhenHallOrderIsComplete(el elev.Elevator, filename string, elevat
 	SaveCombinedInput(combinedInput, filename)
 }
 
-func UpdateJSONWhenNewOrderOccurs(filename string, elevatorName string, btnFloor int, btn elevio.Button, el *elev.Elevator) {
+func UpdateJSONWhenNewOrderOccurs(filename string, elevatorName string, btnFloor int, btn elevio.Button) {
 	combinedInput, _ := LoadCombinedInput(filename)
 	
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
 		combinedInput.CyclicCounter = updateCyclicCounterWhenNewOrderOccurs(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
-		combinedInput.HRAInput = updateHRAInputWhenNewOrderOccurs(combinedInput.HRAInput, elevatorName, btnFloor, btn, el)
+		combinedInput.HRAInput = updateHRAInputWhenNewOrderOccurs(combinedInput.HRAInput, elevatorName, btnFloor, btn)
 	}
 	SaveCombinedInput(combinedInput, filename)
 }
@@ -144,8 +144,8 @@ func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) 
 		fmt.Println("HRAInput.States is empty, skipping order assignment")
 	}
 }
-
-func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInput, incomingElevatorName string) {
+/*
+func InncommingJSONHandeling(el elev.Elevator,localFilname string, localElevatorName string, otherCombinedInput CombinedInput, incomingElevatorName string) {
 	localCombinedInput, _ := LoadCombinedInput(localFilname)
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
@@ -179,16 +179,29 @@ func InncommingJSONHandeling(localFilname string, otherCombinedInput CombinedInp
 			delete(localCombinedInput.CyclicCounter.States, incomingElevatorName)
 		}
 	}
-	localElevatorName := strings.TrimSuffix(localFilname, ".json")
 	if _, exists := otherCombinedInput.CyclicCounter.States[localElevatorName]; exists {
 		if otherCombinedInput.CyclicCounter.States[localElevatorName] > localCombinedInput.CyclicCounter.States[localElevatorName] {
 			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] +1 
 		}
 	}
 	SaveCombinedInput(localCombinedInput, localFilname)
+	allValuesGreater := true
+	for f := 0; f < elevio.NFloors; f++ {
+		for i := 0; i < 2; i++ {
+			if otherCombinedInput.CyclicCounter.HallRequests[f][i] < localCombinedInput.CyclicCounter.HallRequests[f][i] {
+				allValuesGreater = false
+				break
+			}
+		}
+	}
+	if allValuesGreater {
+		// Execute further actions here
+		JSONsetAllLights(localFilname, localElevatorName)
+		JSONOrderAssigner(& el, localFilname, localElevatorName)
+		//fsm.FsmRequestButtonPressV3(localFilname, localElevatorName) // TODO: Only have one version
+	}
 }
-
-
+*/
 func RemoveDysfunctionalElevatorFromJSON(localFilname string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(localFilname)
 	for id := range combinedInput.HRAInput.States {
