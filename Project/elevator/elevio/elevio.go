@@ -15,18 +15,17 @@ func init() {
 	InputDevice = ElevioGetInputDevice()
 }
 
-// TODO: refactor variable names
 func castElevDirToMotorDirection(d ElevDir) hwelevio.HWMotorDirection {
 	switch d {
 	case DirDown:
-		return hwelevio.MD_Down
+		return hwelevio.MDDown
 	case DirUp:
-		return hwelevio.MD_Up
+		return hwelevio.MDUp
 	case DirStop:
-		return hwelevio.MD_Stop
+		return hwelevio.MDStop
 	default:
 		logrus.Error("Something went wrong!")
-		return hwelevio.MD_Down //HELT FEIL MÅ FIKSES
+		return hwelevio.MDDown
 	}
 }
 
@@ -40,7 +39,7 @@ func castButtonToHWButtonType(btn Button) hwelevio.HWButtonType {
 		return hwelevio.BCab
 	default:
 		logrus.Error("Something went wrong!")
-		return hwelevio.BHallUp //Hvordan løse dette?
+		return hwelevio.BHallUp
 	}
 }
 
