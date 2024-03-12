@@ -71,7 +71,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 				//fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
 				//fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
 			}
-
+		//TODO: Alle UpdateElevatorState should be in the fsm functions beeing called
 		case btnEvent := <-drv_buttons:
 			logrus.Debug("Button press detected: ", btnEvent)
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
@@ -82,7 +82,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 
 			fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
-
+		//TODO: Alle UpdateElevatorState should be in the fsm functions beeing called
 		case floor := <-drv_floors:
 			logrus.Debug("Floor sensor triggered: ", floor)
 			fsm.FloorArrival(floor, elevatorName, elevatorStateFile)
