@@ -16,7 +16,6 @@ import (
 )
 
 func initNode(isPrimaryProcess bool) {
-	var lostNodes []string
 	var localStateFile string
 
 	logger.Setup()
@@ -54,12 +53,6 @@ func initNode(isPrimaryProcess bool) {
 			// må fikses 
 			
 			logrus.Info("Known nodes:", reg.Nodes)
-			if len(reg.Lost) <= 0 {
-				logrus.Info("No lost nodes")
-				lostNodes = []string{}
-				continue
-			}
-			
 			logrus.Warn("Lost nodes:", reg.Lost)
 
 			// extract ip from node names
@@ -70,9 +63,11 @@ func initNode(isPrimaryProcess bool) {
 			}
 			logrus.Debug("Removing lost IPs: ", lostNodeAddresses)
 
-			lostNodes = lostNodeAddresses // Update the lostNodes
+			//lostNodes = lostNodeAddresses // Update the lostNodes
 
-			checkpoint.DeleteInactiveElevatorsFromJSON(lostNodes, localStateFile)
+			checkpoint.DeleteInactiveElevatorsFromJSON(lostNodeAddresses, localStateFile)
+			//skal vi reasigne her? nei? 
+			//dersom vi ikke og den er enset igjen online så vil den ta alle den har blitt assignet (kan være mer enn en og fuløre dem)
 			fsm.FsmJSONOrderAssigner(localStateFile, localIP)
 			fsm.FsmRequestButtonPressV3(localStateFile, localIP)
 
@@ -94,7 +89,7 @@ func initNode(isPrimaryProcess bool) {
 
 		case online := <-onlineStatusChannel:
 			//dersom eneste oline ønsker vi ikke dette? 
-			//fsm.FsmRebootJSON(localIP, localStateFile)
+			fsm.FsmRebootJSON(localIP, localStateFile)
 			//fsm.FsmJSONOrderAssigner(localStateFile, localIP)
 			//fsm.FsmRequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
 			logrus.Warn("Updated online status:", online)
