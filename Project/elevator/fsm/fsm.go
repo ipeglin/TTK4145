@@ -147,12 +147,13 @@ func InitJson(filename string, ElevatorName string) {
 	}
 }
 
-func UpdateJSON(elevatorName string, filename string) {
+// This was UpdateJSON()
+func UpdateElevatorState(elevatorName string, filename string) {
 	checkpoint.UpdateJSON(elevator, filename, elevatorName)
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
-// This was RebbootJSON
+// This was RebootJSON()
 func HandleStateOnReboot(elevatorName string, filename string) {
 	checkpoint.UpdateJSONOnReboot(elevator, filename, elevatorName) // Deprecated: json.RebootJSON()
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
