@@ -5,8 +5,6 @@ import (
 	"elevator/hra"
 )
 
-
-
 type CyclicCounterInput struct {
 	HallRequests [][2]int       `json:"hallRequests"`
 	States       map[string]int `json:"states"`
