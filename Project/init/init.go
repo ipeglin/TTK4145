@@ -55,7 +55,7 @@ func initNode(isFirstProcess bool) {
 			logrus.Info("Known nodes:", reg.Nodes)
 			if len(reg.Lost) > 0 {
 				logrus.Warn("Lost nodes:", reg.Lost)
-			}			
+			}
 
 			// extract ip from node names
 			var lostNodeAddresses []string
@@ -66,7 +66,13 @@ func initNode(isFirstProcess bool) {
 			logrus.Debug("Removing lost IPs: ", lostNodeAddresses)
 
 			jsonhandler.DeleteInactiveElevatorsFromJSON(lostNodeAddresses, localStateFile)
-			//skal vi reasigne her? nei? 
+			if fsm.OnlyElevatorOnlie(elevatorStateFile, elevatorName) {
+				fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
+				jsonhandler.JSONsetAllLights(elevatorStateFile, elevatorName)
+				fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
+			}
+
+			//skal vi reasigne her? nei?
 			//dersom vi ikke og den er enset igjen online så vil den ta alle den har blitt assignet (kan være mer enn en og fuløre dem)
 			//fsm.JSONOrderAssigner(localStateFile, localIP)
 			//fsm.MoveOnActiveOrders(localStateFile, localIP)
@@ -84,17 +90,17 @@ func initNode(isFirstProcess bool) {
 				//fsm.HandleIncomingJSON(localStateFile, incomingState, msg.SenderId)
 				//checkpoint.JSONsetAllLights(localStateFile, msg.SenderId)
 				//fsm.JSONOrderAssigner(localStateFile, localIP)
-				 // ! Only have one version
+				// ! Only have one version
 			}
 
 		case online := <-onlineStatusChannel:
-			//ViErOnline = True 
+			//ViErOnline = True
 			fsm.HandleStateOnReboot(localIP, localStateFile) // Deprecated: fsm.RebootJSON()
 			//fsm.JSONOrderAssigner(localStateFile, localIP)
 			//fsm.MoveOnActiveOrders(localStateFile, localIP) // ! Only have one version
 			logrus.Warn("Updated online status:", online)
 		}
-		//case ofline :=<- 
+		//case ofline :=<-
 		//ViErOnline = False
 	}
 
