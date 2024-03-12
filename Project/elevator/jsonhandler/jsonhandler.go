@@ -40,7 +40,7 @@ func SaveCombinedInput(combinedInput CombinedInput, filename string) error {
 // LoadCombinedInput deserialiserer CombinedInput fra en JSON-fil.
 func LoadCombinedInput(filename string) (CombinedInput, error) {
 	var combinedInput CombinedInput
-	
+
 	data, err := filehandler.ReadFromFile(filename)
 	if err != nil {
 		logrus.Error("Failed to read from file: ", err)
@@ -59,7 +59,7 @@ func UpdateJSON(el elev.Elevator, filename string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(filename)
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
 		combinedInput.HRAInput = hra.UpdateHRAInput(combinedInput.HRAInput, el, elevatorName)
-		combinedInput.CyclicCounter = ccounter.UpdateInput(combinedInput.CyclicCounter, elevatorName)
+		combinedInput.CyclicCounter = ccounter.IncrementOnInput(combinedInput.CyclicCounter, elevatorName)
 	}
 	SaveCombinedInput(combinedInput, filename)
 }
@@ -68,7 +68,7 @@ func UpdateJSON(el elev.Elevator, filename string, elevatorName string) {
 func UpdateJSONOnReboot(el elev.Elevator, filename string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(filename)
 	combinedInput.HRAInput = hra.RebootHRAInput(combinedInput.HRAInput, el, elevatorName)
-	combinedInput.CyclicCounter = ccounter.UpdateInput(combinedInput.CyclicCounter, elevatorName)
+	combinedInput.CyclicCounter = ccounter.IncrementOnInput(combinedInput.CyclicCounter, elevatorName)
 	SaveCombinedInput(combinedInput, filename)
 }
 

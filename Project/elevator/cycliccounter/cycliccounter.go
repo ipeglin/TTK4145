@@ -33,7 +33,7 @@ func UpdateOnCompletedOrder(cyclicCounter CyclicCounterInput, elevatorName strin
 	return cyclicCounter
 }
 
-func UpdateInput(cyclicCounter CyclicCounterInput, elevatorName string) CyclicCounterInput {
+func IncrementOnInput(cyclicCounter CyclicCounterInput, elevatorName string) CyclicCounterInput {
 	cyclicCounter.States[elevatorName] += 1
 	return cyclicCounter
 }
