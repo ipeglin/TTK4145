@@ -4,7 +4,6 @@ import (
 	"elevator/driver/hwelevio"
 	"elevator/elevio"
 	"elevator/fsm"
-	"elevator/immobility"
 	"elevator/jsonhandler"
 	"elevator/timer"
 	"time"
@@ -58,7 +57,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			obst = drv_obst
 
 		case motorStop := <-drv_motorActivity:
-			logrus.Warn("Immobile state changed: ", immobile)
+			logrus.Warn("Immobile state changed: ", motorStop)
 			if motorStop {
 				// BUG: THis occurs very late
 				jsonhandler.RemoveDysfunctionalElevatorFromJSON(elevatorStateFile, elevatorName)

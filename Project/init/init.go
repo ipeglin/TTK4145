@@ -66,10 +66,10 @@ func initNode(isFirstProcess bool) {
 			logrus.Debug("Removing lost IPs: ", lostNodeAddresses)
 
 			jsonhandler.DeleteInactiveElevatorsFromJSON(lostNodeAddresses, localStateFile)
-			if fsm.OnlyElevatorOnlie(elevatorStateFile, elevatorName) {
-				fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
-				jsonhandler.JSONsetAllLights(elevatorStateFile, elevatorName)
-				fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
+			if fsm.OnlyElevatorOnlie(localStateFile, localIP) {
+				fsm.JSONOrderAssigner(localStateFile, localIP)
+				jsonhandler.JSONsetAllLights(localStateFile, localIP)
+				fsm.MoveOnActiveOrders(localStateFile, localIP)
 			}
 
 			//skal vi reasigne her? nei?
