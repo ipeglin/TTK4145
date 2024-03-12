@@ -160,6 +160,7 @@ func ClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName string) 
 	return e
 }
 
+// TODO! Remove this function. Never being used
 func ClearAll(e *elev.Elevator) {
 	for f := 0; f < elevio.NFloors; f++ {
 		for btn := 0; btn < elevio.NButtons; btn++ {
