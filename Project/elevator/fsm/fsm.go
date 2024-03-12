@@ -26,19 +26,10 @@ func init() {
 
 	localStateFile = elevatorName + ".json"
 
-	//Burde dette gå et annet sted?
+	// ? Should this be moved
 	setAllLights()
 	elevio.RequestDoorOpenLamp(false)
 	elevio.RequestStopLamp(false)
-}
-
-// BUG: Init and SetElevator crashes when using process pairs
-func SetElevator(f int, cb elev.ElevatorBehaviour, dirn elevio.ElevDir, r [elevio.NFloors][elevio.NButtons]bool, c elev.ElevatorConfig) {
-	elevator.CurrentFloor = f
-	elevator.CurrentBehaviour = cb
-	elevator.Dirn = dirn
-	elevator.Requests = r
-	elevator.Config = c
 }
 
 func setAllLights() {
@@ -59,7 +50,7 @@ func FloorArrival(newFloor int, elevatorName string, filename string) {
 
 	elevator.CurrentFloor = newFloor
 	outputDevice.FloorIndicator(elevator.CurrentFloor)
-	//Helt unødvendig med switch her?
+
 	switch elevator.CurrentBehaviour {
 	case elev.EBMoving:
 		if requests.ShouldStop(elevator) {
@@ -75,7 +66,6 @@ func FloorArrival(newFloor int, elevatorName string, filename string) {
 }
 
 func DoorTimeout(filename string, elevatorName string) {
-	//Hvorfor switch
 	switch elevator.CurrentBehaviour {
 	case elev.EBDoorOpen:
 		pair := requests.ChooseDirection(elevator)
@@ -132,29 +122,28 @@ func ResumeAtLatestCheckpoint(floor int) {
 	}
 }
 
-// Json fra her
 func CreateLocalStateFile(filename string, ElevatorName string) {
-	// Gjør endringer på combinedInput her
+	// TODO: Gjør endringer på combinedInput her
 	err := os.Remove(filename)
 	if err != nil {
 		logrus.Error("Failed to remove:", err)
 	}
 	combinedInput := jsonhandler.InitializeCombinedInput(elevator, ElevatorName)
 
-	// If the file was successfully deleted, return nil
+	// * If the file was successfully deleted, return nil
 	err = jsonhandler.SaveCombinedInput(combinedInput, filename)
 	if err != nil {
 		logrus.Error("Failed to save checkpoint:", err)
 	}
 }
 
-// This was UpdateJSON()
+// * This was UpdateJSON()
 func UpdateElevatorState(elevatorName string, filename string) {
 	jsonhandler.UpdateJSON(elevator, filename, elevatorName)
 	checkpoint.SetCheckpoint(elevator, checkpoint.CheckpointFilename)
 }
 
-// This was RebootJSON()
+// * This was RebootJSON()
 func HandleStateOnReboot(elevatorName string, filename string) {
 	jsonhandler.UpdateJSONOnReboot(elevator, filename, elevatorName) // Deprecated: json.RebootJSON()
 	checkpoint.SetCheckpoint(elevator, checkpoint.CheckpointFilename)
@@ -176,8 +165,7 @@ func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string, fil
 	if requests.ShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
 		timer.Start(elevator.Config.DoorOpenDurationS)
 	} else {
-		//elevator.Requests[btnFloor][btn] = true
-		//trenger å sjekke at alt dette er riktig
+		// TODO: Check if this is correct
 		updateStateOnNewOrder(btnFloor, btn, elevatorName, filename)
 
 		//TODO: This variable just makes it complicated
@@ -188,9 +176,6 @@ func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string, fil
 	}
 }
 
-// etter denne func broadcaster vi.
-// så assigner vi
-// så kaller vi denne
 func MoveOnActiveOrders(filename string, elevatorName string) {
 	switch elevator.CurrentBehaviour {
 	case elev.EBIdle:
