@@ -198,16 +198,6 @@ func MoveOnActiveOrders(filename string, elevatorName string) {
 
 func HandleIncomingJSON(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput, incomingElevatorName string) {
 	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
-	allValuesEqual := true
-	for f := 0; f < elevio.NFloors; f++ {
-		for i := 0; i < 2; i++ {
-			if otherCombinedInput.CyclicCounter.HallRequests[f][i] != localCombinedInput.CyclicCounter.HallRequests[f][i] {
-				allValuesEqual = false
-				break
-			}
-		}
-	}
-
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
 			if otherCombinedInput.CyclicCounter.HallRequests[f][i] > localCombinedInput.CyclicCounter.HallRequests[f][i] {
@@ -245,17 +235,28 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] + 1
 		}
 	}
-	if allValuesEqual {
-		jsonhandler.JSONsetAllLights(localFilename, localElevatorName)
-		jsonhandler.JSONOrderAssigner(&elevator, localFilename, localElevatorName)
 
-		//oppdater localliste av godetatte hallcalls.
-		//fsm.MoveOnActiveOrders(localFilename, localElevatorName) // ! Only have one version
-	}
-	MoveOnActiveOrders(localFilename, localElevatorName)
 	jsonhandler.SaveCombinedInput(localCombinedInput, localFilename)
 }
 
+func AssignOnInncoming(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput) {
+	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
+	allValuesEqual := true
+	for f := 0; f < elevio.NFloors; f++ {
+		for i := 0; i < 2; i++ {
+			if otherCombinedInput.CyclicCounter.HallRequests[f][i] != localCombinedInput.CyclicCounter.HallRequests[f][i] {
+				allValuesEqual = false
+				break
+			}
+		}
+	}
+
+	if allValuesEqual {
+		print("all equal")
+		jsonhandler.JSONOrderAssigner(&elevator, localFilename, localElevatorName)
+		jsonhandler.JSONsetAllLights(localFilename, localElevatorName)
+	}
+}
 func OnlyElevatorOnlie(localFilename string, localElevatorName string) bool {
 	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
 	if len(localCombinedInput.HRAInput.States) == 1 {
@@ -266,10 +267,27 @@ func OnlyElevatorOnlie(localFilename string, localElevatorName string) bool {
 	return false
 }
 
-/*
-func OflineHandeling(){
-	//ikke skru lys av. Finn ut hvor det skjer.
-	//Sett alle konfirmed hallcalls til denne lokale heisen
-	//move
+func compareCombinedInputs(input1, input2 jsonhandler.CombinedInput) bool {
+	// Check if the CyclicCounter fields are equal
+	for f := 0; f < elevio.NFloors; f++ {
+		for i := 0; i < 2; i++ {
+			if input1.CyclicCounter.HallRequests[f][i] != input2.CyclicCounter.HallRequests[f][i] {
+				return false
+			}
+		}
+	}
+
+	// Check if both structs contain the same states
+	if len(input1.HRAInput.States) != len(input2.HRAInput.States) {
+		return false
+	}
+
+	for state, val1 := range input1.CyclicCounter.States {
+		val2, exists := input2.CyclicCounter.States[state]
+		if !exists || val1 != val2 {
+			return false
+		}
+	}
+
+	return true
 }
-*/

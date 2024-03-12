@@ -87,6 +87,11 @@ func initNode(isFirstProcess bool) {
 			// update and remove list nodes
 			if !jsonhandler.IncomingDataIsCorrupt(incomingState) {
 				fsm.HandleIncomingJSON(localStateFile, localIP, msg.Payload, msg.SenderId)
+				fsm.AssignOnInncoming(localStateFile, localIP,msg.Payload)
+				fsm.MoveOnActiveOrders(localStateFile, localIP)
+				
+				//fsm.UpdateElevatorState(localIP, localStateFile)
+
 				//fsm.HandleIncomingJSON(localStateFile, incomingState, msg.SenderId)
 				//checkpoint.JSONsetAllLights(localStateFile, msg.SenderId)
 				//fsm.JSONOrderAssigner(localStateFile, localIP)
