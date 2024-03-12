@@ -102,7 +102,7 @@ func UpdateJSONOnNewOrder(filename string, elevatorName string, btnFloor int, bt
 	//ønsker vi ikke legge til nye ordere/ ta ordere mens vi er offline? 
 	//hvis vi øssker, fjern denne if setningen. 
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
-		combinedInput.CyclicCounter = updateCyclicCounterWhenNewOrderOccurs(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
+		combinedInput.CyclicCounter = updateCyclicCounterOnNewOrder(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
 		combinedInput.HRAInput = updateHRAInputWhenNewOrderOccurs(combinedInput.HRAInput, elevatorName, btnFloor, btn)
 	}
 	SaveCombinedInput(combinedInput, filename)
