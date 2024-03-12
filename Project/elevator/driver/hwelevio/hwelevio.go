@@ -9,6 +9,7 @@ import (
 
 const PollRate = 20 * time.Millisecond
 
+// TODO: refactor these to be in line with camelCase
 var _initialized bool = false
 var _numFloors int = 4
 var _mtx sync.Mutex
@@ -16,6 +17,7 @@ var _conn net.Conn
 
 type HWMotorDirection int
 
+// TODO: refactor these to be in line with camelCase
 const (
 	MD_Down HWMotorDirection = iota - 1
 	MD_Stop

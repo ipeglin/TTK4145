@@ -15,7 +15,7 @@ func init() {
 	InputDevice = ElevioGetInputDevice()
 }
 
-// Liker ikke dene løsningen
+// TODO: refactor variable names
 func castElevDirToMotorDirection(d ElevDir) hwelevio.HWMotorDirection {
 	switch d {
 	case DirDown:
@@ -103,19 +103,6 @@ func ElevioGetOutputDevice() ElevOutputDevice {
 	}
 }
 
-func ElevDirToString(d ElevDir) string {
-	switch d {
-	case DirDown:
-		return "down"
-	case DirStop:
-		return "stop"
-	case DirUp:
-		return "up"
-	default:
-		return "DirUnknown"
-	}
-}
-
 func PollButtons(receiver chan<- ButtonEvent) {
 	prev := make([][3]bool, NFloors)
 	for {
@@ -191,6 +178,7 @@ func MontitorMotorActivity(receiver chan<- bool, duration float64) {
 	}
 }
 
+// TODO: Gustav should use these
 func ButtonToString(b Button) string {
 	switch b {
 	case BHallUp:
@@ -201,5 +189,18 @@ func ButtonToString(b Button) string {
 		return "BCab"
 	default:
 		return "Button Unknown"
+	}
+}
+
+func ElevDirToString(d ElevDir) string {
+	switch d {
+	case DirDown:
+		return "down"
+	case DirStop:
+		return "stop"
+	case DirUp:
+		return "up"
+	default:
+		return "DirUnknown"
 	}
 }
