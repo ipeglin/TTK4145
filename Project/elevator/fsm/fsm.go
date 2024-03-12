@@ -245,10 +245,11 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] + 1
 		}
 	}
+	jsonhandler.SaveCombinedInput(localCombinedInput, localFilename)
 	if allValuesEqual {
 		jsonhandler.JSONsetAllLights(localFilename, localElevatorName)
-		jsonhandler.JSONOrderAssigner(&elevator, localFilename, localElevatorName)
-
+		//jsonhandler.JSONOrderAssigner(&elevator, localFilename, localElevatorName)
+		jsonhandler.SaveCombinedInput(localCombinedInput, localFilename)
 		//oppdater localliste av godetatte hallcalls.
 		//fsm.MoveOnActiveOrders(localFilename, localElevatorName) // ! Only have one version
 	}

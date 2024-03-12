@@ -57,7 +57,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 
 		case motorActive := <-drv_motorActivity:
 			logrus.Warn("Immobile state changed: ", motorActive)
-			if motorActive {
+			if !motorActive {
 				// BUG: THis occurs very late
 				jsonhandler.RemoveDysfunctionalElevatorFromJSON(elevatorStateFile, elevatorName)
 				//we need to remove the request// clear them if we dont want to comlete orders twice.
@@ -75,6 +75,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
 			fsm.HandleButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
 			if fsm.OnlyElevatorOnlie(elevatorStateFile, elevatorName) {
+				print("jeg er eneste onlibe")
 				fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
 				jsonhandler.JSONsetAllLights(elevatorStateFile, elevatorName)
 			}
