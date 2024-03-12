@@ -87,7 +87,8 @@ func UpdateJSON(el elev.Elevator, filename string, elevatorName string) {
 	SaveCombinedInput(combinedInput, filename)
 }
 
-func RebootJSON(el elev.Elevator, filename string, elevatorName string) {
+// This was RebootJSON
+func UpdateJSONOnReboot(el elev.Elevator, filename string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(filename)
 	combinedInput.HRAInput = rebootHRAInput(combinedInput.HRAInput, el, elevatorName)
 	combinedInput.CyclicCounter = updateCyclicCounterInput(combinedInput.CyclicCounter, elevatorName)

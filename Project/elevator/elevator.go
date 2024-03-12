@@ -69,7 +69,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 				//we need to remove the request// clear them if we dont want to comlete orders twice.
 				//it is up to uss and we have functionality to do so
 			} else {
-				fsm.RebootJSON(elevatorName, elevatorStateFile)
+				fsm.HandleStateOnReboot(elevatorName, elevatorStateFile)
 				//fsm.RequestButtonPressV3(elevatorStateFile, elevatorName)
 				//fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
 			}

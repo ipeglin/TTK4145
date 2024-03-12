@@ -152,8 +152,9 @@ func UpdateJSON(elevatorName string, filename string) {
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
-func RebootJSON(elevatorName string, filename string) {
-	checkpoint.RebootJSON(elevator, filename, elevatorName)
+// This was RebbootJSON
+func HandleStateOnReboot(elevatorName string, filename string) {
+	checkpoint.UpdateJSONOnReboot(elevator, filename, elevatorName) // Deprecated: json.RebootJSON()
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
