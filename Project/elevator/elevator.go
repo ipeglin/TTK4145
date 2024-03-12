@@ -31,10 +31,8 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 	drv_buttons := make(chan elevio.ButtonEvent)
 	drv_floors := make(chan int)
 	drv_obstr := make(chan bool)
-	drv_obstr_immob := make(chan bool)
 	drv_stop := make(chan bool)
 	drv_motorActivity := make(chan bool)
-	immob := make(chan bool)
 	// TODO: Add channels for direction and behaviour
 
 	go elevio.PollButtons(drv_buttons)
@@ -42,7 +40,6 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 	go elevio.PollObstructionSwitch(drv_obstr)
 	go elevio.PollStopButton(drv_stop)
 	go elevio.MontitorMotorActivity(drv_motorActivity, 3.0)
-	go immobility.Immobility(drv_obstr_immob, drv_motorActivity, immob)
 	go fsm.CreateCheckpoint()
 	// TODO: Add polling for direction and behaviour
 
@@ -52,24 +49,23 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 		select {
 		case drv_obst := <-drv_obstr:
 			logrus.Warn("Obstruction state changed: ", drv_obst)
-			drv_obstr_immob <- drv_obst
 			if drv_obst == !obst { // If obstruction detected and it's a new obstruction
 				logrus.Debug("New obstruction detected: ", drv_obst)
 				fsm.ToggleObstruction()
+			} else {
+				fsm.HandleStateOnReboot(elevatorName, elevatorStateFile)
 			}
 			obst = drv_obst
 
-		case immobile := <-immob:
+		case motorStop := <-drv_motorActivity:
 			logrus.Warn("Immobile state changed: ", immobile)
-			if immobile {
+			if motorStop {
 				// BUG: THis occurs very late
 				jsonhandler.RemoveDysfunctionalElevatorFromJSON(elevatorStateFile, elevatorName)
 				//we need to remove the request// clear them if we dont want to comlete orders twice.
 				//it is up to uss and we have functionality to do so
 			} else {
 				fsm.HandleStateOnReboot(elevatorName, elevatorStateFile)
-				//lurer på om vi må ha en movebutton her men idk
-
 				//fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
 				//fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
 			}
@@ -81,6 +77,9 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			if fsm.OnlyElevatorOnlie(elevatorStateFile, elevatorName) {
 				fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
 				jsonhandler.JSONsetAllLights(elevatorStateFile, elevatorName)
+			}
+			if obst {
+				jsonhandler.RemoveDysfunctionalElevatorFromJSON(elevatorStateFile, elevatorName)
 			}
 			fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
