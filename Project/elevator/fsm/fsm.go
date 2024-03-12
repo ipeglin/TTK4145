@@ -160,7 +160,6 @@ func HandleStateOnReboot(elevatorName string, filename string) {
 	checkpoint.SetCheckpoint(elevator, checkpoint.CheckpointFilename)
 }
 
-// TODO: Doesn't look like this is used
 func updateStateOnNewOrder(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
 	jsonhandler.UpdateJSONOnNewOrder(filename, elevatorName, btnFloor, btn)
 }
@@ -263,7 +262,7 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 		// Execute further actions here
 		jsonhandler.JSONsetAllLights(localFilename, localElevatorName)
 		jsonhandler.JSONOrderAssigner(& elevator, localFilename, localElevatorName)
-		//fsm.MoveOnActiveOrders(localFilename, localElevatorName) // TODO: Only have one version
+		//fsm.MoveOnActiveOrders(localFilename, localElevatorName) // ! Only have one version
 	}
 	MoveOnActiveOrders(localFilename, localElevatorName)
 	jsonhandler.SaveCombinedInput(localCombinedInput, localFilename)

@@ -84,14 +84,14 @@ func initNode(isFirstProcess bool) {
 				//fsm.HandleIncomingJSON(localStateFile, incomingState, msg.SenderId)
 				//checkpoint.JSONsetAllLights(localStateFile, msg.SenderId)
 				//fsm.JSONOrderAssigner(localStateFile, localIP)
-				 // TODO: Only have one version
+				 // ! Only have one version
 			}
 
 		case online := <-onlineStatusChannel:
 			//dersom eneste oline ønsker vi ikke dette? 
 			fsm.HandleStateOnReboot(localIP, localStateFile) // Deprecated: fsm.RebootJSON()
 			//fsm.JSONOrderAssigner(localStateFile, localIP)
-			//fsm.MoveOnActiveOrders(localStateFile, localIP) // TODO: Only have one version
+			//fsm.MoveOnActiveOrders(localStateFile, localIP) // ! Only have one version
 			logrus.Warn("Updated online status:", online)
 		}
 	}
