@@ -198,15 +198,8 @@ func MoveOnActiveOrders(filename string, elevatorName string) {
 
 func HandleIncomingJSON(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput, incomingElevatorName string) {
 	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
-	allValuesEqual := true
-	for f := 0; f < elevio.NFloors; f++ {
-		for i := 0; i < 2; i++ {
-			if otherCombinedInput.CyclicCounter.HallRequests[f][i] != localCombinedInput.CyclicCounter.HallRequests[f][i] {
-				allValuesEqual = false
-				break
-			}
-		}
-	}
+	
+
 
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
@@ -245,7 +238,7 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] + 1
 		}
 	}
-	if allValuesEqual {
+	if otherCombinedInput.CyclicCounter != localCombinedInput.CyclicCounter {
 		jsonhandler.JSONsetAllLights(localFilename, localElevatorName)
 		jsonhandler.JSONOrderAssigner(&elevator, localFilename, localElevatorName)
 
@@ -255,6 +248,39 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 	MoveOnActiveOrders(localFilename, localElevatorName)
 	jsonhandler.SaveCombinedInput(localCombinedInput, localFilename)
 }
+/*
+func HandleIncomingJSON(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput, incomingElevatorName string) {
+	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
+
+	hra.synchronizeLocalHRAWithIncoming(&localCombinedInput, otherCombinedInput, incomingElevatorName, localElevatorName)
+
+	cyclicCounter.synchronizeLocalCCounterWithIncoming(&localCombinedInput, otherCombinedInput, localElevatorName)
+
+	allValuesEqual := checkIfAllValuesEqual(otherCombinedInput.CyclicCounter.HallRequests, localCombinedInput.CyclicCounter.HallRequests)
+
+	if allValuesEqual {
+		jsonhandler.JSONsetAllLights(localFilename, localElevatorName)
+		//egen mappe for assigner? 
+		jsonhandler.JSONOrderAssigner(&elevator, localFilename, localElevatorName)
+	}
+
+	MoveOnActiveOrders(localFilename, localElevatorName)
+
+	jsonhandler.SaveCombinedInput(localCombinedInput, localFilename)
+}
+
+func checkIfAllValuesEqual(matrix1, matrix2 [][]int) bool {
+	for f := 0; f < elevio.NFloors; f++ {
+		for i := 0; i < 2; i++ {
+			if matrix1[f][i] != matrix2[f][i] {
+				return false
+			}
+		}
+	}
+	return true
+}
+*/
+
 
 func OnlyElevatorOnlie(localFilename string, localElevatorName string) bool {
 	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)

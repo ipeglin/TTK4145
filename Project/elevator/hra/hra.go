@@ -132,3 +132,37 @@ func UpdateHRAInputWhenNewOrderOccurs(hraInput HRAInput, elevatorName string, bt
 	}
 	return hraInput
 }
+
+
+func synchronizeLocalHRAWithIncoming(localCombinedInput *jsonhandler.CombinedInput, otherCombinedInput jsonhandler.CombinedInput, incomingElevatorName string, localElevatorName string) {
+	for f := 0; f < elevio.NFloors; f++ {
+		for i := 0; i < 2; i++ {
+			if otherCombinedInput.CyclicCounter.HallRequests[f][i] > localCombinedInput.CyclicCounter.HallRequests[f][i] {
+				localCombinedInput.CyclicCounter.HallRequests[f][i] = otherCombinedInput.CyclicCounter.HallRequests[f][i]
+				localCombinedInput.HRAInput.HallRequests[f][i] = otherCombinedInput.HRAInput.HallRequests[f][i]
+			}
+			if otherCombinedInput.CyclicCounter.HallRequests[f][i] == localCombinedInput.CyclicCounter.HallRequests[f][i] {
+				if localCombinedInput.HRAInput.HallRequests[f][i] != otherCombinedInput.HRAInput.HallRequests[f][i] {
+					localCombinedInput.HRAInput.HallRequests[f][i] = false
+				}
+			}
+		}
+	}
+
+	if _, exists := otherCombinedInput.HRAInput.States[incomingElevatorName]; exists {
+		if _, exists := localCombinedInput.HRAInput.States[incomingElevatorName]; !exists {
+			localCombinedInput.HRAInput.States[incomingElevatorName] = otherCombinedInput.HRAInput.States[incomingElevatorName]
+			localCombinedInput.CyclicCounter.States[incomingElevatorName] = otherCombinedInput.CyclicCounter.States[incomingElevatorName]
+		} else {
+			if otherCombinedInput.CyclicCounter.States[incomingElevatorName] > localCombinedInput.CyclicCounter.States[incomingElevatorName] {
+				localCombinedInput.HRAInput.States[incomingElevatorName] = otherCombinedInput.HRAInput.States[incomingElevatorName]
+				localCombinedInput.CyclicCounter.States[incomingElevatorName] = otherCombinedInput.CyclicCounter.States[incomingElevatorName]
+			}
+		}
+	} else {
+		if _, exists := localCombinedInput.HRAInput.States[incomingElevatorName]; exists {
+			delete(localCombinedInput.HRAInput.States, incomingElevatorName)
+			delete(localCombinedInput.CyclicCounter.States, incomingElevatorName)
+		}
+	}
+}

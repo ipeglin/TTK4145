@@ -54,3 +54,11 @@ func UpdateOnNewOrder(cyclicCounter CyclicCounterInput, hraInput hra.HRAInput, e
 	}
 	return cyclicCounter
 }
+
+func synchronizeLocalCCounterWithIncoming(localCCounter *CyclicCounterInput, IncomingCCounter CyclicCounterInput, localElevatorName string) {
+	if _, exists := IncomingCCounter.States[localElevatorName]; exists {
+		if IncomingCCounter.States[localElevatorName] > localCCounter.States[localElevatorName] {
+			localCCounter.States[localElevatorName] = IncomingCCounter.States[localElevatorName] + 1
+		}
+	}
+}
