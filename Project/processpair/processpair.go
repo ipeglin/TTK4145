@@ -23,10 +23,10 @@ func CreatePair(f TFunc) {
 	}
 }
 
-func waitForProcessTermination(mainFunc TFunc) {
+func waitForProcessTermination(f TFunc) {
 	for {
 		if !isProcessAlive() {
-			startProcess(mainFunc, false)
+			startProcess(f, false)
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
