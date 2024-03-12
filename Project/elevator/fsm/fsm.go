@@ -43,10 +43,7 @@ func SetElevator(f int, cb elev.ElevatorBehaviour, dirn elevio.ElevDir, r [elevi
 
 func setAllLights() {
 	for floor := 0; floor < elevio.NFloors; floor++ {
-		for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
-			//checkpoint.JSONsetAllLights(localStateFile, elevatorName)
-			outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
-		}
+		outputDevice.RequestButtonLight(floor, elevio.BCab, elevator.Requests[floor][elevio.BCab])
 	}
 }
 

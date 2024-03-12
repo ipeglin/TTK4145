@@ -284,10 +284,10 @@ func IncomingDataIsCorrupt(incomingCombinedInput CombinedInput) bool {
 
 func JSONsetAllLights(localFilname string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(localFilname)
-	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
-		for floor := 0; floor < elevio.NFloors; floor++ {
-			elevio.RequestButtonLight(floor, elevio.BHallUp, combinedInput.HRAInput.HallRequests[floor][0])
-			elevio.RequestButtonLight(floor, elevio.BHallDown, combinedInput.HRAInput.HallRequests[floor][1])
-		}
+	//if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
+	for floor := 0; floor < elevio.NFloors; floor++ {
+		elevio.RequestButtonLight(floor, elevio.BHallUp, combinedInput.HRAInput.HallRequests[floor][0])
+		elevio.RequestButtonLight(floor, elevio.BHallDown, combinedInput.HRAInput.HallRequests[floor][1])
+	
 	}
 }
