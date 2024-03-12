@@ -225,6 +225,24 @@ func FsmRequestButtonPressV3(filename string, elevatorName string) {
 
 func InncommingJSONHandeling(localFilname string, localElevatorName string, otherCombinedInput checkpoint.CombinedInput, incomingElevatorName string) {
 	localCombinedInput, _ := checkpoint.LoadCombinedInput(localFilname)
+	allValuesEqual := true
+	for f := 0; f < elevio.NFloors; f++ {
+		for i := 0; i < 2; i++ {
+			if otherCombinedInput.CyclicCounter.HallRequests[f][i] != localCombinedInput.CyclicCounter.HallRequests[f][i] {
+				allValuesEqual = false
+				break
+			}
+		}
+	}
+	if allValuesEqual {
+		// Execute further actions here
+		checkpoint.JSONsetAllLights(localFilname, localElevatorName)
+		checkpoint.JSONOrderAssigner(& elevator, localFilname, localElevatorName)
+		//fsm.FsmRequestButtonPressV3(localFilname, localElevatorName) // TODO: Only have one version
+	}
+	FsmRequestButtonPressV3(localFilname, localElevatorName)
+
+
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
 			if otherCombinedInput.CyclicCounter.HallRequests[f][i] > localCombinedInput.CyclicCounter.HallRequests[f][i] {
@@ -263,20 +281,4 @@ func InncommingJSONHandeling(localFilname string, localElevatorName string, othe
 		}
 	}
 	checkpoint.SaveCombinedInput(localCombinedInput, localFilname)
-	allValuesGreater := true
-	for f := 0; f < elevio.NFloors; f++ {
-		for i := 0; i < 2; i++ {
-			if otherCombinedInput.CyclicCounter.HallRequests[f][i] < localCombinedInput.CyclicCounter.HallRequests[f][i] {
-				allValuesGreater = false
-				break
-			}
-		}
-	}
-	if allValuesGreater {
-		// Execute further actions here
-		checkpoint.JSONsetAllLights(localFilname, localElevatorName)
-		checkpoint.JSONOrderAssigner(& elevator, localFilname, localElevatorName)
-		//fsm.FsmRequestButtonPressV3(localFilname, localElevatorName) // TODO: Only have one version
-	}
-	FsmRequestButtonPressV3(localFilname, localElevatorName)
 }
