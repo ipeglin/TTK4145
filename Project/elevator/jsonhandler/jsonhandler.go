@@ -8,7 +8,6 @@ import (
 	"elevator/hra"
 	"encoding/json"
 	"fmt"
-	"os"
 	"os/exec"
 
 	"github.com/sirupsen/logrus"
@@ -29,40 +28,34 @@ func InitializeCombinedInput(el elev.Elevator, ElevatorName string) CombinedInpu
 
 // SaveCombinedInput serialiserer CombinedInput til JSON og lagrer det i en fil.
 func SaveCombinedInput(combinedInput CombinedInput, filename string) error {
-	// TODO: Use filehandler.WriteToFile(). This replaces both use of LockFile() and WriteFile()
-	osFile, err := filehandler.LockFile(filename)
-	if err != nil {
-		return err
-
-	}
-	defer filehandler.UnlockFile(osFile) // Ensure file is unlocked after reading
-
 	data, err := json.MarshalIndent(combinedInput, "", "  ")
 	if err != nil {
 		return fmt.Errorf("kunne ikke serialisere CombinedInput til JSON: %v", err)
 	}
 
-	err = os.WriteFile(filename, data, 0644)
-	if err != nil {
-		return fmt.Errorf("kunne ikke skrive CombinedInput til fil: %v", err)
-	}
-
+	filehandler.WriteToFile(data, filename)
 	return nil
 }
 
 // LoadCombinedInput deserialiserer CombinedInput fra en JSON-fil.
 func LoadCombinedInput(filename string) (CombinedInput, error) {
 	// TODO: Use filehandler.ReadFromFile(). This replaces both use of LockFile() and ReadFromFile()
-	var combinedInput CombinedInput
-	osFile, err := filehandler.LockFile(filename) // Lock the file for reading
-	if err != nil {
-		return combinedInput, err
-	}
-	defer filehandler.UnlockFile(osFile) // Ensure file is unlocked after reading
+	// osFile, err := filehandler.LockFile(filename) // Lock the file for reading
+	// if err != nil {
+	// 	return combinedInput, err
+	// }
+	// defer filehandler.UnlockFile(osFile) // Ensure file is unlocked after reading
 
-	data, err := os.ReadFile(filename)
+	// data, err := os.ReadFile(filename)
+	// if err != nil {
+	// 	return combinedInput, fmt.Errorf("kunne ikke lese fil: %v", err)
+	// }
+	var combinedInput CombinedInput
+	
+	data, err := filehandler.ReadFromFile(filename)
 	if err != nil {
-		return combinedInput, fmt.Errorf("kunne ikke lese fil: %v", err)
+		logrus.Error("Failed to read from file: ", err)
+		return combinedInput, fmt.Errorf("failed to read from file %v", err)
 	}
 
 	err = json.Unmarshal(data, &combinedInput)
