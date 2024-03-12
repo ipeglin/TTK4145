@@ -149,7 +149,6 @@ func HandleStateOnReboot(elevatorName string, filename string) {
 	checkpoint.SetCheckpoint(elevator, checkpoint.CheckpointFilename)
 }
 
-
 // TODO: Doesn't look like this is used; it is used!
 func updateStateOnNewOrder(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
 	jsonhandler.UpdateJSONOnNewOrder(filename, elevatorName, btnFloor, btn)

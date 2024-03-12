@@ -2,8 +2,8 @@ package checkpoint
 
 import (
 	"elevator/elev"
-	"elevator/filehandler"
 	"encoding/json"
+	"filehandler"
 	"time"
 )
 
