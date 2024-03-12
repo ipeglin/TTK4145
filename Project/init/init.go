@@ -4,11 +4,11 @@ import (
 	"elevator"
 	"elevator/fsm"
 	"elevator/jsonhandler"
-	"elevator/processpair"
 	"logger"
 	"network"
 	"network/nodes"
 	"os"
+	"processpair"
 	"strings"
 	"time"
 
