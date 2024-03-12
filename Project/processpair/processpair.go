@@ -14,42 +14,41 @@ var timeLimitOnline time.Duration = time.Duration(3 * time.Second)
 
 type TFunc func(bool)
 
-func startMainProcess(mainFunc TFunc, firstProcsess bool) {
-	logrus.Info("Main process initiated...")
-	go mainFunc(firstProcsess)
-	startBackupProcess()
-
-}
-
-func startBackupProcess() {
-	cmd := exec.Command("gnome-terminal", "--", "./elevator", "backup")
-	if err := cmd.Start(); err != nil {
-		fmt.Printf("Failed to start backup process in a new terminal: %s\n", err)
+func CreatePair(f TFunc) {
+	if len(os.Args) > 1 && os.Args[1] == "backup" {
+		logrus.Info("Initiated as backup process. Listening for main process to terminate...")
+		waitForProcessTermination(f)
 	} else {
-		fmt.Println("Backup process started successfully in a new terminal")
+		startProcess(f, true)
 	}
 }
 
-func monitorMainProcessAndTakeOver(mainFunc TFunc) {
+func waitForProcessTermination(mainFunc TFunc) {
 	for {
-		if !isMainAlive() {
-			startMainProcess(mainFunc, false)
+		if !isProcessAlive() {
+			startProcess(mainFunc, false)
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
 }
 
-func isMainAlive() bool {
+func isProcessAlive() bool {
 	_, checkpointTime, _ := checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
 	timeSinceCheckpoint := time.Since(checkpointTime)
 	return timeLimitOnline >= timeSinceCheckpoint
 }
 
-func ProcessPairHandler(mainFunc TFunc) {
-	if len(os.Args) > 1 && os.Args[1] == "backup" {
-		logrus.Info("Initiated as backup process. Listening for main process to terminate...")
-		monitorMainProcessAndTakeOver(mainFunc)
+func startProcess(mainFunc TFunc, firstProcsess bool) {
+	logrus.Info("Main process initiated...")
+	go mainFunc(firstProcsess)
+	startBackup()
+}
+
+func startBackup() {
+	cmd := exec.Command("gnome-terminal", "--", "./elevator", "backup")
+	if err := cmd.Start(); err != nil {
+		fmt.Printf("Failed to start backup process in a new terminal: %s\n", err)
 	} else {
-		startMainProcess(mainFunc, true)
+		fmt.Println("Backup process started successfully in a new terminal")
 	}
 }
