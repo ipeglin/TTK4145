@@ -11,8 +11,6 @@ import (
 	"os"
 	"os/exec"
 
-	// "strings"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -31,6 +29,7 @@ func InitializeCombinedInput(el elev.Elevator, ElevatorName string) CombinedInpu
 
 // SaveCombinedInput serialiserer CombinedInput til JSON og lagrer det i en fil.
 func SaveCombinedInput(combinedInput CombinedInput, filename string) error {
+	// TODO: Use filehandler.WriteToFile(). This replaces both use of LockFile() and WriteFile()
 	osFile, err := filehandler.LockFile(filename)
 	if err != nil {
 		return err
@@ -53,6 +52,7 @@ func SaveCombinedInput(combinedInput CombinedInput, filename string) error {
 
 // LoadCombinedInput deserialiserer CombinedInput fra en JSON-fil.
 func LoadCombinedInput(filename string) (CombinedInput, error) {
+	// TODO: Use filehandler.ReadFromFile(). This replaces both use of LockFile() and ReadFromFile()
 	var combinedInput CombinedInput
 	osFile, err := filehandler.LockFile(filename) // Lock the file for reading
 	if err != nil {
