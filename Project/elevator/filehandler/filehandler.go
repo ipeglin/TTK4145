@@ -6,7 +6,7 @@ import (
 	"syscall"
 )
 
-func LockFile(filePath string) (*os.File, error) {
+func lockFile(filePath string) (*os.File, error) {
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_RDWR, 0666)
 	if err != nil {
 		return nil, err
@@ -18,7 +18,7 @@ func LockFile(filePath string) (*os.File, error) {
 	return file, nil
 }
 
-func UnlockFile(file *os.File) error {
+func unlockFile(file *os.File) error {
 	err := syscall.Flock(int(file.Fd()), syscall.LOCK_UN)
 	closeErr := file.Close()
 	if err != nil {
@@ -29,12 +29,12 @@ func UnlockFile(file *os.File) error {
 
 func WriteToFile(data []byte, fileName string) error {
 
-	osFile, err := LockFile(fileName)
+	osFile, err := lockFile(fileName)
 	if err != nil {
 		return err
 
 	}
-	defer UnlockFile(osFile) // Ensure file is unlocked after reading
+	defer unlockFile(osFile) // Ensure file is unlocked after reading
 
 	err = os.WriteFile(fileName, data, 0644)
 	if err != nil {
@@ -44,11 +44,11 @@ func WriteToFile(data []byte, fileName string) error {
 }
 
 func ReadFromFile(fileName string) ([]byte, error) {
-	osFile, err := LockFile(fileName) // Lock the file for reading
+	osFile, err := lockFile(fileName) // Lock the file for reading
 	if err != nil {
 		return nil, err
 	}
-	defer UnlockFile(osFile) // Ensure file is unlocked after reading
+	defer unlockFile(osFile) // Ensure file is unlocked after reading
 
 	data, err := os.ReadFile(fileName)
 	if err != nil {
