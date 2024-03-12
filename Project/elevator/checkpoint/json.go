@@ -8,18 +8,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-<<<<<<< HEAD
-	"strings"
+
+	// "strings"
 
 	"github.com/sirupsen/logrus"
-=======
-	//"strings"
->>>>>>> sundag
 )
-
-//const JSONFile = "JSONFile.json"
-
-// const ElevatorName = "one"
 
 // CombinedInput kombinerer HRAInput og CyclicCounterInput.
 type CombinedInput struct {
