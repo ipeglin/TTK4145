@@ -133,7 +133,7 @@ func ResumeAtLatestCheckpoint(floor int) {
 }
 
 // Json fra her
-func InitJson(filename string, ElevatorName string) {
+func CreateLocalStateFile(filename string, ElevatorName string) {
 	// Gjør endringer på combinedInput her
 	err := os.Remove(filename)
 	if err != nil {
@@ -160,22 +160,27 @@ func HandleStateOnReboot(elevatorName string, filename string) {
 	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
 }
 
-func UpdateJSONOnNewOrder(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
+// TODO: Doesn't look like this is used
+func updateStateOnNewOrder(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
 	jsonhandler.UpdateJSONOnNewOrder(filename, elevatorName, btnFloor, btn)
 }
 
+// TODO: Change function name to AssignOrders() or similar
 func JSONOrderAssigner(filename string, elevatorName string) {
 	jsonhandler.JSONOrderAssigner(&elevator, filename, elevatorName)
 }
 
-func RequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
+func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
+	// TODO: Extract the conditions into variables with more informative names
 	if requests.ShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
 		timer.Start(elevator.Config.DoorOpenDurationS)
 	} else {
 		//elevator.Requests[btnFloor][btn] = true
 		//trenger å sjekke at alt dette er riktig
-		UpdateJSONOnNewOrder(btnFloor, btn, elevatorName, filename)
-		if btn == elevio.BCab {
+		updateStateOnNewOrder(btnFloor, btn, elevatorName, filename)
+
+		isCabCall := btn == elevio.BCab
+		if isCabCall {
 			elevator.Requests[btnFloor][btn] = true
 		}
 	}
@@ -184,7 +189,7 @@ func RequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, 
 // etter denne func broadcaster vi.
 // så assigner vi
 // så kaller vi denne
-func RequestButtonPressV3(filename string, elevatorName string) {
+func MoveOnActiveOrders(filename string, elevatorName string) {
 	switch elevator.CurrentBehaviour {
 	case elev.EBIdle:
 		pair := requests.ChooseDirection(elevator)
@@ -258,8 +263,8 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 		// Execute further actions here
 		jsonhandler.JSONsetAllLights(localFilename, localElevatorName)
 		jsonhandler.JSONOrderAssigner(& elevator, localFilename, localElevatorName)
-		//fsm.RequestButtonPressV3(localFilename, localElevatorName) // TODO: Only have one version
+		//fsm.MoveOnActiveOrders(localFilename, localElevatorName) // TODO: Only have one version
 	}
-	RequestButtonPressV3(localFilename, localElevatorName)
+	MoveOnActiveOrders(localFilename, localElevatorName)
 	jsonhandler.SaveCombinedInput(localCombinedInput, localFilename)
 }

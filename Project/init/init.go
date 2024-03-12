@@ -69,7 +69,7 @@ func initNode(isFirstProcess bool) {
 			//skal vi reasigne her? nei? 
 			//dersom vi ikke og den er enset igjen online så vil den ta alle den har blitt assignet (kan være mer enn en og fuløre dem)
 			fsm.JSONOrderAssigner(localStateFile, localIP)
-			fsm.RequestButtonPressV3(localStateFile, localIP)
+			fsm.MoveOnActiveOrders(localStateFile, localIP)
 
 		case msg := <-messageReceiveChannel:
 			// TODO: handle incoming messages
@@ -91,7 +91,7 @@ func initNode(isFirstProcess bool) {
 			//dersom eneste oline ønsker vi ikke dette? 
 			fsm.HandleStateOnReboot(localIP, localStateFile) // Deprecated: fsm.RebootJSON()
 			//fsm.JSONOrderAssigner(localStateFile, localIP)
-			//fsm.RequestButtonPressV3(localStateFile, localIP) // TODO: Only have one version
+			//fsm.MoveOnActiveOrders(localStateFile, localIP) // TODO: Only have one version
 			logrus.Warn("Updated online status:", online)
 		}
 	}

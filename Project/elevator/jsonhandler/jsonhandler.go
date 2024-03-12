@@ -201,7 +201,7 @@ func HandleIncomingJSON(el elev.Elevator,localFilename string, localElevatorName
 		// Execute further actions here
 		JSONsetAllLights(localFilename, localElevatorName)
 		JSONOrderAssigner(& el, localFilename, localElevatorName)
-		//fsm.RequestButtonPressV3(localFilename, localElevatorName) // TODO: Only have one version
+		//fsm.MoveOnActiveOrders(localFilename, localElevatorName) // TODO: Only have one version
 	}
 }
 */
