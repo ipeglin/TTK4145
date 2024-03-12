@@ -33,7 +33,7 @@ func waitForProcessTermination(mainFunc TFunc) {
 }
 
 func isProcessAlive() bool {
-	_, checkpointTime, _ := checkpoint.LoadCheckpoint(checkpoint.FilenameCheckpoint)
+	_, checkpointTime, _ := checkpoint.LoadCheckpoint(checkpoint.CheckpointFilename)
 	timeSinceCheckpoint := time.Since(checkpointTime)
 	return timeLimitOnline >= timeSinceCheckpoint
 }

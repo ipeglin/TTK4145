@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const FilenameCheckpoint = "elevCheckpoint.json" // Filepath is kinda a stupid way to do this
+const CheckpointFilename = "checkpoint.json" // Filepath is kinda a stupid way to do this
 
 type ElevCheckpoint struct {
 	State     elev.Elevator
@@ -20,10 +20,12 @@ func SetCheckpoint(e elev.Elevator, filename string) error {
 			e,
 			time.Now(),
 		}
+
 	jsonCP, err := json.MarshalIndent(checkpoint, "", "  ")
 	if err != nil {
 		return err
 	}
+
 	filehandler.WriteToFile(jsonCP, filename)
 	return nil
 }
