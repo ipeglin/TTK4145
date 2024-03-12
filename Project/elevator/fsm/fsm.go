@@ -234,14 +234,6 @@ func InncommingJSONHandeling(localFilname string, localElevatorName string, othe
 			}
 		}
 	}
-	if allValuesEqual {
-		// Execute further actions here
-		checkpoint.JSONsetAllLights(localFilname, localElevatorName)
-		checkpoint.JSONOrderAssigner(& elevator, localFilname, localElevatorName)
-		//fsm.FsmRequestButtonPressV3(localFilname, localElevatorName) // TODO: Only have one version
-	}
-	FsmRequestButtonPressV3(localFilname, localElevatorName)
-
 
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
@@ -280,5 +272,12 @@ func InncommingJSONHandeling(localFilname string, localElevatorName string, othe
 			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] +1 
 		}
 	}
+	if allValuesEqual {
+		// Execute further actions here
+		checkpoint.JSONsetAllLights(localFilname, localElevatorName)
+		checkpoint.JSONOrderAssigner(& elevator, localFilname, localElevatorName)
+		//fsm.FsmRequestButtonPressV3(localFilname, localElevatorName) // TODO: Only have one version
+	}
+	FsmRequestButtonPressV3(localFilname, localElevatorName)
 	checkpoint.SaveCombinedInput(localCombinedInput, localFilname)
 }
