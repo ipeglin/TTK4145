@@ -48,8 +48,6 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 
 	// initial hinderance states
 	var obst bool = false
-	var immobile bool = false
-
 	for {
 		select {
 		case drv_obst := <-drv_obstr:
@@ -61,7 +59,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			}
 			obst = drv_obst
 
-		case immobile = <-immob:
+		case immobile := <-immob:
 			logrus.Warn("Immobile state changed: ", immobile)
 			if immobile {
 				// BUG: THis occurs very late
@@ -81,7 +79,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			//print("hjelp noe må funke")
 			fsm.HandleButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
 			//fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
-			
+
 			fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
 
