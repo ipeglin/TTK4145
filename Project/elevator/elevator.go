@@ -19,7 +19,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 	elevatorStateFile := elevatorName + ".json"
 	if isPrimaryProcess {
 		if elevio.InputDevice.FloorSensor() == -1 {
-			// elevator initialised between floors
+			logrus.Info("Elevator initialised between floors")
 			fsm.MoveDownToFloor()
 		}
 		fsm.CreateLocalStateFile(elevatorStateFile, elevatorName)
