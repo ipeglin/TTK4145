@@ -177,24 +177,6 @@ func RemoveElevatorsFromJSON(elevatorIDs []string) error {
 	return nil
 }
 
-func isValidBehavior(behavior string) bool {
-	switch behavior {
-	case "idle", "moving", "doorOpen":
-		return true
-	default:
-		return false
-	}
-}
-
-func isValidDirection(direction string) bool {
-	switch direction {
-	case "up", "down", "stop":
-		return true
-	default:
-		return false
-	}
-}
-
 func IsStateCorrupted(state TElevState) bool {
 	input := state.HRAInput
 
@@ -213,4 +195,22 @@ func IsStateCorrupted(state TElevState) bool {
 	}
 
 	return false
+}
+
+func isValidBehavior(behavior string) bool {
+	switch behavior {
+	case "idle", "moving", "doorOpen":
+		return true
+	default:
+		return false
+	}
+}
+
+func isValidDirection(direction string) bool {
+	switch direction {
+	case "up", "down", "stop":
+		return true
+	default:
+		return false
+	}
 }
