@@ -13,7 +13,7 @@ func WriteToFile(data []byte, filename string) error {
 	if err != nil {
 		return err
 	}
-	defer unlockFile(osFile) // Ensure file is unlocked after reading
+	defer unlockFile(osFile)
 
 	err = os.WriteFile(filename, data, 0644)
 	if err != nil {
@@ -24,11 +24,11 @@ func WriteToFile(data []byte, filename string) error {
 }
 
 func ReadFromFile(filename string) ([]byte, error) {
-	osFile, err := lockFile(filename) // Lock the file for reading
+	osFile, err := lockFile(filename)
 	if err != nil {
 		return nil, err
 	}
-	defer unlockFile(osFile) // Ensure file is unlocked after reading
+	defer unlockFile(osFile)
 
 	data, err := os.ReadFile(filename)
 	if err != nil {

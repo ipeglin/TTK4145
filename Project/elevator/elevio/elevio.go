@@ -43,14 +43,11 @@ func castButtonToHWButtonType(btn Button) hwelevio.HWButtonType {
 	}
 }
 
-// New name?
 func RequestButton(f int, btn Button) bool {
-	// Implementation using the actual hardware library.
 	return hwelevio.GetButton(castButtonToHWButtonType(btn), f)
 }
 
 func RequestButtonLight(f int, btn Button, v bool) {
-	// Implementation using the actual hardware library.
 	hwelevio.SetButtonLamp(castButtonToHWButtonType(btn), f, v)
 }
 
@@ -79,7 +76,6 @@ func RequestStop() bool {
 }
 
 func MotorDirection(d ElevDir) {
-	// Implementation using the actual hardware library.
 	hwelevio.SetMotorDirection(castElevDirToMotorDirection(d))
 }
 
