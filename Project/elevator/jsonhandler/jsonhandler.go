@@ -177,7 +177,7 @@ func RemoveElevatorsFromJSON(elevatorIDs []string) error {
 	return nil
 }
 
-func IsValidBehavior(behavior string) bool {
+func isValidBehavior(behavior string) bool {
 	switch behavior {
 	case "idle", "moving", "doorOpen":
 		return true
@@ -186,7 +186,7 @@ func IsValidBehavior(behavior string) bool {
 	}
 }
 
-func IsValidDirection(direction string) bool {
+func isValidDirection(direction string) bool {
 	switch direction {
 	case "up", "down", "stop":
 		return true
@@ -195,13 +195,15 @@ func IsValidDirection(direction string) bool {
 	}
 }
 
-func IncomingDataIsCorrupt(externalState TElevState) bool {
-	incomingHRAInput := externalState.HRAInput
-	if len(incomingHRAInput.HallRequests) != elevio.NFloors {
+func IsStateCorrupted(state TElevState) bool {
+	input := state.HRAInput
+
+	if len(input.HallRequests) != elevio.NFloors {
 		return true
 	}
-	for _, state := range incomingHRAInput.States {
-		if !IsValidBehavior(state.Behavior) || !IsValidDirection(state.Direction) {
+
+	for _, state := range input.States {
+		if !isValidBehavior(state.Behavior) || !isValidDirection(state.Direction) {
 			return true
 		}
 
@@ -209,5 +211,6 @@ func IncomingDataIsCorrupt(externalState TElevState) bool {
 			return true
 		}
 	}
+
 	return false
 }
