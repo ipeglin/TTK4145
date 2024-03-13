@@ -48,7 +48,6 @@ func SetConfirmedHallLights(localFilename string, elevatorName string) {
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		elevio.RequestButtonLight(floor, elevio.BHallUp, combinedInput.HRAInput.HallRequests[floor][0])
 		elevio.RequestButtonLight(floor, elevio.BHallDown, combinedInput.HRAInput.HallRequests[floor][1])
-
 	}
 }
 
@@ -99,7 +98,6 @@ func DoorTimeout(filename string, elevatorName string) {
 		case elev.EBIdle:
 			outputDevice.DoorLight(false)
 		}
-
 	}
 }
 
@@ -249,6 +247,9 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 
 func AssignIfWorldViewsAlign(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput) {
 	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
+
+	// TODO: This is a great candidate for extracting into a separate function. 
+	//  * From
 	allValuesEqual := true
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
@@ -258,12 +259,15 @@ func AssignIfWorldViewsAlign(localFilename string, localElevatorName string, oth
 			}
 		}
 	}
+	// * to here
 
 	if allValuesEqual {
 		jsonhandler.JSONOrderAssigner(&elevator, localFilename, localElevatorName)
 		SetConfirmedHallLights(localFilename, localElevatorName)
 	}
 }
+
+// TODO: Maybe IsOnlyNodeOnline()
 func OnlyElevatorOnline(localFilename string, localElevatorName string) bool {
 	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
 	if len(localCombinedInput.HRAInput.States) == 1 {
