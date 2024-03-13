@@ -8,17 +8,27 @@ import (
 	"encoding/json"
 	"filehandler"
 	"fmt"
+	"network/local"
 	"os/exec"
 
 	"github.com/sirupsen/logrus"
 )
 
-const StateFile string = "state.json"
+var StateFile string
 
 // TElevState kombinerer HRAInput og CyclicCounterInput.
 type TElevState struct {
 	HRAInput      hra.HRAInput
 	CyclicCounter ccounter.CyclicCounterInput
+}
+
+func init() {
+	ip, err := local.GetIP()
+	if err != nil {
+		logrus.Fatal("Could not resolve IP address")
+	}
+
+	StateFile = ip + ".json"
 }
 
 // TODO: Change this from Initizalied to make/create
