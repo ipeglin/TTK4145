@@ -10,7 +10,7 @@ import (
 
 func requestsAbove(e elev.Elevator) bool {
 	for f := e.CurrentFloor + 1; f < elevio.NFloors; f++ {
-		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+		for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
 			if e.Requests[f][btn] {
 				return true
 			}
@@ -21,7 +21,7 @@ func requestsAbove(e elev.Elevator) bool {
 
 func requestsBelow(e elev.Elevator) bool {
 	for f := 0; f < e.CurrentFloor; f++ {
-		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+		for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
 			if e.Requests[f][btn] {
 				return true
 			}
@@ -31,7 +31,7 @@ func requestsBelow(e elev.Elevator) bool {
 }
 
 func requestsHere(e elev.Elevator) bool {
-	for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+	for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
 		if e.Requests[e.CurrentFloor][btn] {
 			return true
 
@@ -120,15 +120,15 @@ func ShouldClearImmediately(e elev.Elevator, btn_floor int, btn_type elevio.Butt
 	}
 }
 
-func ClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName string) elev.Elevator {
+func ClearAtCurrentFloor(e elev.Elevator, elevatorName string) elev.Elevator {
 
 	beforeClear := make(map[elevio.Button]bool)
-	for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+	for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
 		beforeClear[btn] = e.Requests[e.CurrentFloor][btn]
 	}
 	switch e.Config.ClearRequestVariant {
 	case elev.CRVAll:
-		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+		for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
 			e.Requests[e.CurrentFloor][btn] = false
 		}
 
@@ -154,7 +154,7 @@ func ClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName string) 
 	}
 	for btn, wasPressed := range beforeClear {
 		if wasPressed && !e.Requests[e.CurrentFloor][btn] {
-			jsonhandler.UpdateJSONOnCompletedHallOrder(e, filename, elevatorName, e.CurrentFloor, btn)
+			jsonhandler.UpdateJSONOnCompletedHallOrder(e, elevatorName, e.CurrentFloor, btn)
 		}
 	}
 	return e
