@@ -273,14 +273,11 @@ func OnlyElevatorOnlie(localFilename string, localElevatorName string) bool {
 	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
 	if len(localCombinedInput.HRAInput.States) == 1 {
 		if _, exists := localCombinedInput.HRAInput.States[localElevatorName]; exists {
-			print("jeg lever faktisk")
 			return true
 		}
 	}
 	return false
 }
-
-
 
 func compareCombinedInputs(input1, input2 jsonhandler.CombinedInput) bool {
 	// Check if the CyclicCounter fields are equal

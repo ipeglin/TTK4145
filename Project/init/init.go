@@ -66,8 +66,11 @@ func initNode(isFirstProcess bool) {
 			logrus.Debug("Removing lost IPs: ", lostNodeAddresses)
 
 			jsonhandler.DeleteInactiveElevatorsFromJSON(lostNodeAddresses, localStateFile)
+			//denne iffen er vi sensetive for med pakketap. er det en måte å garatere at noder har vært offline lenge?
+			//tror jeg fiksa feilen vår. Tror feilen oppstod i cas eonline, men er ikke sikker. 
+			//kan noen av dere som vet bedre om pakketap fra andre heiser får oss til å tro de er offline ? 
+			//vis ikke har jeg fikset feilen tror jeg 
 			if fsm.OnlyElevatorOnlie(localStateFile, localIP) {
-				//denne iffen er vi sensetive for med pakketap. er det en måte å garatere at noder har vært offline lenge?
 				fsm.JSONOrderAssigner(localStateFile, localIP)
 				jsonhandler.JSONsetAllLights(localStateFile, localIP)
 				fsm.MoveOnActiveOrders(localStateFile, localIP)
@@ -100,20 +103,14 @@ func initNode(isFirstProcess bool) {
 			}
 
 		case online := <-onlineStatusChannel:
-			//ViErOnline = True
-			localStateFile = localIP + ".json"
-			fsm.HandleStateOnReboot(localIP, localStateFile) // Deprecated: fsm.RebootJSON()
-			//fsm.JSONOrderAssigner(localStateFile, localIP)
-			//fsm.MoveOnActiveOrders(localStateFile, localIP) // ! Only have one version
-			logrus.Warn("Updated online status:", online)
-			if !online{
-				print("jeg er offline")
+			if online{
+				fsm.HandleStateOnReboot(localIP, localStateFile) // Deprecated: fsm.RebootJSON()
+			}else{
 				fsm.SetLightsWhenOffline()
 				fsm.MoveOnActiveOrders(localStateFile, localIP)
 			}
+			logrus.Warn("Updated online status:", online)
 		}
-		//case ofline :=<-
-		//ViErOnline = False
 	}
 
 }
