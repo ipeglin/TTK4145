@@ -6,8 +6,6 @@ import (
 
 func GetCurrentTimeAsFloat() float64 {
 	now := time.Now()
-	// UnixNano returns nanoseconds since the Unix epoch.
-	// To convert nanoseconds to seconds, divide by 1e9 (the number of nanoseconds in one second).
 	return float64(now.Unix()) + float64(now.Nanosecond())*1e-9
 }
 
