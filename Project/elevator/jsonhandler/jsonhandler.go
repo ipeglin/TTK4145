@@ -106,7 +106,6 @@ func UpdateJSONOnNewOrder(elevatorName string, btnFloor int, btn elevio.Button) 
 }
 
 // TODO : mener denne kan bare bli en fsm func
-// TODO: Changed it from refrence to pass-by-value. Is it very ugly now?
 func JSONOrderAssigner(e *elev.Elevator, elevatorName string) {
 	state, err := LoadState()
 	if err != nil {
