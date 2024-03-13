@@ -12,9 +12,9 @@ import (
 
 var timeLimitOnline time.Duration = time.Duration(3 * time.Second)
 
-type TFunc func(bool)
+type Func func(bool)
 
-func CreatePair(f TFunc) {
+func CreatePair(f Func) {
 	if len(os.Args) > 1 && os.Args[1] == "backup" {
 		logrus.Info("Initiated as backup process. Listening for main process to terminate...")
 		waitForProcessTermination(f)
@@ -23,7 +23,7 @@ func CreatePair(f TFunc) {
 	}
 }
 
-func waitForProcessTermination(f TFunc) {
+func waitForProcessTermination(f Func) {
 	for {
 		if !isProcessAlive() {
 			startProcess(f, false)
@@ -39,7 +39,7 @@ func isProcessAlive() bool {
 	return timeLimitOnline >= timeSinceCheckpoint
 }
 
-func startProcess(mainFunc TFunc, firstProcsess bool) {
+func startProcess(mainFunc Func, firstProcsess bool) {
 	logrus.Info("Main process initiated...")
 	go mainFunc(firstProcsess)
 	startBackup()

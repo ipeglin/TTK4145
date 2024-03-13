@@ -114,7 +114,7 @@ func initNode(isFirstProcess bool) {
 }
 
 func main() {
-	var entryPointFunction processpair.TFunc = initNode
+	var entryPointFunction processpair.Func = initNode
 	processpair.CreatePair(entryPointFunction)
 
 	// Block the main goroutine indefinitely
