@@ -67,6 +67,7 @@ func initNode(isFirstProcess bool) {
 
 			jsonhandler.DeleteInactiveElevatorsFromJSON(lostNodeAddresses, localStateFile)
 			if fsm.OnlyElevatorOnlie(localStateFile, localIP) {
+				//denne iffen er vi sensetive for med pakketap. er det en måte å garatere at noder har vært offline lenge?
 				fsm.JSONOrderAssigner(localStateFile, localIP)
 				jsonhandler.JSONsetAllLights(localStateFile, localIP)
 				fsm.MoveOnActiveOrders(localStateFile, localIP)
@@ -100,10 +101,16 @@ func initNode(isFirstProcess bool) {
 
 		case online := <-onlineStatusChannel:
 			//ViErOnline = True
+			localStateFile = localIP + ".json"
 			fsm.HandleStateOnReboot(localIP, localStateFile) // Deprecated: fsm.RebootJSON()
 			//fsm.JSONOrderAssigner(localStateFile, localIP)
 			//fsm.MoveOnActiveOrders(localStateFile, localIP) // ! Only have one version
 			logrus.Warn("Updated online status:", online)
+			if !online{
+				print("jeg er offline")
+				fsm.SetLightsWhenOffline()
+				fsm.MoveOnActiveOrders(localStateFile, localIP)
+			}
 		}
 		//case ofline :=<-
 		//ViErOnline = False

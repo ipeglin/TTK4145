@@ -38,6 +38,20 @@ func setAllLights() {
 	}
 }
 
+func SetLightsWhenOffline(){
+	for floor := 0; floor < elevio.NFloors; floor++ {
+		for btn:= elevio.BHallUp; btn <= elevio.BCab; btn ++{
+			outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
+		}
+	}	
+}
+
+func IsOffline() bool {
+	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localStateFile)
+	return len(localCombinedInput.HRAInput.States) == 0
+}
+
+
 func MoveDownToFloor() {
 	dirn := elevio.DirDown
 	outputDevice.MotorDirection(dirn)
@@ -251,7 +265,6 @@ func AssignOnInncoming(localFilename string, localElevatorName string, otherComb
 	}
 
 	if allValuesEqual {
-		print("all equal")
 		jsonhandler.JSONOrderAssigner(&elevator, localFilename, localElevatorName)
 		jsonhandler.JSONsetAllLights(localFilename, localElevatorName)
 	}
@@ -260,11 +273,14 @@ func OnlyElevatorOnlie(localFilename string, localElevatorName string) bool {
 	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
 	if len(localCombinedInput.HRAInput.States) == 1 {
 		if _, exists := localCombinedInput.HRAInput.States[localElevatorName]; exists {
+			print("jeg lever faktisk")
 			return true
 		}
 	}
 	return false
 }
+
+
 
 func compareCombinedInputs(input1, input2 jsonhandler.CombinedInput) bool {
 	// Check if the CyclicCounter fields are equal

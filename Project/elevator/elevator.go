@@ -87,8 +87,11 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			fsm.FloorArrival(floor, elevatorName, elevatorStateFile)
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
 			if fsm.OnlyElevatorOnlie(elevatorStateFile, elevatorName) {
-				//fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
+				fsm.JSONOrderAssigner(elevatorStateFile, elevatorName)
 				jsonhandler.JSONsetAllLights(elevatorStateFile, elevatorName)
+			}
+			if fsm.IsOffline(){
+				fsm.SetLightsWhenOffline()
 			}
 			if obst {
 				fsm.RequestObstruction()
