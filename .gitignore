@@ -1,6 +1,7 @@
 *.json
 *.JSON
 *.log
+.DS_Store
 
 # Ignore executables and json
 **/init/*
