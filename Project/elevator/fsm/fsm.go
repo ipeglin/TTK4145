@@ -16,15 +16,12 @@ import (
 
 var elevator elev.Elevator
 var outputDevice elevio.ElevOutputDevice
-var elevatorIP string
-var localStateFile string
+var nodeIP string
 
 func init() {
 	elevator = elev.ElevatorInit()
-	elevatorIP, _ = local.GetIP()
+	nodeIP, _ = local.GetIP()
 	outputDevice = elevio.ElevioGetOutputDevice()
-
-	localStateFile = elevatorIP + ".json"
 
 	// ? Should this be moved
 	SetAllLights()
@@ -35,7 +32,7 @@ func init() {
 func SetAllLights() {
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		outputDevice.RequestButtonLight(floor, elevio.BCab, elevator.Requests[floor][elevio.BCab])
-		if isOffline() || OnlyElevatorOnline(localStateFile, elevatorIP) {
+		if isOffline() || OnlyElevatorOnline(nodeIP) {
 			for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
 				outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
 			}
@@ -43,8 +40,8 @@ func SetAllLights() {
 	}
 }
 
-func SetConfirmedHallLights(localFilename string, elevatorName string) {
-	currentState, _ := jsonhandler.LoadState(localFilename)
+func SetConfirmedHallLights(elevatorName string) {
+	currentState, _ := jsonhandler.LoadState()
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		elevio.RequestButtonLight(floor, elevio.BHallUp, currentState.HRAInput.HallRequests[floor][0])
 		elevio.RequestButtonLight(floor, elevio.BHallDown, currentState.HRAInput.HallRequests[floor][1])
@@ -58,7 +55,7 @@ func MoveDownToFloor() {
 	elevator.CurrentBehaviour = elev.EBMoving
 }
 
-func FloorArrival(newFloor int, elevatorName string, filename string) {
+func FloorArrival(newFloor int, elevatorName string) {
 	logrus.Warn("Arrived at new floor: ", newFloor)
 
 	elevator.CurrentFloor = newFloor
@@ -69,7 +66,7 @@ func FloorArrival(newFloor int, elevatorName string, filename string) {
 		if requests.ShouldStop(elevator) {
 			outputDevice.MotorDirection(elevio.DirStop)
 			outputDevice.DoorLight(true)
-			elevator = requests.ClearAtCurrentFloor(elevator, filename, elevatorName)
+			elevator = requests.ClearAtCurrentFloor(elevator, elevatorName)
 			timer.Start(elevator.Config.DoorOpenDurationS)
 			SetAllLights()
 			elevator.CurrentBehaviour = elev.EBDoorOpen
@@ -78,7 +75,7 @@ func FloorArrival(newFloor int, elevatorName string, filename string) {
 
 }
 
-func DoorTimeout(filename string, elevatorName string) {
+func DoorTimeout(elevatorName string) {
 	switch elevator.CurrentBehaviour {
 	case elev.EBDoorOpen:
 		pair := requests.ChooseDirection(elevator)
@@ -88,7 +85,7 @@ func DoorTimeout(filename string, elevatorName string) {
 		switch elevator.CurrentBehaviour {
 		case elev.EBDoorOpen:
 			timer.Start(elevator.Config.DoorOpenDurationS)
-			elevator = requests.ClearAtCurrentFloor(elevator, filename, elevatorName)
+			elevator = requests.ClearAtCurrentFloor(elevator, elevatorName)
 			SetAllLights()
 
 		case elev.EBMoving:
@@ -104,14 +101,14 @@ func DoorTimeout(filename string, elevatorName string) {
 func RequestObstruction() {
 	if elevator.CurrentBehaviour == elev.EBDoorOpen {
 		timer.StartInfiniteTimer()
-		jsonhandler.RemoveElevatorsFromJSON([]string{elevatorIP}, localStateFile)
+		jsonhandler.RemoveElevatorsFromJSON([]string{nodeIP})
 	}
 }
 
 func StopObstruction() {
 	timer.StopInfiniteTimer()
 	timer.Start(elevator.Config.DoorOpenDurationS)
-	HandleStateOnReboot(elevatorIP, localStateFile)
+	HandleStateOnReboot(nodeIP)
 }
 
 func CreateCheckpoint() {
@@ -135,9 +132,9 @@ func ResumeAtLatestCheckpoint(floor int) {
 	}
 }
 
-func CreateLocalStateFile(filename string, ElevatorName string) {
+func CreateLocalStateFile(ElevatorName string) {
 	// TODO: Gjør endringer på elevState her
-	err := os.Remove(filename)
+	err := os.Remove(jsonhandler.StateFile)
 	if err != nil {
 		logrus.Error("Failed to remove:", err)
 	}
@@ -145,37 +142,37 @@ func CreateLocalStateFile(filename string, ElevatorName string) {
 	initialElevState := jsonhandler.InitialiseState(elevator, ElevatorName)
 
 	// * If the file was successfully deleted, return nil
-	err = jsonhandler.SaveState(initialElevState, filename)
+	err = jsonhandler.SaveState(initialElevState)
 	if err != nil {
 		logrus.Error("Failed to save checkpoint:", err)
 	}
 }
 
 // * This was UpdateJSON()
-func UpdateElevatorState(elevatorName string, filename string) {
-	jsonhandler.UpdateJSON(elevator, filename, elevatorName)
+func UpdateElevatorState(elevatorName string) {
+	jsonhandler.UpdateJSON(elevator, elevatorName)
 	checkpoint.SetCheckpoint(elevator, checkpoint.CheckpointFilename)
 }
 
 // * This was RebootJSON()
-func HandleStateOnReboot(elevatorName string, filename string) {
-	jsonhandler.UpdateJSONOnReboot(elevator, filename, elevatorName) // Deprecated: json.RebootJSON()
+func HandleStateOnReboot(elevatorName string) {
+	jsonhandler.UpdateJSONOnReboot(elevator, elevatorName) // Deprecated: json.RebootJSON()
 	checkpoint.SetCheckpoint(elevator, checkpoint.CheckpointFilename)
 }
 
 // gir det mening å ha slike oneliners? eller burde vi flytte inn JsonOrderAssignerKoden her?
-func AssignOrders(filename string, elevatorName string) {
-	elevator = jsonhandler.JSONOrderAssigner(elevator, filename, elevatorName)
+func AssignOrders(elevatorName string) {
+	elevator = jsonhandler.JSONOrderAssigner(elevator, elevatorName)
 }
 
-func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
+func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string) {
 	// TODO: Extract the conditions into variables with more informative names
 	if requests.ShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
 		timer.Start(elevator.Config.DoorOpenDurationS)
 	} else {
 		// TODO: Check if this is correct
 		//updateStateOnNewOrder(btnFloor, btn, elevatorName, filename)
-		jsonhandler.UpdateJSONOnNewOrder(filename, elevatorName, btnFloor, btn)
+		jsonhandler.UpdateJSONOnNewOrder(elevatorName, btnFloor, btn)
 
 		//TODO: This variable just makes it complicated
 		isCabCall := btn == elevio.BCab
@@ -185,7 +182,7 @@ func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string, fil
 	}
 }
 
-func MoveOnActiveOrders(filename string, elevatorName string) {
+func MoveOnActiveOrders(elevatorName string) {
 	switch elevator.CurrentBehaviour {
 	case elev.EBIdle:
 		pair := requests.ChooseDirection(elevator)
@@ -196,7 +193,7 @@ func MoveOnActiveOrders(filename string, elevatorName string) {
 		case elev.EBDoorOpen:
 			outputDevice.DoorLight(true)
 			timer.Start(elevator.Config.DoorOpenDurationS)
-			elevator = requests.ClearAtCurrentFloor(elevator, filename, elevatorName)
+			elevator = requests.ClearAtCurrentFloor(elevator, elevatorName)
 
 		case elev.EBMoving:
 			outputDevice.MotorDirection(elevator.Dirn)
@@ -205,8 +202,8 @@ func MoveOnActiveOrders(filename string, elevatorName string) {
 	SetAllLights()
 }
 
-func HandleIncomingJSON(localFilename string, localElevatorName string, externalState jsonhandler.TElevState, incomingElevatorName string) {
-	localState, _ := jsonhandler.LoadState(localFilename)
+func HandleIncomingJSON(localElevatorName string, externalState jsonhandler.TElevState, incomingElevatorName string) {
+	localState, _ := jsonhandler.LoadState()
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
 			if externalState.CyclicCounter.HallRequests[f][i] > localState.CyclicCounter.HallRequests[f][i] {
@@ -244,7 +241,7 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, external
 			localState.CyclicCounter.States[localElevatorName] = externalState.CyclicCounter.States[localElevatorName] + 1
 		}
 	}
-	jsonhandler.SaveState(localState, localFilename)
+	jsonhandler.SaveState(localState)
 }
 
 // TODO: Should this go somewehre else?
@@ -259,18 +256,18 @@ func worldViewsAllign(localState jsonhandler.TElevState, externalState jsonhandl
 	return true
 }
 
-func AssignIfWorldViewsAlign(localFilename string, localElevatorName string, externalState jsonhandler.TElevState) {
-	localState, _ := jsonhandler.LoadState(localFilename)
+func AssignIfWorldViewsAlign(localElevatorName string, externalState jsonhandler.TElevState) {
+	localState, _ := jsonhandler.LoadState()
 
 	if worldViewsAllign(localState, externalState) {
-		elevator = jsonhandler.JSONOrderAssigner(elevator, localFilename, localElevatorName)
-		SetConfirmedHallLights(localFilename, localElevatorName)
+		elevator = jsonhandler.JSONOrderAssigner(elevator, localElevatorName)
+		SetConfirmedHallLights(localElevatorName)
 	}
 }
 
 // TODO: Maybe IsOnlyNodeOnline()
-func OnlyElevatorOnline(localFilename string, localElevatorName string) bool {
-	currentState, _ := jsonhandler.LoadState(localFilename)
+func OnlyElevatorOnline(localElevatorName string) bool {
+	currentState, _ := jsonhandler.LoadState()
 	if len(currentState.HRAInput.States) == 1 {
 		if _, exists := currentState.HRAInput.States[localElevatorName]; exists {
 			return true
@@ -280,6 +277,6 @@ func OnlyElevatorOnline(localFilename string, localElevatorName string) bool {
 }
 
 func isOffline() bool {
-	currentState, _ := jsonhandler.LoadState(localStateFile)
+	currentState, _ := jsonhandler.LoadState()
 	return len(currentState.HRAInput.States) == 0
 }

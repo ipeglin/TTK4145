@@ -13,6 +13,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const StateFile string = "state.json"
+
 // TElevState kombinerer HRAInput og CyclicCounterInput.
 type TElevState struct {
 	HRAInput      hra.HRAInput
@@ -28,21 +30,21 @@ func InitialiseState(e elev.Elevator, elevatorName string) TElevState {
 }
 
 // SaveState serialiserer state til JSON og lagrer det i en fil.
-func SaveState(state TElevState, filename string) error {
+func SaveState(state TElevState) error {
 	data, err := json.MarshalIndent(state, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to serialise state to JSON: %v", err)
 	}
 
-	filehandler.WriteToFile(data, filename)
+	filehandler.WriteToFile(data, StateFile)
 	return nil
 }
 
 // LoadState deserialiserer state fra en JSON-fil.
-func LoadState(filename string) (TElevState, error) {
+func LoadState() (TElevState, error) {
 	var state TElevState
 
-	data, err := filehandler.ReadFromFile(filename)
+	data, err := filehandler.ReadFromFile(StateFile)
 	if err != nil {
 		logrus.Error("Failed to read from file: ", err)
 		return state, fmt.Errorf("failed to read from file %v", err)
@@ -56,47 +58,47 @@ func LoadState(filename string) (TElevState, error) {
 	return state, nil
 }
 
-func UpdateJSON(e elev.Elevator, filename string, elevatorName string) {
-	state, _ := LoadState(filename)
+func UpdateJSON(e elev.Elevator, elevatorName string) {
+	state, _ := LoadState()
 	if _, exists := state.HRAInput.States[elevatorName]; exists {
 		state.HRAInput = hra.UpdateHRAInput(state.HRAInput, e, elevatorName)
 		state.CyclicCounter = ccounter.IncrementOnInput(state.CyclicCounter, elevatorName)
 	}
-	SaveState(state, filename)
+	SaveState(state)
 }
 
 // This was RebootJSON
-func UpdateJSONOnReboot(e elev.Elevator, filename string, elevatorName string) {
-	state, _ := LoadState(filename)
+func UpdateJSONOnReboot(e elev.Elevator, elevatorName string) {
+	state, _ := LoadState()
 	state.HRAInput = hra.RebootHRAInput(state.HRAInput, e, elevatorName)
 	state.CyclicCounter = ccounter.IncrementOnInput(state.CyclicCounter, elevatorName)
-	SaveState(state, filename)
+	SaveState(state)
 }
 
-func UpdateJSONOnCompletedHallOrder(e elev.Elevator, filename string, elevatorName string, btn_floor int, btn_type elevio.Button) {
-	state, _ := LoadState(filename)
+func UpdateJSONOnCompletedHallOrder(e elev.Elevator, elevatorName string, btn_floor int, btn_type elevio.Button) {
+	state, _ := LoadState()
 	if _, exists := state.HRAInput.States[elevatorName]; exists {
 		state.HRAInput = hra.UpdateHRAInputOnCompletedOrder(state.HRAInput, e, elevatorName, btn_floor, btn_type)
 		state.CyclicCounter = ccounter.UpdateOnCompletedOrder(state.CyclicCounter, elevatorName, btn_floor, btn_type)
 	}
-	SaveState(state, filename)
+	SaveState(state)
 }
 
-func UpdateJSONOnNewOrder(filename string, elevatorName string, btnFloor int, btn elevio.Button) {
-	state, _ := LoadState(filename)
+func UpdateJSONOnNewOrder(elevatorName string, btnFloor int, btn elevio.Button) {
+	state, _ := LoadState()
 	//ønsker vi ikke legge til nye ordere/ ta ordere mens vi er offline?
 	//hvis vi øssker, fjern denne if setningen.
 	if _, exists := state.HRAInput.States[elevatorName]; exists {
 		state.CyclicCounter = ccounter.UpdateOnNewOrder(state.CyclicCounter, state.HRAInput, elevatorName, btnFloor, btn)
 		state.HRAInput = hra.UpdateHRAInputOnNewOrder(state.HRAInput, elevatorName, btnFloor, btn)
 	}
-	SaveState(state, filename)
+	SaveState(state)
 }
 
 // TODO : mener denne kan bare bli en fsm func
 // TODO: Changed it from refrence to pass-by-value. Is it very ugly now?
-func JSONOrderAssigner(e elev.Elevator, filename string, elevatorName string) elev.Elevator {
-	state, err := LoadState(filename)
+func JSONOrderAssigner(e elev.Elevator, elevatorName string) elev.Elevator {
+	state, err := LoadState()
 	if err != nil {
 		fmt.Printf("Failed to load combined input: %v\n", err)
 		return e
@@ -136,8 +138,8 @@ func JSONOrderAssigner(e elev.Elevator, filename string, elevatorName string) el
 }
 
 // denne brukes en gang i main. kan vi gjøre den over komatibel
-func RemoveElevatorsFromJSON(elevatorIDs []string, filename string) error {
-	state, err := LoadState(filename)
+func RemoveElevatorsFromJSON(elevatorIDs []string) error {
+	state, err := LoadState()
 	if err != nil {
 		return fmt.Errorf("failed to load local combined input: %v", err)
 	}
@@ -159,7 +161,7 @@ func RemoveElevatorsFromJSON(elevatorIDs []string, filename string) error {
 
 	// Save the updated state back to the file
 	//TODO: Got error check for this saveState but not for anyone else
-	err = SaveState(state, filename)
+	err = SaveState(state)
 	if err != nil {
 		return fmt.Errorf("failed to save updated combined input: %v", err)
 	}

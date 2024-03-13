@@ -120,7 +120,7 @@ func ShouldClearImmediately(e elev.Elevator, btn_floor int, btn_type elevio.Butt
 	}
 }
 
-func ClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName string) elev.Elevator {
+func ClearAtCurrentFloor(e elev.Elevator, elevatorName string) elev.Elevator {
 
 	beforeClear := make(map[elevio.Button]bool)
 	for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
@@ -154,7 +154,7 @@ func ClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName string) 
 	}
 	for btn, wasPressed := range beforeClear {
 		if wasPressed && !e.Requests[e.CurrentFloor][btn] {
-			jsonhandler.UpdateJSONOnCompletedHallOrder(e, filename, elevatorName, e.CurrentFloor, btn)
+			jsonhandler.UpdateJSONOnCompletedHallOrder(e, elevatorName, e.CurrentFloor, btn)
 		}
 	}
 	return e
