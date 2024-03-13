@@ -12,13 +12,12 @@ import (
 
 func Init(elevatorName string, isPrimaryProcess bool) {
 	logrus.Info("Elevator module initiated with name ", elevatorName)
-	localStateFilename := elevatorName + ".json"
 	if isPrimaryProcess {
 		if elevio.InputDevice.FloorSensor() == -1 {
 			logrus.Info("Elevator initialised between floors")
 			fsm.MoveDownToFloor()
 		}
-		fsm.CreateLocalStateFile(localStateFilename, elevatorName)
+		fsm.CreateLocalStateFile(elevatorName)
 	} else {
 		floor := elevio.InputDevice.FloorSensor()
 		fsm.ResumeAtLatestCheckpoint(floor)
@@ -53,30 +52,34 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 		case motorActive := <-drv_motorActivity:
 			logrus.Warn("MotorActive state changed: ", motorActive)
 			if !motorActive {
-				jsonhandler.RemoveElevatorsFromJSON(localStateFilename, []string{elevatorName})
+				// BUG: THis occurs very late
+				jsonhandler.RemoveElevatorsFromJSON([]string{elevatorName})
+				//we need to remove the request// clear them if we dont want to comlete orders twice.
+				//it is up to uss and we have functionality to do so
 			} else {
-				fsm.HandleStateOnReboot(elevatorName, localStateFilename)
+				fsm.HandleStateOnReboot(elevatorName)
+				//lurer på om vi må ha en movebutton her men idk
+
+				//fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
+				//fsm.AssignOrders(elevatorStateFile, elevatorName)
 			}
 
 		case btnEvent := <-drv_buttons:
 			logrus.Debug("Button press detected: ", btnEvent)
-			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
-			fsm.HandleButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
-
-			if fsm.OnlyElevatorOnline(elevatorStateFile, elevatorName) {
-				fsm.AssignOrders(elevatorStateFile, elevatorName)
+			fsm.UpdateElevatorState(elevatorName)
+			fsm.HandleButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName)
+			if fsm.OnlyElevatorOnline(elevatorName) {
+				fsm.AssignOrders(elevatorName)
 			}
-
-			fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
-			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
+			fsm.MoveOnActiveOrders(elevatorName)
+			fsm.UpdateElevatorState(elevatorName)
 
 		case floor := <-drv_floors:
 			logrus.Debug("Floor sensor triggered: ", floor)
-			fsm.FloorArrival(floor, elevatorName, elevatorStateFile)
-			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
-
-			if fsm.OnlyElevatorOnline(elevatorStateFile, elevatorName) {
-				fsm.AssignOrders(elevatorStateFile, elevatorName)
+			fsm.FloorArrival(floor, elevatorName)
+			fsm.UpdateElevatorState(elevatorName)
+			if fsm.OnlyElevatorOnline(elevatorName) {
+				fsm.AssignOrders(elevatorName)
 			}
 			if obst {
 				fsm.RequestObstruction()
@@ -85,10 +88,10 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 		default:
 			if timer.TimedOut() {
 				logrus.Debug("Elevator timeout")
-				fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
+				fsm.UpdateElevatorState(elevatorName)
 				timer.Stop()
-				fsm.DoorTimeout(elevatorStateFile, elevatorName)
-				fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
+				fsm.DoorTimeout(elevatorName)
+				fsm.UpdateElevatorState(elevatorName)
 			}
 			time.Sleep(50 * time.Millisecond)
 		}
