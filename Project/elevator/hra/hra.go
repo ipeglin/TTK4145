@@ -5,8 +5,6 @@ import (
 	"elevator/elevio"
 )
 
-const FilenameHRAInput = "elevHRAInput.json"
-
 type HRAElevState struct {
 	Behavior    string `json:"behaviour"`
 	Floor       int    `json:"floor"`
@@ -45,7 +43,7 @@ func UpdateHRAInput(hraInput HRAInput, e elev.Elevator, elevatorName string) HRA
 		hraInput.HallRequests[f][0] = hraInput.HallRequests[f][0] || e.Requests[f][elevio.BHallUp]
 		hraInput.HallRequests[f][1] = hraInput.HallRequests[f][1] || e.Requests[f][elevio.BHallDown]
 	}
-	
+
 	behavior, direction, cabRequests := convertLocalElevatorState(e)
 	hraInput.States[elevatorName] = HRAElevState{
 		Behavior:    behavior,
@@ -54,7 +52,7 @@ func UpdateHRAInput(hraInput HRAInput, e elev.Elevator, elevatorName string) HRA
 		CabRequests: cabRequests,
 	}
 	return hraInput
-	}
+}
 
 func RebootHRAInput(hraInput HRAInput, e elev.Elevator, elevatorName string) HRAInput {
 	behavior, direction, cabRequests := convertLocalElevatorState(e)
@@ -66,7 +64,6 @@ func RebootHRAInput(hraInput HRAInput, e elev.Elevator, elevatorName string) HRA
 	}
 	return hraInput
 }
-
 
 func UpdateHRAInputOnCompletedOrder(hraInput HRAInput, e elev.Elevator, elevatorName string, btn_floor int, btn_type elevio.Button) HRAInput {
 	switch btn_type {
@@ -89,28 +86,9 @@ func UpdateHRAInputOnCompletedOrder(hraInput HRAInput, e elev.Elevator, elevator
 	return hraInput
 }
 
-//HAR SIMEN FUNC FOR DETTE ALLERDE? 
 func convertLocalElevatorState(localElevator elev.Elevator) (string, string, []bool) {
-	// Convert behavior
-	var behavior string
-	switch localElevator.CurrentBehaviour {
-	case elev.EBIdle:
-		behavior = "idle"
-	case elev.EBMoving:
-		behavior = "moving"
-	case elev.EBDoorOpen:
-		behavior = "doorOpen"
-	}
-	// Convert direction
-	var direction string
-	switch localElevator.Dirn {
-	case elevio.DirUp:
-		direction = "up"
-	case elevio.DirDown:
-		direction = "down"
-	default:
-		direction = "stop"
-	}
+	behavior := elev.EBToString(localElevator.CurrentBehaviour)
+	direction := elevio.ElevDirToString(localElevator.Dirn)
 
 	// Convert cab requests
 	cabRequests := make([]bool, elevio.NFloors)
@@ -121,7 +99,7 @@ func convertLocalElevatorState(localElevator elev.Elevator) (string, string, []b
 	return behavior, direction, cabRequests
 }
 
-func UpdateHRAInputWhenNewOrderOccurs(hraInput HRAInput, elevatorName string, btnFloor int, btn elevio.Button) HRAInput {
+func UpdateHRAInputOnNewOrder(hraInput HRAInput, elevatorName string, btnFloor int, btn elevio.Button) HRAInput {
 	switch btn {
 	case elevio.BHallUp:
 		hraInput.HallRequests[btnFloor][0] = true

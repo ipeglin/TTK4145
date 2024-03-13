@@ -20,10 +20,10 @@ type CombinedInput struct {
 	CyclicCounter ccounter.CyclicCounterInput
 }
 
-func InitializeCombinedInput(e elev.Elevator, ElevatorName string) CombinedInput {
+func InitializeCombinedInput(e elev.Elevator, elevatorName string) CombinedInput {
 	return CombinedInput{
-		HRAInput:      hra.InitializeHRAInput(e, ElevatorName),
-		CyclicCounter: ccounter.InitializeCyclicCounterInput(ElevatorName),
+		HRAInput:      hra.InitializeHRAInput(e, elevatorName),
+		CyclicCounter: ccounter.InitializeCyclicCounterInput(elevatorName),
 	}
 }
 
@@ -88,17 +88,18 @@ func UpdateJSONOnNewOrder(filename string, elevatorName string, btnFloor int, bt
 	//hvis vi øssker, fjern denne if setningen.
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
 		combinedInput.CyclicCounter = ccounter.UpdateOnNewOrder(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
-		combinedInput.HRAInput = hra.UpdateHRAInputWhenNewOrderOccurs(combinedInput.HRAInput, elevatorName, btnFloor, btn)
+		combinedInput.HRAInput = hra.UpdateHRAInputOnNewOrder(combinedInput.HRAInput, elevatorName, btnFloor, btn)
 	}
 	SaveCombinedInput(combinedInput, filename)
 }
 
 // TODO : mener denne kan bare bli en fsm func
-func JSONOrderAssigner(e *elev.Elevator, filename string, elevatorName string) {
+// TODO: Changed it from refrence to pass-by-value. Is it very ugly now?
+func JSONOrderAssigner(e elev.Elevator, filename string, elevatorName string) elev.Elevator {
 	combinedInput, err := LoadCombinedInput(filename)
 	if err != nil {
 		fmt.Printf("Failed to load combined input: %v\n", err)
-		return
+		return e
 	}
 
 	// Check if HRAInput.States is not empty
@@ -106,19 +107,19 @@ func JSONOrderAssigner(e *elev.Elevator, filename string, elevatorName string) {
 		jsonBytes, err := json.Marshal(combinedInput.HRAInput)
 		if err != nil {
 			fmt.Printf("Failed to marshal HRAInput: %v\n", err)
-			return
+			return e
 		}
 
 		ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
 		if err != nil {
 			fmt.Printf("exec.Command error: %v\nOutput: %s\n", err, string(ret))
-			return
+			return e
 		}
 
 		output := make(map[string][][2]bool) // Changed from using new to make for clarity
 		if err := json.Unmarshal(ret, &output); err != nil {
 			fmt.Printf("json.Unmarshal error: %v\n", err)
-			return
+			return e
 		}
 
 		for floor := 0; floor < elevio.NFloors; floor++ {
@@ -127,20 +128,22 @@ func JSONOrderAssigner(e *elev.Elevator, filename string, elevatorName string) {
 				e.Requests[floor][elevio.BHallDown] = orders[floor][1]
 			}
 		}
+		return e
 	} else {
 		logrus.Debug("HRAInput.States is empty, skipping order assignment")
+		return e
 	}
 }
 
-func RemoveDysfunctionalElevatorFromJSON(localFilename string, elevatorName string) {
-	combinedInput, _ := LoadCombinedInput(localFilename)
+func RemoveDysfunctionalElevatorFromJSON(localStateFilename string, elevatorName string) {
+	combinedInput, _ := LoadCombinedInput(localStateFilename)
 	for id := range combinedInput.HRAInput.States {
 		if id == elevatorName {
 			delete(combinedInput.HRAInput.States, id)
 			delete(combinedInput.CyclicCounter.States, id)
 		}
 	}
-	SaveCombinedInput(combinedInput, localFilename)
+	SaveCombinedInput(combinedInput, localStateFilename)
 }
 
 // denne brukes en gang i main. kan vi gjøre den over komatibel
