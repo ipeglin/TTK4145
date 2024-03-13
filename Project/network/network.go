@@ -18,7 +18,7 @@ const messagePort int = lifelinePort + 1
 
 type Message struct {
 	SenderId string // IPv4
-	Payload  jsonhandler.TElevState
+	Payload  jsonhandler.ElevatorState
 	Checksum string
 }
 

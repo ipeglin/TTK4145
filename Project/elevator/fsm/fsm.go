@@ -199,7 +199,7 @@ func MoveOnActiveOrders(elevatorName string) {
 	SetAllLights()
 }
 
-func HandleIncomingJSON(localElevatorName string, externalState jsonhandler.TElevState, incomingElevatorName string) {
+func HandleIncomingJSON(localElevatorName string, externalState jsonhandler.ElevatorState, incomingElevatorName string) {
 	localState, _ := jsonhandler.LoadState()
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
@@ -242,7 +242,7 @@ func HandleIncomingJSON(localElevatorName string, externalState jsonhandler.TEle
 }
 
 // TODO: Should this go somewehre else?
-func worldViewsAlign(localState jsonhandler.TElevState, externalState jsonhandler.TElevState) bool {
+func worldViewsAlign(localState jsonhandler.ElevatorState, externalState jsonhandler.ElevatorState) bool {
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
 			if externalState.CyclicCounter.HallRequests[f][i] != localState.CyclicCounter.HallRequests[f][i] {
@@ -253,7 +253,7 @@ func worldViewsAlign(localState jsonhandler.TElevState, externalState jsonhandle
 	return true
 }
 
-func AssignIfWorldViewsAlign(localElevatorName string, externalState jsonhandler.TElevState) {
+func AssignIfWorldViewsAlign(localElevatorName string, externalState jsonhandler.ElevatorState) {
 	localState, _ := jsonhandler.LoadState()
 
 	if worldViewsAlign(localState, externalState) {
