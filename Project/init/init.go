@@ -75,14 +75,11 @@ func initNode(isFirstProcess bool) {
 
 			}
 
-<<<<<<< HEAD
-=======
 			//skal vi reasigne her? nei?
 			//dersom vi ikke og den er enset igjen online så vil den ta alle den har blitt assignet (kan være mer enn en og fuløre dem)
 			//fsm.AssignOrders(, localIP)
 			//fsm.MoveOnActiveOrders(, localIP)
 
->>>>>>> e7516f40c0301f6fa4ac2c28f0a50ec6c94b4be9
 		case msg := <-messageReceiveChannel:
 			// TODO: handle incoming messages
 			logrus.Debug("Received message from ", msg.SenderId)
