@@ -1,7 +1,6 @@
 package elevator
 
 import (
-	"elevator/driver/hwelevio"
 	"elevator/elevio"
 	"elevator/fsm"
 	"elevator/jsonhandler"
@@ -13,9 +12,6 @@ import (
 
 func Init(elevatorName string, isPrimaryProcess bool) {
 	logrus.Info("Elevator module initiated with name ", elevatorName)
-
-	hwelevio.Init(elevio.Addr, elevio.NFloors)
-
 	if isPrimaryProcess {
 		if elevio.InputDevice.FloorSensor() == -1 {
 			logrus.Info("Elevator initialised between floors")
@@ -32,7 +28,6 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 	drv_obstr := make(chan bool)
 	drv_stop := make(chan bool)
 	drv_motorActivity := make(chan bool)
-	// TODO: Add channels for direction and behaviour
 
 	go elevio.PollButtons(drv_buttons)
 	go elevio.PollFloorSensor(drv_floors)
@@ -40,7 +35,6 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 	go elevio.PollStopButton(drv_stop)
 	go elevio.MontitorMotorActivity(drv_motorActivity, 3.0)
 	go fsm.CreateCheckpoint()
-	// TODO: Add polling for direction and behaviour
 
 	// initial hinderance states
 	var obst bool = false
@@ -101,7 +95,6 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			}
 			time.Sleep(50 * time.Millisecond)
 		}
-		/// we need a case for each time a state updates.
 	}
 
 }

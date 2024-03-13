@@ -11,7 +11,7 @@ import (
 var InputDevice ElevInputDevice
 
 func init() {
-	hwelevio.Init(Addr, NFloors)
+	hwelevio.Init(Addr)
 	InputDevice = ElevioGetInputDevice()
 }
 
@@ -177,7 +177,6 @@ func MontitorMotorActivity(receiver chan<- bool, duration float64) {
 	}
 }
 
-// TODO: Gustav should use these
 func ButtonToString(b Button) string {
 	switch b {
 	case BHallUp:

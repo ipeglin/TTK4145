@@ -1,8 +1,6 @@
 package requests
 
 import (
-	//"fmt"
-
 	"elevator/elev"
 	"elevator/elevio"
 	"elevator/jsonhandler"
@@ -126,6 +124,7 @@ func ClearAtCurrentFloor(e elev.Elevator, elevatorName string) elev.Elevator {
 	for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
 		beforeClear[btn] = e.Requests[e.CurrentFloor][btn]
 	}
+
 	switch e.Config.ClearRequestVariant {
 	case elev.CRVAll:
 		for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
@@ -152,6 +151,7 @@ func ClearAtCurrentFloor(e elev.Elevator, elevatorName string) elev.Elevator {
 
 		}
 	}
+
 	for btn, wasPressed := range beforeClear {
 		if wasPressed && !e.Requests[e.CurrentFloor][btn] {
 			jsonhandler.UpdateJSONOnCompletedHallOrder(e, elevatorName, e.CurrentFloor, btn)

@@ -9,15 +9,12 @@ import (
 
 const PollRate = 20 * time.Millisecond
 
-// TODO: refactor these to be in line with camelCase
 var initialized bool = false
-var nFloors int = 4
 var mtx sync.Mutex
 var conn net.Conn
 
 type HWMotorDirection int
 
-// TODO: refactor these to be in line with camelCase
 const (
 	MDDown HWMotorDirection = iota - 1
 	MDStop
@@ -32,12 +29,11 @@ const (
 	BCab
 )
 
-func Init(addr string, numFloors int) {
+func Init(addr string) {
 	if initialized {
 		fmt.Println("Driver already initialized!")
 		return
 	}
-	nFloors = numFloors
 	mtx = sync.Mutex{}
 	var err error
 	conn, err = net.Dial("tcp", addr)

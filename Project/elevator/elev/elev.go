@@ -24,8 +24,8 @@ func ElevatorPrint(e Elevator) {
 			"  |dirn  = %-12s|\n"+
 			"  |behav = %-12s|\n",
 		e.CurrentFloor,
-		elevio.ElevDirToString(e.Dirn), // Assuming this function exists
-		EBToString(e.CurrentBehaviour), // You'll need to implement or assume this function
+		elevio.ElevDirToString(e.Dirn),
+		EBToString(e.CurrentBehaviour),
 	)
 	fmt.Println("  +--------------------+")
 	fmt.Println("  |  | up  | dn  | cab |")
@@ -48,7 +48,6 @@ func ElevatorPrint(e Elevator) {
 	fmt.Println("  +--------------------+")
 }
 
-// Assuming ebToString function exists or is defined similar to:
 func EBToString(behaviour ElevatorBehaviour) string {
 	switch behaviour {
 	case EBIdle:

@@ -113,13 +113,13 @@ func StopObstruction() {
 
 func CreateCheckpoint() {
 	for {
-		checkpoint.SetCheckpoint(elevator, checkpoint.CheckpointFilename)
+		checkpoint.SetCheckpoint(elevator)
 		time.Sleep(50 * time.Millisecond)
 	}
 }
 
 func ResumeAtLatestCheckpoint(floor int) {
-	elevator, _, _ = checkpoint.LoadCheckpoint(checkpoint.CheckpointFilename)
+	elevator, _, _ = checkpoint.LoadCheckpoint()
 	SetAllLights()
 
 	if elevator.Dirn != elevio.DirStop && floor == -1 {
@@ -151,13 +151,13 @@ func CreateLocalStateFile(ElevatorName string) {
 // * This was UpdateJSON()
 func UpdateElevatorState(elevatorName string) {
 	jsonhandler.UpdateJSON(elevator, elevatorName)
-	checkpoint.SetCheckpoint(elevator, checkpoint.CheckpointFilename)
+	checkpoint.SetCheckpoint(elevator)
 }
 
 // * This was RebootJSON()
 func HandleStateOnReboot(elevatorName string) {
 	jsonhandler.UpdateJSONOnReboot(elevator, elevatorName) // Deprecated: json.RebootJSON()
-	checkpoint.SetCheckpoint(elevator, checkpoint.CheckpointFilename)
+	checkpoint.SetCheckpoint(elevator)
 }
 
 // gir det mening å ha slike oneliners? eller burde vi flytte inn JsonOrderAssignerKoden her?
@@ -174,9 +174,7 @@ func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string) {
 		//updateStateOnNewOrder(btnFloor, btn, elevatorName, filename)
 		jsonhandler.UpdateJSONOnNewOrder(elevatorName, btnFloor, btn)
 
-		//TODO: This variable just makes it complicated
-		isCabCall := btn == elevio.BCab
-		if isCabCall {
+		if btn == elevio.BCab {
 			elevator.Requests[btnFloor][btn] = true
 		}
 	}
