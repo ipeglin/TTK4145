@@ -34,7 +34,7 @@ func waitForProcessTermination(f TFunc) {
 
 // ? Maybe pass this is as param to CreatePair to detach module from elevator/checkpoint
 func isProcessAlive() bool {
-	_, checkpointTime, _ := checkpoint.LoadCheckpoint(checkpoint.CheckpointFilename)
+	_, checkpointTime, _ := checkpoint.LoadCheckpoint()
 	timeSinceCheckpoint := time.Since(checkpointTime)
 	return timeLimitOnline >= timeSinceCheckpoint
 }

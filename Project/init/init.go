@@ -39,7 +39,7 @@ func initNode(isFirstProcess bool) {
 	go func() {
 		for {
 			// TODO: If invalid json, do not broadcast, so ther nodes will think it is offline
-			elv, _ := jsonhandler.LoadCombinedInput(localStateFile)
+			elv, _ := jsonhandler.LoadState(localStateFile)
 			messageTransmitterChannel <- network.Message{Payload: elv}
 			time.Sleep(500 * time.Millisecond)
 		}

@@ -7,14 +7,14 @@ import (
 	"time"
 )
 
-const CheckpointFilename = "checkpoint.json"
+const checkpointFilename = "checkpoint.json"
 
 type ElevCheckpoint struct {
 	State     elev.Elevator
 	Timestamp time.Time
 }
 
-func SetCheckpoint(e elev.Elevator, filename string) error {
+func SetCheckpoint(e elev.Elevator) error {
 	checkpoint :=
 		ElevCheckpoint{
 			e,
@@ -26,12 +26,12 @@ func SetCheckpoint(e elev.Elevator, filename string) error {
 		return err
 	}
 
-	filehandler.WriteToFile(jsonCP, filename)
+	filehandler.WriteToFile(jsonCP, checkpointFilename)
 	return nil
 }
 
-func LoadCheckpoint(filename string) (elev.Elevator, time.Time, error) {
-	jsonCp, err := filehandler.ReadFromFile(filename)
+func LoadCheckpoint() (elev.Elevator, time.Time, error) {
+	jsonCp, err := filehandler.ReadFromFile(checkpointFilename)
 	if err != nil {
 		return elev.Elevator{}, time.Time{}, err
 	}

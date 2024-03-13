@@ -12,13 +12,13 @@ import (
 
 func Init(elevatorName string, isPrimaryProcess bool) {
 	logrus.Info("Elevator module initiated with name ", elevatorName)
-	elevatorStateFile := elevatorName + ".json"
+	localStateFilename := elevatorName + ".json"
 	if isPrimaryProcess {
 		if elevio.InputDevice.FloorSensor() == -1 {
 			logrus.Info("Elevator initialised between floors")
 			fsm.MoveDownToFloor()
 		}
-		fsm.CreateLocalStateFile(elevatorStateFile, elevatorName)
+		fsm.CreateLocalStateFile(localStateFilename, elevatorName)
 	} else {
 		floor := elevio.InputDevice.FloorSensor()
 		fsm.ResumeAtLatestCheckpoint(floor)
@@ -53,9 +53,9 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 		case motorActive := <-drv_motorActivity:
 			logrus.Warn("MotorActive state changed: ", motorActive)
 			if !motorActive {
-				jsonhandler.RemoveElevatorsFromJSON([]string{elevatorName}, elevatorStateFile)
+				jsonhandler.RemoveElevatorsFromJSON(localStateFilename, []string{elevatorName})
 			} else {
-				fsm.HandleStateOnReboot(elevatorName, elevatorStateFile)
+				fsm.HandleStateOnReboot(elevatorName, localStateFilename)
 			}
 
 		case btnEvent := <-drv_buttons:

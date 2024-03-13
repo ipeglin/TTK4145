@@ -44,10 +44,10 @@ func SetAllLights() {
 }
 
 func SetConfirmedHallLights(localFilename string, elevatorName string) {
-	combinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
+	currentState, _ := jsonhandler.LoadState(localFilename)
 	for floor := 0; floor < elevio.NFloors; floor++ {
-		elevio.RequestButtonLight(floor, elevio.BHallUp, combinedInput.HRAInput.HallRequests[floor][0])
-		elevio.RequestButtonLight(floor, elevio.BHallDown, combinedInput.HRAInput.HallRequests[floor][1])
+		elevio.RequestButtonLight(floor, elevio.BHallUp, currentState.HRAInput.HallRequests[floor][0])
+		elevio.RequestButtonLight(floor, elevio.BHallDown, currentState.HRAInput.HallRequests[floor][1])
 	}
 }
 
@@ -116,18 +116,19 @@ func StopObstruction() {
 
 func CreateCheckpoint() {
 	for {
-		checkpoint.SetCheckpoint(elevator, checkpoint.CheckpointFilename)
+		checkpoint.SetCheckpoint(elevator)
 		time.Sleep(50 * time.Millisecond)
 	}
 }
 
 func ResumeAtLatestCheckpoint(floor int) {
-	elevator, _, _ = checkpoint.LoadCheckpoint(checkpoint.CheckpointFilename)
+	elevator, _, _ = checkpoint.LoadCheckpoint()
 	SetAllLights()
 
 	if elevator.Dirn != elevio.DirStop && floor == -1 {
 		outputDevice.MotorDirection(elevator.Dirn)
 	}
+
 	if floor != -1 {
 		timer.Start(elev.DoorOpenDurationSConfig)
 		outputDevice.DoorLight(true)
@@ -135,15 +136,16 @@ func ResumeAtLatestCheckpoint(floor int) {
 }
 
 func CreateLocalStateFile(filename string, ElevatorName string) {
-	// TODO: Gjør endringer på combinedInput her
+	// TODO: Gjør endringer på elevState her
 	err := os.Remove(filename)
 	if err != nil {
 		logrus.Error("Failed to remove:", err)
 	}
-	combinedInput := jsonhandler.InitializeCombinedInput(elevator, ElevatorName)
+
+	initialElevState := jsonhandler.InitialiseState(elevator, ElevatorName)
 
 	// * If the file was successfully deleted, return nil
-	err = jsonhandler.SaveCombinedInput(combinedInput, filename)
+	err = jsonhandler.SaveState(initialElevState, filename)
 	if err != nil {
 		logrus.Error("Failed to save checkpoint:", err)
 	}
@@ -152,13 +154,13 @@ func CreateLocalStateFile(filename string, ElevatorName string) {
 // * This was UpdateJSON()
 func UpdateElevatorState(elevatorName string, filename string) {
 	jsonhandler.UpdateJSON(elevator, filename, elevatorName)
-	checkpoint.SetCheckpoint(elevator, checkpoint.CheckpointFilename)
+	checkpoint.SetCheckpoint(elevator)
 }
 
 // * This was RebootJSON()
 func HandleStateOnReboot(elevatorName string, filename string) {
 	jsonhandler.UpdateJSONOnReboot(elevator, filename, elevatorName) // Deprecated: json.RebootJSON()
-	checkpoint.SetCheckpoint(elevator, checkpoint.CheckpointFilename)
+	checkpoint.SetCheckpoint(elevator)
 }
 
 // gir det mening å ha slike oneliners? eller burde vi flytte inn JsonOrderAssignerKoden her?
@@ -201,53 +203,53 @@ func MoveOnActiveOrders(filename string, elevatorName string) {
 	SetAllLights()
 }
 
-func HandleIncomingJSON(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput, incomingElevatorName string) {
-	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
+func HandleIncomingJSON(localFilename string, localElevatorName string, externalState jsonhandler.TElevState, incomingElevatorName string) {
+	localState, _ := jsonhandler.LoadState(localFilename)
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
-			if otherCombinedInput.CyclicCounter.HallRequests[f][i] > localCombinedInput.CyclicCounter.HallRequests[f][i] {
-				localCombinedInput.CyclicCounter.HallRequests[f][i] = otherCombinedInput.CyclicCounter.HallRequests[f][i]
-				localCombinedInput.HRAInput.HallRequests[f][i] = otherCombinedInput.HRAInput.HallRequests[f][i]
+			if externalState.CyclicCounter.HallRequests[f][i] > localState.CyclicCounter.HallRequests[f][i] {
+				localState.CyclicCounter.HallRequests[f][i] = externalState.CyclicCounter.HallRequests[f][i]
+				localState.HRAInput.HallRequests[f][i] = externalState.HRAInput.HallRequests[f][i]
 			}
-			if otherCombinedInput.CyclicCounter.HallRequests[f][i] == localCombinedInput.CyclicCounter.HallRequests[f][i] {
-				if localCombinedInput.HRAInput.HallRequests[f][i] != otherCombinedInput.HRAInput.HallRequests[f][i] {
+			if externalState.CyclicCounter.HallRequests[f][i] == localState.CyclicCounter.HallRequests[f][i] {
+				if localState.HRAInput.HallRequests[f][i] != externalState.HRAInput.HallRequests[f][i] {
 					//midliertilig konflikt logikk dersom den ene er true og den andre er false
 					//oppstår ved motostop og bostruksjoner etc dersom den har selv claimet en orde som blir utført ila den har motorstop
 					//Tenk om dette er beste løsning
-					localCombinedInput.HRAInput.HallRequests[f][i] = false
+					localState.HRAInput.HallRequests[f][i] = false
 				}
 			}
 		}
 	}
-	if _, exists := otherCombinedInput.HRAInput.States[incomingElevatorName]; exists {
-		if _, exists := localCombinedInput.HRAInput.States[incomingElevatorName]; !exists {
-			localCombinedInput.HRAInput.States[incomingElevatorName] = otherCombinedInput.HRAInput.States[incomingElevatorName]
-			localCombinedInput.CyclicCounter.States[incomingElevatorName] = otherCombinedInput.CyclicCounter.States[incomingElevatorName]
+	if _, exists := externalState.HRAInput.States[incomingElevatorName]; exists {
+		if _, exists := localState.HRAInput.States[incomingElevatorName]; !exists {
+			localState.HRAInput.States[incomingElevatorName] = externalState.HRAInput.States[incomingElevatorName]
+			localState.CyclicCounter.States[incomingElevatorName] = externalState.CyclicCounter.States[incomingElevatorName]
 		} else {
-			if otherCombinedInput.CyclicCounter.States[incomingElevatorName] > localCombinedInput.CyclicCounter.States[incomingElevatorName] {
-				localCombinedInput.HRAInput.States[incomingElevatorName] = otherCombinedInput.HRAInput.States[incomingElevatorName]
-				localCombinedInput.CyclicCounter.States[incomingElevatorName] = otherCombinedInput.CyclicCounter.States[incomingElevatorName]
+			if externalState.CyclicCounter.States[incomingElevatorName] > localState.CyclicCounter.States[incomingElevatorName] {
+				localState.HRAInput.States[incomingElevatorName] = externalState.HRAInput.States[incomingElevatorName]
+				localState.CyclicCounter.States[incomingElevatorName] = externalState.CyclicCounter.States[incomingElevatorName]
 			}
 		}
 	} else {
-		if _, exists := localCombinedInput.HRAInput.States[incomingElevatorName]; exists {
-			delete(localCombinedInput.HRAInput.States, incomingElevatorName)
-			delete(localCombinedInput.CyclicCounter.States, incomingElevatorName)
+		if _, exists := localState.HRAInput.States[incomingElevatorName]; exists {
+			delete(localState.HRAInput.States, incomingElevatorName)
+			delete(localState.CyclicCounter.States, incomingElevatorName)
 		}
 	}
-	if _, exists := otherCombinedInput.CyclicCounter.States[localElevatorName]; exists {
-		if otherCombinedInput.CyclicCounter.States[localElevatorName] > localCombinedInput.CyclicCounter.States[localElevatorName] {
-			localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] + 1
+	if _, exists := externalState.CyclicCounter.States[localElevatorName]; exists {
+		if externalState.CyclicCounter.States[localElevatorName] > localState.CyclicCounter.States[localElevatorName] {
+			localState.CyclicCounter.States[localElevatorName] = externalState.CyclicCounter.States[localElevatorName] + 1
 		}
 	}
-	jsonhandler.SaveCombinedInput(localCombinedInput, localFilename)
+	jsonhandler.SaveState(localState, localFilename)
 }
 
 // TODO: Should this go somewehre else?
-func worldViewsAllign(localCombinedInput jsonhandler.CombinedInput, otherCombinedInput jsonhandler.CombinedInput) bool {
+func worldViewsAllign(localState jsonhandler.TElevState, externalState jsonhandler.TElevState) bool {
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
-			if otherCombinedInput.CyclicCounter.HallRequests[f][i] != localCombinedInput.CyclicCounter.HallRequests[f][i] {
+			if externalState.CyclicCounter.HallRequests[f][i] != localState.CyclicCounter.HallRequests[f][i] {
 				return false
 			}
 		}
@@ -255,10 +257,10 @@ func worldViewsAllign(localCombinedInput jsonhandler.CombinedInput, otherCombine
 	return true
 }
 
-func AssignIfWorldViewsAlign(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput) {
-	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
+func AssignIfWorldViewsAlign(localFilename string, localElevatorName string, externalState jsonhandler.TElevState) {
+	localState, _ := jsonhandler.LoadState(localFilename)
 
-	if worldViewsAllign(localCombinedInput, otherCombinedInput) {
+	if worldViewsAllign(localState, externalState) {
 		elevator = jsonhandler.JSONOrderAssigner(elevator, localFilename, localElevatorName)
 		SetConfirmedHallLights(localFilename, localElevatorName)
 	}
@@ -266,9 +268,9 @@ func AssignIfWorldViewsAlign(localFilename string, localElevatorName string, oth
 
 // TODO: Maybe IsOnlyNodeOnline()
 func OnlyElevatorOnline(localFilename string, localElevatorName string) bool {
-	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
-	if len(localCombinedInput.HRAInput.States) == 1 {
-		if _, exists := localCombinedInput.HRAInput.States[localElevatorName]; exists {
+	currentState, _ := jsonhandler.LoadState(localFilename)
+	if len(currentState.HRAInput.States) == 1 {
+		if _, exists := currentState.HRAInput.States[localElevatorName]; exists {
 			return true
 		}
 	}
@@ -276,6 +278,6 @@ func OnlyElevatorOnline(localFilename string, localElevatorName string) bool {
 }
 
 func isOffline() bool {
-	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localStateFile)
-	return len(localCombinedInput.HRAInput.States) == 0
+	currentState, _ := jsonhandler.LoadState(localStateFile)
+	return len(currentState.HRAInput.States) == 0
 }
