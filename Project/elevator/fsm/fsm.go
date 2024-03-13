@@ -203,6 +203,7 @@ func MoveOnActiveOrders(filename string, elevatorName string) {
 	SetAllLights()
 }
 
+// TODO: Simplify, and split into smaller functions if necessary
 func HandleIncomingJSON(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput, incomingElevatorName string) {
 	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
 	for f := 0; f < elevio.NFloors; f++ {
