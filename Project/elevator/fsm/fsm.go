@@ -203,11 +203,11 @@ func HandleIncomingJSON(localElevatorName string, externalState jsonhandler.Elev
 	localState, _ := jsonhandler.LoadState()
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
-			if externalState.CyclicCounter.HallRequests[f][i] > localState.CyclicCounter.HallRequests[f][i] {
-				localState.CyclicCounter.HallRequests[f][i] = externalState.CyclicCounter.HallRequests[f][i]
+			if externalState.Counter.HallRequests[f][i] > localState.Counter.HallRequests[f][i] {
+				localState.Counter.HallRequests[f][i] = externalState.Counter.HallRequests[f][i]
 				localState.HRAInput.HallRequests[f][i] = externalState.HRAInput.HallRequests[f][i]
 			}
-			if externalState.CyclicCounter.HallRequests[f][i] == localState.CyclicCounter.HallRequests[f][i] {
+			if externalState.Counter.HallRequests[f][i] == localState.Counter.HallRequests[f][i] {
 				if localState.HRAInput.HallRequests[f][i] != externalState.HRAInput.HallRequests[f][i] {
 					//midliertilig konflikt logikk dersom den ene er true og den andre er false
 					//oppstår ved motostop og bostruksjoner etc dersom den har selv claimet en orde som blir utført ila den har motorstop
@@ -220,22 +220,22 @@ func HandleIncomingJSON(localElevatorName string, externalState jsonhandler.Elev
 	if _, exists := externalState.HRAInput.States[incomingElevatorName]; exists {
 		if _, exists := localState.HRAInput.States[incomingElevatorName]; !exists {
 			localState.HRAInput.States[incomingElevatorName] = externalState.HRAInput.States[incomingElevatorName]
-			localState.CyclicCounter.States[incomingElevatorName] = externalState.CyclicCounter.States[incomingElevatorName]
+			localState.Counter.States[incomingElevatorName] = externalState.Counter.States[incomingElevatorName]
 		} else {
-			if externalState.CyclicCounter.States[incomingElevatorName] > localState.CyclicCounter.States[incomingElevatorName] {
+			if externalState.Counter.States[incomingElevatorName] > localState.Counter.States[incomingElevatorName] {
 				localState.HRAInput.States[incomingElevatorName] = externalState.HRAInput.States[incomingElevatorName]
-				localState.CyclicCounter.States[incomingElevatorName] = externalState.CyclicCounter.States[incomingElevatorName]
+				localState.Counter.States[incomingElevatorName] = externalState.Counter.States[incomingElevatorName]
 			}
 		}
 	} else {
 		if _, exists := localState.HRAInput.States[incomingElevatorName]; exists {
 			delete(localState.HRAInput.States, incomingElevatorName)
-			delete(localState.CyclicCounter.States, incomingElevatorName)
+			delete(localState.Counter.States, incomingElevatorName)
 		}
 	}
-	if _, exists := externalState.CyclicCounter.States[localElevatorName]; exists {
-		if externalState.CyclicCounter.States[localElevatorName] > localState.CyclicCounter.States[localElevatorName] {
-			localState.CyclicCounter.States[localElevatorName] = externalState.CyclicCounter.States[localElevatorName] + 1
+	if _, exists := externalState.Counter.States[localElevatorName]; exists {
+		if externalState.Counter.States[localElevatorName] > localState.Counter.States[localElevatorName] {
+			localState.Counter.States[localElevatorName] = externalState.Counter.States[localElevatorName] + 1
 		}
 	}
 	jsonhandler.SaveState(localState)
@@ -245,7 +245,7 @@ func HandleIncomingJSON(localElevatorName string, externalState jsonhandler.Elev
 func worldViewsAlign(localState jsonhandler.ElevatorState, externalState jsonhandler.ElevatorState) bool {
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
-			if externalState.CyclicCounter.HallRequests[f][i] != localState.CyclicCounter.HallRequests[f][i] {
+			if externalState.Counter.HallRequests[f][i] != localState.Counter.HallRequests[f][i] {
 				return false
 			}
 		}

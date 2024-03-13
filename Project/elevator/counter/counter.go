@@ -1,4 +1,4 @@
-package cycliccounter
+package counter
 
 import (
 	"elevator/elevio"
@@ -6,13 +6,13 @@ import (
 )
 
 // TODO: Change to just CyclicCounter
-type CyclicCounterInput struct {
+type Counter struct {
 	HallRequests [][2]int       `json:"hallRequests"`
 	States       map[string]int `json:"states"`
 }
 
-func InitializeCyclicCounterInput(elevatorName string) CyclicCounterInput {
-	cyclicCounter := CyclicCounterInput{
+func InitializeCounter(elevatorName string) Counter {
+	cyclicCounter := Counter{
 		HallRequests: make([][2]int, elevio.NFloors),
 		States:       make(map[string]int), // Initialiserer map her
 	}
@@ -23,7 +23,7 @@ func InitializeCyclicCounterInput(elevatorName string) CyclicCounterInput {
 	return cyclicCounter
 }
 
-func UpdateOnCompletedOrder(cyclicCounter CyclicCounterInput, elevatorName string, btn_floor int, btn_type elevio.Button) CyclicCounterInput {
+func UpdateOnCompletedOrder(cyclicCounter Counter, elevatorName string, btn_floor int, btn_type elevio.Button) Counter {
 	switch btn_type {
 	case elevio.BHallUp:
 		cyclicCounter.HallRequests[btn_floor][0] += 1
@@ -34,12 +34,12 @@ func UpdateOnCompletedOrder(cyclicCounter CyclicCounterInput, elevatorName strin
 	return cyclicCounter
 }
 
-func IncrementOnInput(cyclicCounter CyclicCounterInput, elevatorName string) CyclicCounterInput {
+func IncrementOnInput(cyclicCounter Counter, elevatorName string) Counter {
 	cyclicCounter.States[elevatorName] += 1
 	return cyclicCounter
 }
 
-func UpdateOnNewOrder(cyclicCounter CyclicCounterInput, hraInput hra.HRAInput, elevatorName string, btnFloor int, btn elevio.Button) CyclicCounterInput {
+func UpdateOnNewOrder(cyclicCounter Counter, hraInput hra.HRAInput, elevatorName string, btnFloor int, btn elevio.Button) Counter {
 	switch btn {
 	case elevio.BHallUp:
 		if !hraInput.HallRequests[btnFloor][0] {

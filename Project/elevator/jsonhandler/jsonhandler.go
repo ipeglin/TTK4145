@@ -1,7 +1,7 @@
 package jsonhandler
 
 import (
-	ccounter "elevator/cycliccounter"
+	"elevator/counter"
 	"elevator/elev"
 	"elevator/elevio"
 	"elevator/hra"
@@ -16,10 +16,10 @@ import (
 
 var StateFile string
 
-// ElevatorState kombinerer HRAInput og CyclicCounterInput.
+// ElevatorState kombinerer HRAInput og Counter.
 type ElevatorState struct {
-	HRAInput      hra.HRAInput
-	CyclicCounter ccounter.CyclicCounterInput
+	HRAInput hra.HRAInput
+	Counter  counter.Counter
 }
 
 func init() {
@@ -34,8 +34,8 @@ func init() {
 // TODO: Change this from Initizalied to make/create
 func InitialiseState(e elev.Elevator, elevatorName string) ElevatorState {
 	return ElevatorState{
-		HRAInput:      hra.InitializeHRAInput(e, elevatorName),
-		CyclicCounter: ccounter.InitializeCyclicCounterInput(elevatorName),
+		HRAInput: hra.InitializeHRAInput(e, elevatorName),
+		Counter:  counter.InitializeCounter(elevatorName),
 	}
 }
 
@@ -72,7 +72,7 @@ func UpdateJSON(e elev.Elevator, elevatorName string) {
 	state, _ := LoadState()
 	if _, exists := state.HRAInput.States[elevatorName]; exists {
 		state.HRAInput = hra.UpdateHRAInput(state.HRAInput, e, elevatorName)
-		state.CyclicCounter = ccounter.IncrementOnInput(state.CyclicCounter, elevatorName)
+		state.Counter = counter.IncrementOnInput(state.Counter, elevatorName)
 	}
 	SaveState(state)
 }
@@ -81,7 +81,7 @@ func UpdateJSON(e elev.Elevator, elevatorName string) {
 func UpdateJSONOnReboot(e elev.Elevator, elevatorName string) {
 	state, _ := LoadState()
 	state.HRAInput = hra.RebootHRAInput(state.HRAInput, e, elevatorName)
-	state.CyclicCounter = ccounter.IncrementOnInput(state.CyclicCounter, elevatorName)
+	state.Counter = counter.IncrementOnInput(state.Counter, elevatorName)
 	SaveState(state)
 }
 
@@ -89,7 +89,7 @@ func UpdateJSONOnCompletedHallOrder(e elev.Elevator, elevatorName string, btn_fl
 	state, _ := LoadState()
 	if _, exists := state.HRAInput.States[elevatorName]; exists {
 		state.HRAInput = hra.UpdateHRAInputOnCompletedOrder(state.HRAInput, e, elevatorName, btn_floor, btn_type)
-		state.CyclicCounter = ccounter.UpdateOnCompletedOrder(state.CyclicCounter, elevatorName, btn_floor, btn_type)
+		state.Counter = counter.UpdateOnCompletedOrder(state.Counter, elevatorName, btn_floor, btn_type)
 	}
 	SaveState(state)
 }
@@ -99,7 +99,7 @@ func UpdateJSONOnNewOrder(elevatorName string, btnFloor int, btn elevio.Button) 
 	//ønsker vi ikke legge til nye ordere/ ta ordere mens vi er offline?
 	//hvis vi øssker, fjern denne if setningen.
 	if _, exists := state.HRAInput.States[elevatorName]; exists {
-		state.CyclicCounter = ccounter.UpdateOnNewOrder(state.CyclicCounter, state.HRAInput, elevatorName, btnFloor, btn)
+		state.Counter = counter.UpdateOnNewOrder(state.Counter, state.HRAInput, elevatorName, btnFloor, btn)
 		state.HRAInput = hra.UpdateHRAInputOnNewOrder(state.HRAInput, elevatorName, btnFloor, btn)
 	}
 	SaveState(state)
@@ -162,7 +162,7 @@ func RemoveElevatorsFromJSON(elevatorIDs []string) error {
 		if _, exists := inactiveElevatorsMap[id]; exists {
 			delete(state.HRAInput.States, id)
 			//ønsker ikke fjerne cylick counter
-			delete(state.CyclicCounter.States, id)
+			delete(state.Counter.States, id)
 		}
 	}
 
