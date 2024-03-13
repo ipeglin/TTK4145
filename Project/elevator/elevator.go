@@ -48,7 +48,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 		select {
 		case obst = <-drv_obstr:
 			logrus.Warn("Obstruction state changed: ", obst)
-			if obst { // If obstruction detected and it's a new obstruction
+			if obst {
 				logrus.Debug("New obstruction detected: ", obst)
 				fsm.RequestObstruction()
 			} else {
@@ -92,7 +92,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			}
 
 		default:
-			if timer.TimedOut() { // Check for timeout only if no obstruction
+			if timer.TimedOut() {
 				logrus.Debug("Elevator timeout")
 				fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
 				timer.Stop()

@@ -20,10 +20,10 @@ type CombinedInput struct {
 	CyclicCounter ccounter.CyclicCounterInput
 }
 
-func InitializeCombinedInput(el elev.Elevator, ElevatorName string) CombinedInput {
+func InitializeCombinedInput(e elev.Elevator, ElevatorName string) CombinedInput {
 	return CombinedInput{
-		HRAInput:      hra.InitializeHRAInput(el, ElevatorName),            
-		CyclicCounter: ccounter.InitializeCyclicCounterInput(ElevatorName), 
+		HRAInput:      hra.InitializeHRAInput(e, ElevatorName),
+		CyclicCounter: ccounter.InitializeCyclicCounterInput(ElevatorName),
 	}
 }
 
@@ -56,27 +56,27 @@ func LoadCombinedInput(filename string) (CombinedInput, error) {
 	return combinedInput, nil
 }
 
-func UpdateJSON(el elev.Elevator, filename string, elevatorName string) {
+func UpdateJSON(e elev.Elevator, filename string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(filename)
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
-		combinedInput.HRAInput = hra.UpdateHRAInput(combinedInput.HRAInput, el, elevatorName)
+		combinedInput.HRAInput = hra.UpdateHRAInput(combinedInput.HRAInput, e, elevatorName)
 		combinedInput.CyclicCounter = ccounter.IncrementOnInput(combinedInput.CyclicCounter, elevatorName)
 	}
 	SaveCombinedInput(combinedInput, filename)
 }
 
 // This was RebootJSON
-func UpdateJSONOnReboot(el elev.Elevator, filename string, elevatorName string) {
+func UpdateJSONOnReboot(e elev.Elevator, filename string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(filename)
-	combinedInput.HRAInput = hra.RebootHRAInput(combinedInput.HRAInput, el, elevatorName)
+	combinedInput.HRAInput = hra.RebootHRAInput(combinedInput.HRAInput, e, elevatorName)
 	combinedInput.CyclicCounter = ccounter.IncrementOnInput(combinedInput.CyclicCounter, elevatorName)
 	SaveCombinedInput(combinedInput, filename)
 }
 
-func UpdateJSONOnCompletedHallOrder(el elev.Elevator, filename string, elevatorName string, btn_floor int, btn_type elevio.Button) {
+func UpdateJSONOnCompletedHallOrder(e elev.Elevator, filename string, elevatorName string, btn_floor int, btn_type elevio.Button) {
 	combinedInput, _ := LoadCombinedInput(filename)
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
-		combinedInput.HRAInput = hra.UpdateHRAInputOnCompletedOrder(combinedInput.HRAInput, el, elevatorName, btn_floor, btn_type)
+		combinedInput.HRAInput = hra.UpdateHRAInputOnCompletedOrder(combinedInput.HRAInput, e, elevatorName, btn_floor, btn_type)
 		combinedInput.CyclicCounter = ccounter.UpdateOnCompletedOrder(combinedInput.CyclicCounter, elevatorName, btn_floor, btn_type)
 	}
 	SaveCombinedInput(combinedInput, filename)
@@ -92,8 +92,9 @@ func UpdateJSONOnNewOrder(filename string, elevatorName string, btnFloor int, bt
 	}
 	SaveCombinedInput(combinedInput, filename)
 }
-//TODO : mener denne kan bare bli en fsm func
-func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) {
+
+// TODO : mener denne kan bare bli en fsm func
+func JSONOrderAssigner(e *elev.Elevator, filename string, elevatorName string) {
 	combinedInput, err := LoadCombinedInput(filename)
 	if err != nil {
 		fmt.Printf("Failed to load combined input: %v\n", err)
@@ -122,8 +123,8 @@ func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) 
 
 		for floor := 0; floor < elevio.NFloors; floor++ {
 			if orders, ok := output[elevatorName]; ok && floor < len(orders) {
-				el.Requests[floor][elevio.BHallUp] = orders[floor][0]
-				el.Requests[floor][elevio.BHallDown] = orders[floor][1]
+				e.Requests[floor][elevio.BHallUp] = orders[floor][0]
+				e.Requests[floor][elevio.BHallDown] = orders[floor][1]
 			}
 		}
 	} else {
@@ -173,7 +174,6 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 	return nil
 }
 
-// SIMEN HEVDER DETTE ER DOBBELT OPP AV FUNKSJONER
 func IsValidBehavior(behavior string) bool {
 	switch behavior {
 	case "idle", "moving", "doorOpen":
@@ -183,7 +183,6 @@ func IsValidBehavior(behavior string) bool {
 	}
 }
 
-// IsValidDirection sjekker om oppgitt retning er gyldig
 func IsValidDirection(direction string) bool {
 	switch direction {
 	case "up", "down", "stop":
@@ -193,7 +192,6 @@ func IsValidDirection(direction string) bool {
 	}
 }
 
-// IncomingDataIsCorrupt sjekker om inngående data er korrupt
 func IncomingDataIsCorrupt(incomingCombinedInput CombinedInput) bool {
 	incomingHRAInput := incomingCombinedInput.HRAInput
 	if len(incomingHRAInput.HallRequests) != elevio.NFloors {
@@ -201,13 +199,12 @@ func IncomingDataIsCorrupt(incomingCombinedInput CombinedInput) bool {
 	}
 	for _, state := range incomingHRAInput.States {
 		if !IsValidBehavior(state.Behavior) || !IsValidDirection(state.Direction) {
-			return true // Data er korrupt basert på ugyldig Behavior eller Direction
+			return true
 		}
 
-		// Sjekk om CabRequests har riktig lengde og inneholder boolske verdier
 		if len(state.CabRequests) != elevio.NFloors {
-			return true // Data er korrupt basert på lengde
+			return true
 		}
 	}
-	return false // Data er gyldig
+	return false
 }

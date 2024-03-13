@@ -10,7 +10,7 @@ import (
 
 func requestsAbove(e elev.Elevator) bool {
 	for f := e.CurrentFloor + 1; f < elevio.NFloors; f++ {
-		for btn := 0; btn < elevio.NButtons; btn++ {
+		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
 			if e.Requests[f][btn] {
 				return true
 			}
@@ -21,7 +21,7 @@ func requestsAbove(e elev.Elevator) bool {
 
 func requestsBelow(e elev.Elevator) bool {
 	for f := 0; f < e.CurrentFloor; f++ {
-		for btn := 0; btn < elevio.NButtons; btn++ {
+		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
 			if e.Requests[f][btn] {
 				return true
 			}
@@ -31,7 +31,7 @@ func requestsBelow(e elev.Elevator) bool {
 }
 
 func requestsHere(e elev.Elevator) bool {
-	for btn := 0; btn < elevio.NButtons; btn++ {
+	for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
 		if e.Requests[e.CurrentFloor][btn] {
 			return true
 
@@ -123,12 +123,12 @@ func ShouldClearImmediately(e elev.Elevator, btn_floor int, btn_type elevio.Butt
 func ClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName string) elev.Elevator {
 
 	beforeClear := make(map[elevio.Button]bool)
-	for btn := 0; btn < elevio.NButtons; btn++ {
-		beforeClear[elevio.Button(btn)] = e.Requests[e.CurrentFloor][btn]
+	for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+		beforeClear[btn] = e.Requests[e.CurrentFloor][btn]
 	}
 	switch e.Config.ClearRequestVariant {
 	case elev.CRVAll:
-		for btn := 0; btn < elevio.NButtons; btn++ {
+		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
 			e.Requests[e.CurrentFloor][btn] = false
 		}
 
@@ -158,13 +158,4 @@ func ClearAtCurrentFloor(e elev.Elevator, filename string, elevatorName string) 
 		}
 	}
 	return e
-}
-
-// ! Remove this function. Never being used
-func ClearAll(e *elev.Elevator) {
-	for f := 0; f < elevio.NFloors; f++ {
-		for btn := 0; btn < elevio.NButtons; btn++ {
-			e.Requests[f][btn] = false
-		}
-	}
 }

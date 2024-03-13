@@ -20,7 +20,7 @@ type Button int
 const (
 	BHallUp Button = iota
 	BHallDown
-	BCab
+	BCab 
 )
 
 type ButtonEvent struct {

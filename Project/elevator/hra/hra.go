@@ -19,48 +19,48 @@ type HRAInput struct {
 	States       map[string]HRAElevState `json:"states"`
 }
 
-func InitializeHRAInput(el elev.Elevator, elevatorName string) HRAInput {
+func InitializeHRAInput(e elev.Elevator, elevatorName string) HRAInput {
 	hraInput := HRAInput{
 		HallRequests: make([][2]bool, elevio.NFloors),
 		States:       make(map[string]HRAElevState),
 	}
 	for f := 0; f < elevio.NFloors; f++ {
-		hraInput.HallRequests[f][0] = el.Requests[f][elevio.BHallUp]
-		hraInput.HallRequests[f][1] = el.Requests[f][elevio.BHallDown]
+		hraInput.HallRequests[f][0] = e.Requests[f][elevio.BHallUp]
+		hraInput.HallRequests[f][1] = e.Requests[f][elevio.BHallDown]
 	}
 
-	behavior, direction, cabRequests := convertLocalElevatorState(el)
+	behavior, direction, cabRequests := convertLocalElevatorState(e)
 
 	hraInput.States[elevatorName] = HRAElevState{
 		Behavior:    behavior,
-		Floor:       el.CurrentFloor,
+		Floor:       e.CurrentFloor,
 		Direction:   direction,
 		CabRequests: cabRequests,
 	}
 	return hraInput
 }
 
-func UpdateHRAInput(hraInput HRAInput, el elev.Elevator, elevatorName string) HRAInput {
+func UpdateHRAInput(hraInput HRAInput, e elev.Elevator, elevatorName string) HRAInput {
 	for f := 0; f < elevio.NFloors; f++ {
-		hraInput.HallRequests[f][0] = hraInput.HallRequests[f][0] || el.Requests[f][elevio.BHallUp]
-		hraInput.HallRequests[f][1] = hraInput.HallRequests[f][1] || el.Requests[f][elevio.BHallDown]
+		hraInput.HallRequests[f][0] = hraInput.HallRequests[f][0] || e.Requests[f][elevio.BHallUp]
+		hraInput.HallRequests[f][1] = hraInput.HallRequests[f][1] || e.Requests[f][elevio.BHallDown]
 	}
 	
-	behavior, direction, cabRequests := convertLocalElevatorState(el)
+	behavior, direction, cabRequests := convertLocalElevatorState(e)
 	hraInput.States[elevatorName] = HRAElevState{
 		Behavior:    behavior,
-		Floor:       el.CurrentFloor,
+		Floor:       e.CurrentFloor,
 		Direction:   direction,
 		CabRequests: cabRequests,
 	}
 	return hraInput
 	}
 
-func RebootHRAInput(hraInput HRAInput, el elev.Elevator, elevatorName string) HRAInput {
-	behavior, direction, cabRequests := convertLocalElevatorState(el)
+func RebootHRAInput(hraInput HRAInput, e elev.Elevator, elevatorName string) HRAInput {
+	behavior, direction, cabRequests := convertLocalElevatorState(e)
 	hraInput.States[elevatorName] = HRAElevState{
 		Behavior:    behavior,
-		Floor:       el.CurrentFloor,
+		Floor:       e.CurrentFloor,
 		Direction:   direction,
 		CabRequests: cabRequests,
 	}
@@ -68,7 +68,7 @@ func RebootHRAInput(hraInput HRAInput, el elev.Elevator, elevatorName string) HR
 }
 
 
-func UpdateHRAInputOnCompletedOrder(hraInput HRAInput, el elev.Elevator, elevatorName string, btn_floor int, btn_type elevio.Button) HRAInput {
+func UpdateHRAInputOnCompletedOrder(hraInput HRAInput, e elev.Elevator, elevatorName string, btn_floor int, btn_type elevio.Button) HRAInput {
 	switch btn_type {
 	case elevio.BHallUp:
 		hraInput.HallRequests[btn_floor][0] = false
@@ -78,11 +78,11 @@ func UpdateHRAInputOnCompletedOrder(hraInput HRAInput, el elev.Elevator, elevato
 		hraInput.States[elevatorName].CabRequests[btn_floor] = false
 	}
 
-	behavior, direction, cabRequests := convertLocalElevatorState(el)
+	behavior, direction, cabRequests := convertLocalElevatorState(e)
 
 	hraInput.States[elevatorName] = HRAElevState{
 		Behavior:    behavior,
-		Floor:       el.CurrentFloor,
+		Floor:       e.CurrentFloor,
 		Direction:   direction,
 		CabRequests: cabRequests,
 	}
