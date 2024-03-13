@@ -11,12 +11,12 @@ type HRAElevState struct {
 	Direction   string `json:"direction"`
 	CabRequests []bool `json:"cabRequests"`
 }
-
+//TODO: Change this to HRAData
 type HRAInput struct {
 	HallRequests [][2]bool               `json:"hallRequests"`
 	States       map[string]HRAElevState `json:"states"`
 }
-
+//TODO: Change this from Initialize to Make or create
 func InitializeHRAInput(e elev.Elevator, elevatorName string) HRAInput {
 	hraInput := HRAInput{
 		HallRequests: make([][2]bool, elevio.NFloors),

@@ -20,6 +20,7 @@ type CombinedInput struct {
 	CyclicCounter ccounter.CyclicCounterInput
 }
 
+// TODO: Change this from Initizalied to make/create
 func InitializeCombinedInput(e elev.Elevator, elevatorName string) CombinedInput {
 	return CombinedInput{
 		HRAInput:      hra.InitializeHRAInput(e, elevatorName),
@@ -135,27 +136,16 @@ func JSONOrderAssigner(e elev.Elevator, filename string, elevatorName string) el
 	}
 }
 
-func RemoveDysfunctionalElevatorFromJSON(localStateFilename string, elevatorName string) {
-	combinedInput, _ := LoadCombinedInput(localStateFilename)
-	for id := range combinedInput.HRAInput.States {
-		if id == elevatorName {
-			delete(combinedInput.HRAInput.States, id)
-			delete(combinedInput.CyclicCounter.States, id)
-		}
-	}
-	SaveCombinedInput(combinedInput, localStateFilename)
-}
-
 // denne brukes en gang i main. kan vi gjøre den over komatibel
-func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename string) error {
-	localCombinedInput, err := LoadCombinedInput(localFilename)
+func RemoveElevatorsFromJSON(elevatorIDs []string, localStateFilename string) error {
+	localCombinedInput, err := LoadCombinedInput(localStateFilename)
 	if err != nil {
 		return fmt.Errorf("failed to load local combined input: %v", err)
 	}
 
 	// Convert slice of inactive elevator IDs to a map for efficient lookups
 	inactiveElevatorsMap := make(map[string]struct{})
-	for _, id := range inactiveElevatorIDs {
+	for _, id := range elevatorIDs {
 		inactiveElevatorsMap[id] = struct{}{}
 	}
 
@@ -169,7 +159,8 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 	}
 
 	// Save the updated CombinedInput back to the file
-	err = SaveCombinedInput(localCombinedInput, localFilename)
+	//TODO: Got error check for this saveCombinedInput but not for anyone else
+	err = SaveCombinedInput(localCombinedInput, localStateFilename)
 	if err != nil {
 		return fmt.Errorf("failed to save updated combined input: %v", err)
 	}

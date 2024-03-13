@@ -104,7 +104,7 @@ func DoorTimeout(filename string, elevatorName string) {
 func RequestObstruction() {
 	if elevator.CurrentBehaviour == elev.EBDoorOpen {
 		timer.StartInfiniteTimer()
-		jsonhandler.RemoveDysfunctionalElevatorFromJSON(localStateFile, elevatorName)
+		jsonhandler.RemoveElevatorsFromJSON([]string{elevatorName}, localStateFile)
 	}
 }
 

@@ -59,7 +59,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			logrus.Warn("Immobile state changed: ", motorActive)
 			if !motorActive {
 				// BUG: THis occurs very late
-				jsonhandler.RemoveDysfunctionalElevatorFromJSON(elevatorStateFile, elevatorName)
+				jsonhandler.RemoveElevatorsFromJSON([]string{elevatorName}, elevatorStateFile)
 				//we need to remove the request// clear them if we dont want to comlete orders twice.
 				//it is up to uss and we have functionality to do so
 			} else {
@@ -79,7 +79,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			}
 			fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
-		
+
 		case floor := <-drv_floors:
 			logrus.Debug("Floor sensor triggered: ", floor)
 			fsm.FloorArrival(floor, elevatorName, elevatorStateFile)
