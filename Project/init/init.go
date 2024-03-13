@@ -74,6 +74,8 @@ func initNode(isFirstProcess bool) {
 				fsm.AssignOrders(localStateFile, localIP)
 				fsm.SetConfirmedHallLights(localStateFile, localIP)
 				fsm.MoveOnActiveOrders(localStateFile, localIP)
+				fsm.UpdateElevatorState(localIP, localStateFile)
+
 			}
 
 			//skal vi reasigne her? nei?
@@ -93,8 +95,7 @@ func initNode(isFirstProcess bool) {
 				fsm.HandleIncomingJSON(localStateFile, localIP, msg.Payload, msg.SenderId)
 				fsm.AssignIfWorldViewsAlign(localStateFile, localIP, msg.Payload)
 				fsm.MoveOnActiveOrders(localStateFile, localIP)
-
-				//fsm.UpdateElevatorState(localIP, localStateFile)
+				fsm.UpdateElevatorState(localIP, localStateFile)
 
 				//fsm.HandleIncomingJSON(localStateFile, incomingState, msg.SenderId)
 				//checkpoint.SetConfirmedHallLights(localStateFile, msg.SenderId)
