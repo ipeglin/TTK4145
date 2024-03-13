@@ -244,7 +244,7 @@ func HandleIncomingJSON(localElevatorName string, externalState jsonhandler.TEle
 }
 
 // TODO: Should this go somewehre else?
-func worldViewsAllign(localState jsonhandler.TElevState, externalState jsonhandler.TElevState) bool {
+func worldViewsAlign(localState jsonhandler.TElevState, externalState jsonhandler.TElevState) bool {
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
 			if externalState.CyclicCounter.HallRequests[f][i] != localState.CyclicCounter.HallRequests[f][i] {
@@ -258,7 +258,7 @@ func worldViewsAllign(localState jsonhandler.TElevState, externalState jsonhandl
 func AssignIfWorldViewsAlign(localElevatorName string, externalState jsonhandler.TElevState) {
 	localState, _ := jsonhandler.LoadState()
 
-	if worldViewsAllign(localState, externalState) {
+	if worldViewsAlign(localState, externalState) {
 		jsonhandler.JSONOrderAssigner(&elevator, localElevatorName)
 		SetConfirmedHallLights(localElevatorName)
 	}
