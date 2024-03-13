@@ -1,7 +1,6 @@
 package elev
 
 import (
-	"elevator/driver/hwelevio"
 	"elevator/elevio"
 	"fmt"
 )
@@ -31,9 +30,9 @@ func ElevatorPrint(e Elevator) {
 	fmt.Println("  |  | up  | dn  | cab |")
 	for f := elevio.NFloors - 1; f >= 0; f-- {
 		fmt.Printf("  | %d", f)
-		for btn := hwelevio.BHallUp; btn <= hwelevio.BCab; btn++ {
-			if (f == elevio.NFloors-1 && btn == hwelevio.BHallUp) ||
-				(f == 0 && btn == hwelevio.BHallDown) {
+		for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
+			if (f == elevio.NFloors-1 && btn == elevio.BHallUp) ||
+				(f == 0 && btn == elevio.BHallDown) {
 				fmt.Print("|     ")
 			} else {
 				if e.Requests[f][btn] {

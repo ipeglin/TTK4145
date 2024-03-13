@@ -27,7 +27,7 @@ func InitializeHRAInput(e elev.Elevator, elevatorName string) HRAInput {
 		hraInput.HallRequests[f][1] = e.Requests[f][elevio.BHallDown]
 	}
 
-	behavior, direction, cabRequests := convertLocalElevatorState(e)
+	behavior, direction, cabRequests := convertElevatorState(e)
 
 	hraInput.States[elevatorName] = HRAElevState{
 		Behavior:    behavior,
@@ -44,7 +44,7 @@ func UpdateHRAInput(hraInput HRAInput, e elev.Elevator, elevatorName string) HRA
 		hraInput.HallRequests[f][1] = hraInput.HallRequests[f][1] || e.Requests[f][elevio.BHallDown]
 	}
 
-	behavior, direction, cabRequests := convertLocalElevatorState(e)
+	behavior, direction, cabRequests := convertElevatorState(e)
 	hraInput.States[elevatorName] = HRAElevState{
 		Behavior:    behavior,
 		Floor:       e.CurrentFloor,
@@ -55,7 +55,7 @@ func UpdateHRAInput(hraInput HRAInput, e elev.Elevator, elevatorName string) HRA
 }
 
 func RebootHRAInput(hraInput HRAInput, e elev.Elevator, elevatorName string) HRAInput {
-	behavior, direction, cabRequests := convertLocalElevatorState(e)
+	behavior, direction, cabRequests := convertElevatorState(e)
 	hraInput.States[elevatorName] = HRAElevState{
 		Behavior:    behavior,
 		Floor:       e.CurrentFloor,
@@ -75,7 +75,7 @@ func UpdateHRAInputOnCompletedOrder(hraInput HRAInput, e elev.Elevator, elevator
 		hraInput.States[elevatorName].CabRequests[btn_floor] = false
 	}
 
-	behavior, direction, cabRequests := convertLocalElevatorState(e)
+	behavior, direction, cabRequests := convertElevatorState(e)
 
 	hraInput.States[elevatorName] = HRAElevState{
 		Behavior:    behavior,
@@ -86,14 +86,14 @@ func UpdateHRAInputOnCompletedOrder(hraInput HRAInput, e elev.Elevator, elevator
 	return hraInput
 }
 
-func convertLocalElevatorState(localElevator elev.Elevator) (string, string, []bool) {
-	behavior := elev.EBToString(localElevator.CurrentBehaviour)
-	direction := elevio.ElevDirToString(localElevator.Dirn)
+func convertElevatorState(e elev.Elevator) (string, string, []bool) {
+	behavior := elev.EBToString(e.CurrentBehaviour)
+	direction := elevio.ElevDirToString(e.Dirn)
 
 	// Convert cab requests
 	cabRequests := make([]bool, elevio.NFloors)
 	for f := 0; f < elevio.NFloors; f++ {
-		cabRequests[f] = localElevator.Requests[f][elevio.BCab]
+		cabRequests[f] = e.Requests[f][elevio.BCab]
 	}
 
 	return behavior, direction, cabRequests

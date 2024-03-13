@@ -1,7 +1,7 @@
 package elevio
 
 import (
-	"elevator/driver/hwelevio"
+	"elevator/elevio/driver/hwelevio"
 	"elevator/timer"
 	"time"
 
