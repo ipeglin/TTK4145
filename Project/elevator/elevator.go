@@ -1,7 +1,6 @@
 package elevator
 
 import (
-	"elevator/driver/hwelevio"
 	"elevator/elevio"
 	"elevator/fsm"
 	"elevator/jsonhandler"
@@ -13,8 +12,6 @@ import (
 
 func Init(elevatorName string, isPrimaryProcess bool) {
 	logrus.Info("Elevator module initiated with name ", elevatorName)
-
-	hwelevio.Init(elevio.Addr, elevio.NFloors)
 	elevatorStateFile := elevatorName + ".json"
 	if isPrimaryProcess {
 		if elevio.InputDevice.FloorSensor() == -1 {
@@ -32,7 +29,6 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 	drv_obstr := make(chan bool)
 	drv_stop := make(chan bool)
 	drv_motorActivity := make(chan bool)
-	// TODO: Add channels for direction and behaviour
 
 	go elevio.PollButtons(drv_buttons)
 	go elevio.PollFloorSensor(drv_floors)
@@ -40,7 +36,6 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 	go elevio.PollStopButton(drv_stop)
 	go elevio.MontitorMotorActivity(drv_motorActivity, 3.0)
 	go fsm.CreateCheckpoint()
-	// TODO: Add polling for direction and behaviour
 
 	// initial hinderance states
 	var obst bool = false
@@ -56,27 +51,22 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			}
 
 		case motorActive := <-drv_motorActivity:
-			logrus.Warn("Immobile state changed: ", motorActive)
+			logrus.Warn("MotorActive state changed: ", motorActive)
 			if !motorActive {
-				// BUG: THis occurs very late
 				jsonhandler.RemoveElevatorsFromJSON([]string{elevatorName}, elevatorStateFile)
-				//we need to remove the request// clear them if we dont want to comlete orders twice.
-				//it is up to uss and we have functionality to do so
 			} else {
 				fsm.HandleStateOnReboot(elevatorName, elevatorStateFile)
-				//lurer på om vi må ha en movebutton her men idk
-
-				//fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
-				//fsm.AssignOrders(elevatorStateFile, elevatorName)
 			}
 
 		case btnEvent := <-drv_buttons:
 			logrus.Debug("Button press detected: ", btnEvent)
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
 			fsm.HandleButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName, elevatorStateFile)
+
 			if fsm.OnlyElevatorOnline(elevatorStateFile, elevatorName) {
 				fsm.AssignOrders(elevatorStateFile, elevatorName)
 			}
+
 			fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
 
@@ -84,6 +74,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			logrus.Debug("Floor sensor triggered: ", floor)
 			fsm.FloorArrival(floor, elevatorName, elevatorStateFile)
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
+
 			if fsm.OnlyElevatorOnline(elevatorStateFile, elevatorName) {
 				fsm.AssignOrders(elevatorStateFile, elevatorName)
 			}
@@ -101,7 +92,6 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			}
 			time.Sleep(50 * time.Millisecond)
 		}
-		/// we need a case for each time a state updates.
 	}
 
 }

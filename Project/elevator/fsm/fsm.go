@@ -175,9 +175,7 @@ func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string, fil
 		//updateStateOnNewOrder(btnFloor, btn, elevatorName, filename)
 		jsonhandler.UpdateJSONOnNewOrder(filename, elevatorName, btnFloor, btn)
 
-		//TODO: This variable just makes it complicated
-		isCabCall := btn == elevio.BCab
-		if isCabCall {
+		if btn == elevio.BCab {
 			elevator.Requests[btnFloor][btn] = true
 		}
 	}

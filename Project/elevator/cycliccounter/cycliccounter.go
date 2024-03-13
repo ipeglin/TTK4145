@@ -11,14 +11,14 @@ type CyclicCounterInput struct {
 	States       map[string]int `json:"states"`
 }
 
-func InitializeCyclicCounterInput(ElevatorName string) CyclicCounterInput {
+func InitializeCyclicCounterInput(elevatorName string) CyclicCounterInput {
 	cyclicCounter := CyclicCounterInput{
 		HallRequests: make([][2]int, elevio.NFloors),
 		States:       make(map[string]int), // Initialiserer map her
 	}
 
 	// Nå som States er initialisert, kan du legge til oppføringer i den
-	cyclicCounter.States[ElevatorName] = 0
+	cyclicCounter.States[elevatorName] = 0
 
 	return cyclicCounter
 }
