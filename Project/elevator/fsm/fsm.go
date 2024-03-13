@@ -246,7 +246,7 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 }
 
 // TODO: Should this go somewehre else?
-func worldViewsAllign(localCombinedInput jsonhandler.CombinedInput, otherCombinedInput jsonhandler.CombinedInput) bool {
+func worldViewsAlign(localCombinedInput jsonhandler.CombinedInput, otherCombinedInput jsonhandler.CombinedInput) bool {
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
 			if otherCombinedInput.CyclicCounter.HallRequests[f][i] != localCombinedInput.CyclicCounter.HallRequests[f][i] {
@@ -260,7 +260,7 @@ func worldViewsAllign(localCombinedInput jsonhandler.CombinedInput, otherCombine
 func AssignIfWorldViewsAlign(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput) {
 	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
 
-	if worldViewsAllign(localCombinedInput, otherCombinedInput) {
+	if worldViewsAlign(localCombinedInput, otherCombinedInput) {
 		elevator = jsonhandler.JSONOrderAssigner(elevator, localFilename, localElevatorName)
 		SetConfirmedHallLights(localFilename, localElevatorName)
 	}
