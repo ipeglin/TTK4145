@@ -11,7 +11,7 @@ type Counter struct {
 	States       map[string]int `json:"states"`
 }
 
-func InitializeCounter(elevatorName string) Counter {
+func InitialiseCounter(elevatorName string) Counter {
 	cyclicCounter := Counter{
 		HallRequests: make([][2]int, elevio.NFloors),
 		States:       make(map[string]int), // Initialiserer map her

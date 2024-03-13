@@ -31,11 +31,10 @@ func init() {
 	StateFile = ip + ".json"
 }
 
-// TODO: Change this from Initizalied to make/create
 func InitialiseState(e elev.Elevator, elevatorName string) ElevatorState {
 	return ElevatorState{
-		HRAInput: hra.InitializeHRAInput(e, elevatorName),
-		Counter:  counter.InitializeCounter(elevatorName),
+		HRAInput: hra.InitialiseHRAInput(e, elevatorName),
+		Counter:  counter.InitialiseCounter(elevatorName),
 	}
 }
 

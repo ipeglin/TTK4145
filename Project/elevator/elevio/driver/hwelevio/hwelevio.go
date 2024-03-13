@@ -9,7 +9,7 @@ import (
 
 const PollRate = 20 * time.Millisecond
 
-var initialized bool = false
+var initialised bool = false
 var mtx sync.Mutex
 var conn net.Conn
 
@@ -30,8 +30,8 @@ const (
 )
 
 func Init(addr string) {
-	if initialized {
-		fmt.Println("Driver already initialized!")
+	if initialised {
+		fmt.Println("Driver already initialised!")
 		return
 	}
 	mtx = sync.Mutex{}
@@ -40,7 +40,7 @@ func Init(addr string) {
 	if err != nil {
 		panic(err.Error())
 	}
-	initialized = true
+	initialised = true
 }
 
 func SetMotorDirection(dir HWMotorDirection) {
