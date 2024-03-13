@@ -56,7 +56,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			}
 
 		case motorActive := <-drv_motorActivity:
-			logrus.Warn("Immobile state changed: ", motorActive)
+			logrus.Warn("MotorActive state changed: ", motorActive)
 			if !motorActive {
 				// BUG: THis occurs very late
 				jsonhandler.RemoveElevatorsFromJSON([]string{elevatorName})

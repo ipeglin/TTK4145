@@ -107,11 +107,11 @@ func UpdateJSONOnNewOrder(elevatorName string, btnFloor int, btn elevio.Button) 
 
 // TODO : mener denne kan bare bli en fsm func
 // TODO: Changed it from refrence to pass-by-value. Is it very ugly now?
-func JSONOrderAssigner(e elev.Elevator, elevatorName string) elev.Elevator {
+func JSONOrderAssigner(e *elev.Elevator, elevatorName string) {
 	state, err := LoadState()
 	if err != nil {
 		fmt.Printf("Failed to load combined input: %v\n", err)
-		return e
+		return
 	}
 
 	// Check if HRAInput.States is not empty
@@ -119,19 +119,19 @@ func JSONOrderAssigner(e elev.Elevator, elevatorName string) elev.Elevator {
 		jsonBytes, err := json.Marshal(state.HRAInput)
 		if err != nil {
 			fmt.Printf("Failed to marshal HRAInput: %v\n", err)
-			return e
+			return
 		}
 
 		ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
 		if err != nil {
 			fmt.Printf("exec.Command error: %v\nOutput: %s\n", err, string(ret))
-			return e
+			return
 		}
 
 		output := make(map[string][][2]bool) // Changed from using new to make for clarity
 		if err := json.Unmarshal(ret, &output); err != nil {
 			fmt.Printf("json.Unmarshal error: %v\n", err)
-			return e
+			return
 		}
 
 		for floor := 0; floor < elevio.NFloors; floor++ {
@@ -140,10 +140,8 @@ func JSONOrderAssigner(e elev.Elevator, elevatorName string) elev.Elevator {
 				e.Requests[floor][elevio.BHallDown] = orders[floor][1]
 			}
 		}
-		return e
 	} else {
 		logrus.Debug("HRAInput.States is empty, skipping order assignment")
-		return e
 	}
 }
 

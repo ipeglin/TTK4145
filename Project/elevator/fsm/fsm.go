@@ -33,7 +33,7 @@ func SetAllLights() {
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		outputDevice.RequestButtonLight(floor, elevio.BCab, elevator.Requests[floor][elevio.BCab])
 		if isOffline() || OnlyElevatorOnline(nodeIP) {
-			for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+			for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
 				outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
 			}
 		}
@@ -162,7 +162,7 @@ func HandleStateOnReboot(elevatorName string) {
 
 // gir det mening å ha slike oneliners? eller burde vi flytte inn JsonOrderAssignerKoden her?
 func AssignOrders(elevatorName string) {
-	elevator = jsonhandler.JSONOrderAssigner(elevator, elevatorName)
+	jsonhandler.JSONOrderAssigner(&elevator, elevatorName)
 }
 
 func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string) {
@@ -188,7 +188,6 @@ func MoveOnActiveOrders(elevatorName string) {
 		pair := requests.ChooseDirection(elevator)
 		elevator.Dirn = pair.Dirn
 		elevator.CurrentBehaviour = pair.Behaviour
-
 		switch pair.Behaviour {
 		case elev.EBDoorOpen:
 			outputDevice.DoorLight(true)
@@ -260,7 +259,7 @@ func AssignIfWorldViewsAlign(localElevatorName string, externalState jsonhandler
 	localState, _ := jsonhandler.LoadState()
 
 	if worldViewsAllign(localState, externalState) {
-		elevator = jsonhandler.JSONOrderAssigner(elevator, localElevatorName)
+		jsonhandler.JSONOrderAssigner(&elevator, localElevatorName)
 		SetConfirmedHallLights(localElevatorName)
 	}
 }

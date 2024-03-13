@@ -107,7 +107,7 @@ func PollButtons(receiver chan<- ButtonEvent) {
 	for {
 		time.Sleep(hwelevio.PollRate)
 		for f := 0; f < NFloors; f++ {
-			for b := Button(0); b < 3; b++ {
+			for b := BHallUp; b <= BCab; b++ {
 				v := hwelevio.GetButton(castButtonToHWButtonType(b), f)
 				if v != prev[f][b] && v {
 					receiver <- ButtonEvent{f, Button(b)}
