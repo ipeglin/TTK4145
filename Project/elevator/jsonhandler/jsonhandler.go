@@ -143,7 +143,6 @@ func JSONOrderAssigner(e *elev.Elevator, elevatorName string) {
 	}
 }
 
-// denne brukes en gang i main. kan vi gjøre den over komatibel
 func RemoveElevatorsFromJSON(elevatorIDs []string) error {
 	state, err := LoadState()
 	if err != nil {
@@ -175,6 +174,7 @@ func RemoveElevatorsFromJSON(elevatorIDs []string) error {
 	return nil
 }
 
+// TODO: Gustav shceck if this is neccesary
 func IsStateCorrupted(state ElevatorState) bool {
 	input := state.HRAInput
 

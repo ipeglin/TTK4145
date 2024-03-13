@@ -132,14 +132,14 @@ func ResumeAtLatestCheckpoint(floor int) {
 	}
 }
 
-func CreateLocalStateFile(ElevatorName string) {
+func CreateLocalStateFile(elevatorName string) {
 	// TODO: Gjør endringer på elevState her
 	err := os.Remove(jsonhandler.StateFile)
 	if err != nil {
 		logrus.Error("Failed to remove:", err)
 	}
 
-	initialElevState := jsonhandler.InitialiseState(elevator, ElevatorName)
+	initialElevState := jsonhandler.InitialiseState(elevator, elevatorName)
 
 	// * If the file was successfully deleted, return nil
 	err = jsonhandler.SaveState(initialElevState)
@@ -262,7 +262,7 @@ func AssignIfWorldViewsAlign(localElevatorName string, externalState jsonhandler
 	}
 }
 
-// TODO: Maybe IsOnlyNodeOnline()
+// TODO: Maybe IsOnlyNodeOnline() and these functions below dont need to be in fsm?
 func OnlyElevatorOnline(localElevatorName string) bool {
 	currentState, _ := jsonhandler.LoadState()
 	if len(currentState.HRAInput.States) == 1 {
