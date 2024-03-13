@@ -67,18 +67,18 @@ func initNode(isFirstProcess bool) {
 
 			jsonhandler.DeleteInactiveElevatorsFromJSON(lostNodeAddresses, localStateFile)
 			//denne iffen er vi sensetive for med pakketap. er det en måte å garatere at noder har vært offline lenge?
-			//tror jeg fiksa feilen vår. Tror feilen oppstod i cas eonline, men er ikke sikker. 
-			//kan noen av dere som vet bedre om pakketap fra andre heiser får oss til å tro de er offline ? 
-			//vis ikke har jeg fikset feilen tror jeg 
-			if fsm.OnlyElevatorOnlie(localStateFile, localIP) {
-				fsm.JSONOrderAssigner(localStateFile, localIP)
-				jsonhandler.JSONsetAllLights(localStateFile, localIP)
+			//tror jeg fiksa feilen vår. Tror feilen oppstod i cas eonline, men er ikke sikker.
+			//kan noen av dere som vet bedre om pakketap fra andre heiser får oss til å tro de er offline ?
+			//vis ikke har jeg fikset feilen tror jeg
+			if fsm.OnlyElevatorOnline(localStateFile, localIP) {
+				fsm.AssignOrders(localStateFile, localIP)
+				fsm.SetConfirmedHallLights(localStateFile, localIP)
 				fsm.MoveOnActiveOrders(localStateFile, localIP)
 			}
 
 			//skal vi reasigne her? nei?
 			//dersom vi ikke og den er enset igjen online så vil den ta alle den har blitt assignet (kan være mer enn en og fuløre dem)
-			//fsm.JSONOrderAssigner(localStateFile, localIP)
+			//fsm.AssignOrders(localStateFile, localIP)
 			//fsm.MoveOnActiveOrders(localStateFile, localIP)
 
 		case msg := <-messageReceiveChannel:
@@ -91,22 +91,22 @@ func initNode(isFirstProcess bool) {
 			// update and remove list nodes
 			if !jsonhandler.IncomingDataIsCorrupt(incomingState) {
 				fsm.HandleIncomingJSON(localStateFile, localIP, msg.Payload, msg.SenderId)
-				fsm.AssignOnInncoming(localStateFile, localIP,msg.Payload)
+				fsm.AssignIfWorldViewsAlign(localStateFile, localIP, msg.Payload)
 				fsm.MoveOnActiveOrders(localStateFile, localIP)
-				
+
 				//fsm.UpdateElevatorState(localIP, localStateFile)
 
 				//fsm.HandleIncomingJSON(localStateFile, incomingState, msg.SenderId)
-				//checkpoint.JSONsetAllLights(localStateFile, msg.SenderId)
-				//fsm.JSONOrderAssigner(localStateFile, localIP)
+				//checkpoint.SetConfirmedHallLights(localStateFile, msg.SenderId)
+				//fsm.AssignOrders(localStateFile, localIP)
 				// ! Only have one version
 			}
 
 		case online := <-onlineStatusChannel:
-			if online{
+			if online {
 				fsm.HandleStateOnReboot(localIP, localStateFile) // Deprecated: fsm.RebootJSON()
-			}else{
-				fsm.SetLightsWhenOffline()
+			} else {
+				fsm.SetAllLights()
 				fsm.MoveOnActiveOrders(localStateFile, localIP)
 			}
 			logrus.Warn("Updated online status:", online)

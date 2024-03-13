@@ -27,30 +27,30 @@ func init() {
 	localStateFile = elevatorName + ".json"
 
 	// ? Should this be moved
-	setAllLights()
+	SetAllLights()
 	elevio.RequestDoorOpenLamp(false)
 	elevio.RequestStopLamp(false)
 }
 
-func setAllLights() {
+func SetAllLights() {
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		outputDevice.RequestButtonLight(floor, elevio.BCab, elevator.Requests[floor][elevio.BCab])
+		if isOffline() || OnlyElevatorOnline(localStateFile, elevatorName) {
+			for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+				outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
+			}
+		}
 	}
 }
 
-func SetLightsWhenOffline(){
+func SetConfirmedHallLights(localFilename string, elevatorName string) {
+	combinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
 	for floor := 0; floor < elevio.NFloors; floor++ {
-		for btn:= elevio.BHallUp; btn <= elevio.BCab; btn ++{
-			outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
-		}
-	}	
-}
+		elevio.RequestButtonLight(floor, elevio.BHallUp, combinedInput.HRAInput.HallRequests[floor][0])
+		elevio.RequestButtonLight(floor, elevio.BHallDown, combinedInput.HRAInput.HallRequests[floor][1])
 
-func IsOffline() bool {
-	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localStateFile)
-	return len(localCombinedInput.HRAInput.States) == 0
+	}
 }
-
 
 func MoveDownToFloor() {
 	dirn := elevio.DirDown
@@ -72,7 +72,7 @@ func FloorArrival(newFloor int, elevatorName string, filename string) {
 			outputDevice.DoorLight(true)
 			elevator = requests.ClearAtCurrentFloor(elevator, filename, elevatorName)
 			timer.Start(elevator.Config.DoorOpenDurationS)
-			setAllLights()
+			SetAllLights()
 			elevator.CurrentBehaviour = elev.EBDoorOpen
 		}
 	}
@@ -90,7 +90,7 @@ func DoorTimeout(filename string, elevatorName string) {
 		case elev.EBDoorOpen:
 			timer.Start(elevator.Config.DoorOpenDurationS)
 			elevator = requests.ClearAtCurrentFloor(elevator, filename, elevatorName)
-			setAllLights()
+			SetAllLights()
 
 		case elev.EBMoving:
 			outputDevice.DoorLight(false)
@@ -125,7 +125,7 @@ func CreateCheckpoint() {
 
 func ResumeAtLatestCheckpoint(floor int) {
 	elevator, _, _ = checkpoint.LoadCheckpoint(checkpoint.CheckpointFilename)
-	setAllLights()
+	SetAllLights()
 
 	if elevator.Dirn != elevio.DirStop && floor == -1 {
 		outputDevice.MotorDirection(elevator.Dirn)
@@ -163,13 +163,8 @@ func HandleStateOnReboot(elevatorName string, filename string) {
 	checkpoint.SetCheckpoint(elevator, checkpoint.CheckpointFilename)
 }
 
-// TODO: Doesn't look like this is used;
-func updateStateOnNewOrder(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
-	jsonhandler.UpdateJSONOnNewOrder(filename, elevatorName, btnFloor, btn)
-}
-
-// TODO: Change function name to AssignOrders() or similar
-func JSONOrderAssigner(filename string, elevatorName string) {
+// gir det mening å ha slike oneliners? eller burde vi flytte inn JsonOrderAssignerKoden her?
+func AssignOrders(filename string, elevatorName string) {
 	jsonhandler.JSONOrderAssigner(&elevator, filename, elevatorName)
 }
 
@@ -207,7 +202,7 @@ func MoveOnActiveOrders(filename string, elevatorName string) {
 			outputDevice.MotorDirection(elevator.Dirn)
 		}
 	}
-	setAllLights()
+	SetAllLights()
 }
 
 func HandleIncomingJSON(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput, incomingElevatorName string) {
@@ -252,7 +247,7 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 	jsonhandler.SaveCombinedInput(localCombinedInput, localFilename)
 }
 
-func AssignOnInncoming(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput) {
+func AssignIfWorldViewsAlign(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput) {
 	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
 	allValuesEqual := true
 	for f := 0; f < elevio.NFloors; f++ {
@@ -266,10 +261,10 @@ func AssignOnInncoming(localFilename string, localElevatorName string, otherComb
 
 	if allValuesEqual {
 		jsonhandler.JSONOrderAssigner(&elevator, localFilename, localElevatorName)
-		jsonhandler.JSONsetAllLights(localFilename, localElevatorName)
+		SetConfirmedHallLights(localFilename, localElevatorName)
 	}
 }
-func OnlyElevatorOnlie(localFilename string, localElevatorName string) bool {
+func OnlyElevatorOnline(localFilename string, localElevatorName string) bool {
 	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
 	if len(localCombinedInput.HRAInput.States) == 1 {
 		if _, exists := localCombinedInput.HRAInput.States[localElevatorName]; exists {
@@ -279,27 +274,7 @@ func OnlyElevatorOnlie(localFilename string, localElevatorName string) bool {
 	return false
 }
 
-func compareCombinedInputs(input1, input2 jsonhandler.CombinedInput) bool {
-	// Check if the CyclicCounter fields are equal
-	for f := 0; f < elevio.NFloors; f++ {
-		for i := 0; i < 2; i++ {
-			if input1.CyclicCounter.HallRequests[f][i] != input2.CyclicCounter.HallRequests[f][i] {
-				return false
-			}
-		}
-	}
-
-	// Check if both structs contain the same states
-	if len(input1.HRAInput.States) != len(input2.HRAInput.States) {
-		return false
-	}
-
-	for state, val1 := range input1.CyclicCounter.States {
-		val2, exists := input2.CyclicCounter.States[state]
-		if !exists || val1 != val2 {
-			return false
-		}
-	}
-
-	return true
+func isOffline() bool {
+	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localStateFile)
+	return len(localCombinedInput.HRAInput.States) == 0
 }

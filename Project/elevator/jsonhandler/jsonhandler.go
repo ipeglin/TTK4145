@@ -22,8 +22,8 @@ type CombinedInput struct {
 
 func InitializeCombinedInput(el elev.Elevator, ElevatorName string) CombinedInput {
 	return CombinedInput{
-		HRAInput:      hra.InitializeHRAInput(el, ElevatorName),            // Anta at denne funksjonen initialiserer HRAInput
-		CyclicCounter: ccounter.InitializeCyclicCounterInput(ElevatorName), // Bruker eksisterende initialiseringsfunksjon
+		HRAInput:      hra.InitializeHRAInput(el, ElevatorName),            
+		CyclicCounter: ccounter.InitializeCyclicCounterInput(ElevatorName), 
 	}
 }
 
@@ -92,7 +92,7 @@ func UpdateJSONOnNewOrder(filename string, elevatorName string, btnFloor int, bt
 	}
 	SaveCombinedInput(combinedInput, filename)
 }
-
+//TODO : mener denne kan bare bli en fsm func
 func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) {
 	combinedInput, err := LoadCombinedInput(filename)
 	if err != nil {
@@ -131,64 +131,6 @@ func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) 
 	}
 }
 
-/*
-	func HandleIncomingJSON(el elev.Elevator,localFilename string, localElevatorName string, otherCombinedInput CombinedInput, incomingElevatorName string) {
-		localCombinedInput, _ := LoadCombinedInput(localFilename)
-		for f := 0; f < elevio.NFloors; f++ {
-			for i := 0; i < 2; i++ {
-				if otherCombinedInput.CyclicCounter.HallRequests[f][i] > localCombinedInput.CyclicCounter.HallRequests[f][i] {
-					localCombinedInput.CyclicCounter.HallRequests[f][i] = otherCombinedInput.CyclicCounter.HallRequests[f][i]
-					localCombinedInput.HRAInput.HallRequests[f][i] = otherCombinedInput.HRAInput.HallRequests[f][i]
-				}
-				if otherCombinedInput.CyclicCounter.HallRequests[f][i] == localCombinedInput.CyclicCounter.HallRequests[f][i] {
-					if localCombinedInput.HRAInput.HallRequests[f][i] != otherCombinedInput.HRAInput.HallRequests[f][i] {
-						//midliertilig konflikt logikk dersom den ene er true og den andre er false
-						//oppstår ved motostop og bostruksjoner etc dersom den har selv claimet en orde som blir utført ila den har motorstop
-						//Tenk om dette er beste løsning
-						localCombinedInput.HRAInput.HallRequests[f][i] = false
-					}
-				}
-			}
-		}
-		if _, exists := otherCombinedInput.HRAInput.States[incomingElevatorName]; exists {
-			if _, exists := localCombinedInput.HRAInput.States[incomingElevatorName]; !exists {
-				localCombinedInput.HRAInput.States[incomingElevatorName] = otherCombinedInput.HRAInput.States[incomingElevatorName]
-				localCombinedInput.CyclicCounter.States[incomingElevatorName] = otherCombinedInput.CyclicCounter.States[incomingElevatorName]
-			} else {
-				if otherCombinedInput.CyclicCounter.States[incomingElevatorName] > localCombinedInput.CyclicCounter.States[incomingElevatorName] {
-					localCombinedInput.HRAInput.States[incomingElevatorName] = otherCombinedInput.HRAInput.States[incomingElevatorName]
-					localCombinedInput.CyclicCounter.States[incomingElevatorName] = otherCombinedInput.CyclicCounter.States[incomingElevatorName]
-				}
-			}
-		} else {
-			if _, exists := localCombinedInput.HRAInput.States[incomingElevatorName]; exists {
-				delete(localCombinedInput.HRAInput.States, incomingElevatorName)
-				delete(localCombinedInput.CyclicCounter.States, incomingElevatorName)
-			}
-		}
-		if _, exists := otherCombinedInput.CyclicCounter.States[localElevatorName]; exists {
-			if otherCombinedInput.CyclicCounter.States[localElevatorName] > localCombinedInput.CyclicCounter.States[localElevatorName] {
-				localCombinedInput.CyclicCounter.States[localElevatorName] = otherCombinedInput.CyclicCounter.States[localElevatorName] + 1
-			}
-		}
-		SaveCombinedInput(localCombinedInput, localFilename)
-		allValuesGreater := true
-		for f := 0; f < elevio.NFloors; f++ {
-			for i := 0; i < 2; i++ {
-				if otherCombinedInput.CyclicCounter.HallRequests[f][i] < localCombinedInput.CyclicCounter.HallRequests[f][i] {
-					allValuesGreater = false
-					break
-				}
-			}
-		}
-		if allValuesGreater {
-			// Execute further actions here
-			JSONsetAllLights(localFilename, localElevatorName)
-			JSONOrderAssigner(& el, localFilename, localElevatorName)
-			//fsm.MoveOnActiveOrders(localFilename, localElevatorName) // TODO: Only have one version
-		}
-	}
-*/
 func RemoveDysfunctionalElevatorFromJSON(localFilename string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(localFilename)
 	for id := range combinedInput.HRAInput.States {
@@ -268,14 +210,4 @@ func IncomingDataIsCorrupt(incomingCombinedInput CombinedInput) bool {
 		}
 	}
 	return false // Data er gyldig
-}
-
-func JSONsetAllLights(localFilename string, elevatorName string) {
-	combinedInput, _ := LoadCombinedInput(localFilename)
-	//if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
-	for floor := 0; floor < elevio.NFloors; floor++ {
-		elevio.RequestButtonLight(floor, elevio.BHallUp, combinedInput.HRAInput.HallRequests[floor][0])
-		elevio.RequestButtonLight(floor, elevio.BHallDown, combinedInput.HRAInput.HallRequests[floor][1])
-
-	}
 }
