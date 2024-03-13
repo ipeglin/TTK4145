@@ -20,10 +20,11 @@ type CombinedInput struct {
 	CyclicCounter ccounter.CyclicCounterInput
 }
 
-func InitializeCombinedInput(el elev.Elevator, ElevatorName string) CombinedInput {
+// TODO: Change this from Initizalied to make/create
+func InitializeCombinedInput(e elev.Elevator, elevatorName string) CombinedInput {
 	return CombinedInput{
-		HRAInput:      hra.InitializeHRAInput(el, ElevatorName),            
-		CyclicCounter: ccounter.InitializeCyclicCounterInput(ElevatorName), 
+		HRAInput:      hra.InitializeHRAInput(e, elevatorName),
+		CyclicCounter: ccounter.InitializeCyclicCounterInput(elevatorName),
 	}
 }
 
@@ -56,27 +57,27 @@ func LoadCombinedInput(filename string) (CombinedInput, error) {
 	return combinedInput, nil
 }
 
-func UpdateJSON(el elev.Elevator, filename string, elevatorName string) {
+func UpdateJSON(e elev.Elevator, filename string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(filename)
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
-		combinedInput.HRAInput = hra.UpdateHRAInput(combinedInput.HRAInput, el, elevatorName)
+		combinedInput.HRAInput = hra.UpdateHRAInput(combinedInput.HRAInput, e, elevatorName)
 		combinedInput.CyclicCounter = ccounter.IncrementOnInput(combinedInput.CyclicCounter, elevatorName)
 	}
 	SaveCombinedInput(combinedInput, filename)
 }
 
 // This was RebootJSON
-func UpdateJSONOnReboot(el elev.Elevator, filename string, elevatorName string) {
+func UpdateJSONOnReboot(e elev.Elevator, filename string, elevatorName string) {
 	combinedInput, _ := LoadCombinedInput(filename)
-	combinedInput.HRAInput = hra.RebootHRAInput(combinedInput.HRAInput, el, elevatorName)
+	combinedInput.HRAInput = hra.RebootHRAInput(combinedInput.HRAInput, e, elevatorName)
 	combinedInput.CyclicCounter = ccounter.IncrementOnInput(combinedInput.CyclicCounter, elevatorName)
 	SaveCombinedInput(combinedInput, filename)
 }
 
-func UpdateJSONOnCompletedHallOrder(el elev.Elevator, filename string, elevatorName string, btn_floor int, btn_type elevio.Button) {
+func UpdateJSONOnCompletedHallOrder(e elev.Elevator, filename string, elevatorName string, btn_floor int, btn_type elevio.Button) {
 	combinedInput, _ := LoadCombinedInput(filename)
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
-		combinedInput.HRAInput = hra.UpdateHRAInputOnCompletedOrder(combinedInput.HRAInput, el, elevatorName, btn_floor, btn_type)
+		combinedInput.HRAInput = hra.UpdateHRAInputOnCompletedOrder(combinedInput.HRAInput, e, elevatorName, btn_floor, btn_type)
 		combinedInput.CyclicCounter = ccounter.UpdateOnCompletedOrder(combinedInput.CyclicCounter, elevatorName, btn_floor, btn_type)
 	}
 	SaveCombinedInput(combinedInput, filename)
@@ -88,16 +89,18 @@ func UpdateJSONOnNewOrder(filename string, elevatorName string, btnFloor int, bt
 	//hvis vi øssker, fjern denne if setningen.
 	if _, exists := combinedInput.HRAInput.States[elevatorName]; exists {
 		combinedInput.CyclicCounter = ccounter.UpdateOnNewOrder(combinedInput.CyclicCounter, combinedInput.HRAInput, elevatorName, btnFloor, btn)
-		combinedInput.HRAInput = hra.UpdateHRAInputWhenNewOrderOccurs(combinedInput.HRAInput, elevatorName, btnFloor, btn)
+		combinedInput.HRAInput = hra.UpdateHRAInputOnNewOrder(combinedInput.HRAInput, elevatorName, btnFloor, btn)
 	}
 	SaveCombinedInput(combinedInput, filename)
 }
-//TODO : mener denne kan bare bli en fsm func
-func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) {
+
+// TODO : mener denne kan bare bli en fsm func
+// TODO: Changed it from refrence to pass-by-value. Is it very ugly now?
+func JSONOrderAssigner(e elev.Elevator, filename string, elevatorName string) elev.Elevator {
 	combinedInput, err := LoadCombinedInput(filename)
 	if err != nil {
 		fmt.Printf("Failed to load combined input: %v\n", err)
-		return
+		return e
 	}
 
 	// Check if HRAInput.States is not empty
@@ -105,53 +108,44 @@ func JSONOrderAssigner(el *elev.Elevator, filename string, elevatorName string) 
 		jsonBytes, err := json.Marshal(combinedInput.HRAInput)
 		if err != nil {
 			fmt.Printf("Failed to marshal HRAInput: %v\n", err)
-			return
+			return e
 		}
 
 		ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
 		if err != nil {
 			fmt.Printf("exec.Command error: %v\nOutput: %s\n", err, string(ret))
-			return
+			return e
 		}
 
 		output := make(map[string][][2]bool) // Changed from using new to make for clarity
 		if err := json.Unmarshal(ret, &output); err != nil {
 			fmt.Printf("json.Unmarshal error: %v\n", err)
-			return
+			return e
 		}
 
 		for floor := 0; floor < elevio.NFloors; floor++ {
 			if orders, ok := output[elevatorName]; ok && floor < len(orders) {
-				el.Requests[floor][elevio.BHallUp] = orders[floor][0]
-				el.Requests[floor][elevio.BHallDown] = orders[floor][1]
+				e.Requests[floor][elevio.BHallUp] = orders[floor][0]
+				e.Requests[floor][elevio.BHallDown] = orders[floor][1]
 			}
 		}
+		return e
 	} else {
 		logrus.Debug("HRAInput.States is empty, skipping order assignment")
+		return e
 	}
-}
-
-func RemoveDysfunctionalElevatorFromJSON(localFilename string, elevatorName string) {
-	combinedInput, _ := LoadCombinedInput(localFilename)
-	for id := range combinedInput.HRAInput.States {
-		if id == elevatorName {
-			delete(combinedInput.HRAInput.States, id)
-			delete(combinedInput.CyclicCounter.States, id)
-		}
-	}
-	SaveCombinedInput(combinedInput, localFilename)
 }
 
 // denne brukes en gang i main. kan vi gjøre den over komatibel
-func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename string) error {
-	localCombinedInput, err := LoadCombinedInput(localFilename)
+func RemoveElevatorsFromJSON(elevatorIDs []string, localStateFilename string) error {
+	localCombinedInput, err := LoadCombinedInput(localStateFilename)
 	if err != nil {
 		return fmt.Errorf("failed to load local combined input: %v", err)
 	}
 
 	// Convert slice of inactive elevator IDs to a map for efficient lookups
 	inactiveElevatorsMap := make(map[string]struct{})
-	for _, id := range inactiveElevatorIDs {
+	for _, id := range elevatorIDs {
 		inactiveElevatorsMap[id] = struct{}{}
 	}
 
@@ -165,7 +159,8 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 	}
 
 	// Save the updated CombinedInput back to the file
-	err = SaveCombinedInput(localCombinedInput, localFilename)
+	//TODO: Got error check for this saveCombinedInput but not for anyone else
+	err = SaveCombinedInput(localCombinedInput, localStateFilename)
 	if err != nil {
 		return fmt.Errorf("failed to save updated combined input: %v", err)
 	}
@@ -173,7 +168,6 @@ func DeleteInactiveElevatorsFromJSON(inactiveElevatorIDs []string, localFilename
 	return nil
 }
 
-// SIMEN HEVDER DETTE ER DOBBELT OPP AV FUNKSJONER
 func IsValidBehavior(behavior string) bool {
 	switch behavior {
 	case "idle", "moving", "doorOpen":
@@ -183,7 +177,6 @@ func IsValidBehavior(behavior string) bool {
 	}
 }
 
-// IsValidDirection sjekker om oppgitt retning er gyldig
 func IsValidDirection(direction string) bool {
 	switch direction {
 	case "up", "down", "stop":
@@ -193,7 +186,6 @@ func IsValidDirection(direction string) bool {
 	}
 }
 
-// IncomingDataIsCorrupt sjekker om inngående data er korrupt
 func IncomingDataIsCorrupt(incomingCombinedInput CombinedInput) bool {
 	incomingHRAInput := incomingCombinedInput.HRAInput
 	if len(incomingHRAInput.HallRequests) != elevio.NFloors {
@@ -201,13 +193,12 @@ func IncomingDataIsCorrupt(incomingCombinedInput CombinedInput) bool {
 	}
 	for _, state := range incomingHRAInput.States {
 		if !IsValidBehavior(state.Behavior) || !IsValidDirection(state.Direction) {
-			return true // Data er korrupt basert på ugyldig Behavior eller Direction
+			return true
 		}
 
-		// Sjekk om CabRequests har riktig lengde og inneholder boolske verdier
 		if len(state.CabRequests) != elevio.NFloors {
-			return true // Data er korrupt basert på lengde
+			return true
 		}
 	}
-	return false // Data er gyldig
+	return false
 }

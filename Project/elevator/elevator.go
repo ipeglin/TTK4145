@@ -48,7 +48,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 		select {
 		case obst = <-drv_obstr:
 			logrus.Warn("Obstruction state changed: ", obst)
-			if obst { // If obstruction detected and it's a new obstruction
+			if obst {
 				logrus.Debug("New obstruction detected: ", obst)
 				fsm.RequestObstruction()
 			} else {
@@ -59,7 +59,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			logrus.Warn("Immobile state changed: ", motorActive)
 			if !motorActive {
 				// BUG: THis occurs very late
-				jsonhandler.RemoveDysfunctionalElevatorFromJSON(elevatorStateFile, elevatorName)
+				jsonhandler.RemoveElevatorsFromJSON([]string{elevatorName}, elevatorStateFile)
 				//we need to remove the request// clear them if we dont want to comlete orders twice.
 				//it is up to uss and we have functionality to do so
 			} else {
@@ -69,7 +69,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 				//fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
 				//fsm.AssignOrders(elevatorStateFile, elevatorName)
 			}
-		//TODO: Alle UpdateElevatorState should be in the fsm functions beeing called
+
 		case btnEvent := <-drv_buttons:
 			logrus.Debug("Button press detected: ", btnEvent)
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
@@ -79,7 +79,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			}
 			fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
 			fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
-		//TODO: Alle UpdateElevatorState should be in the fsm functions beeing called
+
 		case floor := <-drv_floors:
 			logrus.Debug("Floor sensor triggered: ", floor)
 			fsm.FloorArrival(floor, elevatorName, elevatorStateFile)
@@ -92,7 +92,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			}
 
 		default:
-			if timer.TimedOut() { // Check for timeout only if no obstruction
+			if timer.TimedOut() {
 				logrus.Debug("Elevator timeout")
 				fsm.UpdateElevatorState(elevatorName, elevatorStateFile)
 				timer.Stop()

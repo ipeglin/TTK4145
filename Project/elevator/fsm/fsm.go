@@ -104,7 +104,7 @@ func DoorTimeout(filename string, elevatorName string) {
 func RequestObstruction() {
 	if elevator.CurrentBehaviour == elev.EBDoorOpen {
 		timer.StartInfiniteTimer()
-		jsonhandler.RemoveDysfunctionalElevatorFromJSON(localStateFile, elevatorName)
+		jsonhandler.RemoveElevatorsFromJSON([]string{elevatorName}, localStateFile)
 	}
 }
 
@@ -163,7 +163,7 @@ func HandleStateOnReboot(elevatorName string, filename string) {
 
 // gir det mening å ha slike oneliners? eller burde vi flytte inn JsonOrderAssignerKoden her?
 func AssignOrders(filename string, elevatorName string) {
-	jsonhandler.JSONOrderAssigner(&elevator, filename, elevatorName)
+	elevator = jsonhandler.JSONOrderAssigner(elevator, filename, elevatorName)
 }
 
 func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
@@ -245,24 +245,23 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 	jsonhandler.SaveCombinedInput(localCombinedInput, localFilename)
 }
 
-func AssignIfWorldViewsAlign(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput) {
-	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
-
-	// TODO: This is a great candidate for extracting into a separate function. 
-	//  * From
-	allValuesEqual := true
+// TODO: Should this go somewehre else?
+func worldViewsAllign(localCombinedInput jsonhandler.CombinedInput, otherCombinedInput jsonhandler.CombinedInput) bool {
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
 			if otherCombinedInput.CyclicCounter.HallRequests[f][i] != localCombinedInput.CyclicCounter.HallRequests[f][i] {
-				allValuesEqual = false
-				break
+				return false
 			}
 		}
 	}
-	// * to here
+	return true
+}
 
-	if allValuesEqual {
-		jsonhandler.JSONOrderAssigner(&elevator, localFilename, localElevatorName)
+func AssignIfWorldViewsAlign(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput) {
+	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
+
+	if worldViewsAllign(localCombinedInput, otherCombinedInput) {
+		elevator = jsonhandler.JSONOrderAssigner(elevator, localFilename, localElevatorName)
 		SetConfirmedHallLights(localFilename, localElevatorName)
 	}
 }
