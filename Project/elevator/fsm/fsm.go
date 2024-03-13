@@ -203,7 +203,7 @@ func MoveOnActiveOrders(filename string, elevatorName string) {
 	SetAllLights()
 }
 
-func HandleIncomingJSON(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput, incomingElevatorName string) {
+func HandleIncomingJSON(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.TElevState, incomingElevatorName string) {
 	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
@@ -246,7 +246,7 @@ func HandleIncomingJSON(localFilename string, localElevatorName string, otherCom
 }
 
 // TODO: Should this go somewehre else?
-func worldViewsAllign(localCombinedInput jsonhandler.CombinedInput, otherCombinedInput jsonhandler.CombinedInput) bool {
+func worldViewsAllign(localCombinedInput jsonhandler.TElevState, otherCombinedInput jsonhandler.TElevState) bool {
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
 			if otherCombinedInput.CyclicCounter.HallRequests[f][i] != localCombinedInput.CyclicCounter.HallRequests[f][i] {
@@ -257,7 +257,7 @@ func worldViewsAllign(localCombinedInput jsonhandler.CombinedInput, otherCombine
 	return true
 }
 
-func AssignIfWorldViewsAlign(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.CombinedInput) {
+func AssignIfWorldViewsAlign(localFilename string, localElevatorName string, otherCombinedInput jsonhandler.TElevState) {
 	localCombinedInput, _ := jsonhandler.LoadCombinedInput(localFilename)
 
 	if worldViewsAllign(localCombinedInput, otherCombinedInput) {

@@ -13,23 +13,22 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// TODO: Change to ElevatorState or similar
-// CombinedInput kombinerer HRAInput og CyclicCounterInput.
-type CombinedInput struct {
+// TElevState kombinerer HRAInput og CyclicCounterInput.
+type TElevState struct {
 	HRAInput      hra.HRAInput
 	CyclicCounter ccounter.CyclicCounterInput
 }
 
 // TODO: Change this from Initizalied to make/create
-func InitializeCombinedInput(e elev.Elevator, elevatorName string) CombinedInput {
-	return CombinedInput{
+func InitializeCombinedInput(e elev.Elevator, elevatorName string) TElevState {
+	return TElevState{
 		HRAInput:      hra.InitializeHRAInput(e, elevatorName),
 		CyclicCounter: ccounter.InitializeCyclicCounterInput(elevatorName),
 	}
 }
 
 // SaveCombinedInput serialiserer CombinedInput til JSON og lagrer det i en fil.
-func SaveCombinedInput(combinedInput CombinedInput, filename string) error {
+func SaveCombinedInput(combinedInput TElevState, filename string) error {
 	data, err := json.MarshalIndent(combinedInput, "", "  ")
 	if err != nil {
 		return fmt.Errorf("kunne ikke serialisere CombinedInput til JSON: %v", err)
@@ -40,8 +39,8 @@ func SaveCombinedInput(combinedInput CombinedInput, filename string) error {
 }
 
 // LoadCombinedInput deserialiserer CombinedInput fra en JSON-fil.
-func LoadCombinedInput(filename string) (CombinedInput, error) {
-	var combinedInput CombinedInput
+func LoadCombinedInput(filename string) (TElevState, error) {
+	var combinedInput TElevState
 
 	data, err := filehandler.ReadFromFile(filename)
 	if err != nil {
@@ -186,7 +185,7 @@ func IsValidDirection(direction string) bool {
 	}
 }
 
-func IncomingDataIsCorrupt(incomingCombinedInput CombinedInput) bool {
+func IncomingDataIsCorrupt(incomingCombinedInput TElevState) bool {
 	incomingHRAInput := incomingCombinedInput.HRAInput
 	if len(incomingHRAInput.HallRequests) != elevio.NFloors {
 		return true
