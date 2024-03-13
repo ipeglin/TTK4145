@@ -16,15 +16,15 @@ import (
 
 var elevator elev.Elevator
 var outputDevice elevio.ElevOutputDevice
-var elevatorName string
+var elevatorIP string
 var localStateFile string
 
 func init() {
 	elevator = elev.ElevatorInit()
-	elevatorName, _ = local.GetIP()
+	elevatorIP, _ = local.GetIP()
 	outputDevice = elevio.ElevioGetOutputDevice()
 
-	localStateFile = elevatorName + ".json"
+	localStateFile = elevatorIP + ".json"
 
 	// ? Should this be moved
 	SetAllLights()
@@ -35,7 +35,7 @@ func init() {
 func SetAllLights() {
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		outputDevice.RequestButtonLight(floor, elevio.BCab, elevator.Requests[floor][elevio.BCab])
-		if isOffline() || OnlyElevatorOnline(localStateFile, elevatorName) {
+		if isOffline() || OnlyElevatorOnline(localStateFile, elevatorIP) {
 			for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
 				outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
 			}
@@ -104,14 +104,14 @@ func DoorTimeout(filename string, elevatorName string) {
 func RequestObstruction() {
 	if elevator.CurrentBehaviour == elev.EBDoorOpen {
 		timer.StartInfiniteTimer()
-		jsonhandler.RemoveElevatorsFromJSON([]string{elevatorName}, localStateFile)
+		jsonhandler.RemoveElevatorsFromJSON([]string{elevatorIP}, localStateFile)
 	}
 }
 
 func StopObstruction() {
 	timer.StopInfiniteTimer()
 	timer.Start(elevator.Config.DoorOpenDurationS)
-	HandleStateOnReboot(elevatorName, localStateFile)
+	HandleStateOnReboot(elevatorIP, localStateFile)
 }
 
 func CreateCheckpoint() {
