@@ -16,8 +16,8 @@ import (
 
 var StateFile string
 
-// TElevState kombinerer HRAInput og CyclicCounterInput.
-type TElevState struct {
+// ElevatorState kombinerer HRAInput og CyclicCounterInput.
+type ElevatorState struct {
 	HRAInput      hra.HRAInput
 	CyclicCounter ccounter.CyclicCounterInput
 }
@@ -32,15 +32,15 @@ func init() {
 }
 
 // TODO: Change this from Initizalied to make/create
-func InitialiseState(e elev.Elevator, elevatorName string) TElevState {
-	return TElevState{
+func InitialiseState(e elev.Elevator, elevatorName string) ElevatorState {
+	return ElevatorState{
 		HRAInput:      hra.InitializeHRAInput(e, elevatorName),
 		CyclicCounter: ccounter.InitializeCyclicCounterInput(elevatorName),
 	}
 }
 
 // SaveState serialiserer state til JSON og lagrer det i en fil.
-func SaveState(state TElevState) error {
+func SaveState(state ElevatorState) error {
 	data, err := json.MarshalIndent(state, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to serialise state to JSON: %v", err)
@@ -51,8 +51,8 @@ func SaveState(state TElevState) error {
 }
 
 // LoadState deserialiserer state fra en JSON-fil.
-func LoadState() (TElevState, error) {
-	var state TElevState
+func LoadState() (ElevatorState, error) {
+	var state ElevatorState
 
 	data, err := filehandler.ReadFromFile(StateFile)
 	if err != nil {
@@ -177,7 +177,27 @@ func RemoveElevatorsFromJSON(elevatorIDs []string) error {
 	return nil
 }
 
-func IsValidBehavior(behavior string) bool {
+func IsStateCorrupted(state ElevatorState) bool {
+	input := state.HRAInput
+
+	if len(input.HallRequests) != elevio.NFloors {
+		return true
+	}
+
+	for _, state := range input.States {
+		if !isValidBehavior(state.Behavior) || !isValidDirection(state.Direction) {
+			return true
+		}
+
+		if len(state.CabRequests) != elevio.NFloors {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isValidBehavior(behavior string) bool {
 	switch behavior {
 	case "idle", "moving", "doorOpen":
 		return true
@@ -186,28 +206,11 @@ func IsValidBehavior(behavior string) bool {
 	}
 }
 
-func IsValidDirection(direction string) bool {
+func isValidDirection(direction string) bool {
 	switch direction {
 	case "up", "down", "stop":
 		return true
 	default:
 		return false
 	}
-}
-
-func IncomingDataIsCorrupt(externalState TElevState) bool {
-	incomingHRAInput := externalState.HRAInput
-	if len(incomingHRAInput.HallRequests) != elevio.NFloors {
-		return true
-	}
-	for _, state := range incomingHRAInput.States {
-		if !IsValidBehavior(state.Behavior) || !IsValidDirection(state.Direction) {
-			return true
-		}
-
-		if len(state.CabRequests) != elevio.NFloors {
-			return true
-		}
-	}
-	return false
 }

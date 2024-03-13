@@ -88,7 +88,7 @@ func initNode(isFirstProcess bool) {
 			// TODO: Reassign orders
 
 			// update and remove list nodes
-			if !jsonhandler.IncomingDataIsCorrupt(incomingState) {
+			if !jsonhandler.IsStateCorrupted(incomingState) {
 				fsm.HandleIncomingJSON(localIP, msg.Payload, msg.SenderId)
 				fsm.AssignIfWorldViewsAlign(localIP, msg.Payload)
 				fsm.MoveOnActiveOrders(localIP)
@@ -114,7 +114,7 @@ func initNode(isFirstProcess bool) {
 }
 
 func main() {
-	var entryPointFunction processpair.TFunc = initNode
+	var entryPointFunction func(bool) = initNode
 	processpair.CreatePair(entryPointFunction)
 
 	// Block the main goroutine indefinitely
