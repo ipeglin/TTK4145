@@ -46,8 +46,6 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 	for {
 		select {
 		case reg := <-nodeRegistryChannel:
-			logrus.Debug(fmt.Sprintf("Node registry update:\n  Nodes:    %q\n  New:      %q\n  Lost:     %q", reg.Nodes, reg.New, reg.Lost))
-
 			if slices.Contains(reg.Lost, nodeUid) {
 				logrus.Warn("Node lost connection:", nodeUid)
 				onlineStatusChannel <- false
@@ -59,8 +57,6 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 			nodesChannel <- reg
 
 		case msg := <-broadcastReceiverChannel:
-			logrus.Debug("Broadcast received from network")
-
 			sum, err := checksum.GenerateJSONChecksum(msg.Payload)
 			if err != nil {
 				logrus.Error("Checksum generation failed:", err)
@@ -73,6 +69,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 				continue
 			}
 
+			logrus.Debug("Received message from ", msg.SenderId)
 			responseChannel <- msg
 
 		case msg := <-messageChannel:

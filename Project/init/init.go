@@ -15,7 +15,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Todo ! : Ikke kall init node kanskje?
 func initNode(isFirstProcess bool) {
 	logger.Setup()
 	logrus.Info("Node initialised with PID:", os.Getpid())
@@ -64,7 +63,6 @@ func initNode(isFirstProcess bool) {
 			}
 
 		case msg := <-messageReceiveChannel:
-			logrus.Debug("Received message from ", msg.SenderId)
 			statehandler.HandleIncomingSate(localIP, msg.Payload, msg.SenderId)
 			fsm.AssignIfWorldViewsAlign(localIP, msg.Payload)
 			fsm.MoveOnActiveOrders(localIP)
@@ -77,7 +75,6 @@ func initNode(isFirstProcess bool) {
 				fsm.SetAllLights()
 				fsm.MoveOnActiveOrders(localIP)
 			}
-			logrus.Warn("Updated online status:", online)
 		}
 	}
 }
