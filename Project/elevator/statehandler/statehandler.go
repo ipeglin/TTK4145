@@ -65,8 +65,7 @@ func LoadState() (ElevatorState, error) {
 
 func UpdateState(e elev.Elevator, elevatorName string) {
 	state, _ := LoadState()
-	isOffline := (len(state.HRAInput.States) == 0)
-	if !isOffline {
+	if _, exists := state.HRAInput.States[elevatorName]; exists {
 		state.HRAInput = hra.UpdateHRAInput(state.HRAInput, e, elevatorName)
 		state.Counter = counter.IncrementOnInput(state.Counter, elevatorName)
 	}
@@ -82,8 +81,7 @@ func UpdateStateOnReboot(e elev.Elevator, elevatorName string) {
 
 func UpdateStateOnCompletedHallOrder(e elev.Elevator, elevatorName string, btn_floor int, btn_type elevio.Button) {
 	state, _ := LoadState()
-	isOffline := (len(state.HRAInput.States) == 0)
-	if !isOffline {
+	if _, exists := state.HRAInput.States[elevatorName]; exists {
 		state.HRAInput = hra.UpdateHRAInputOnCompletedOrder(state.HRAInput, e, elevatorName, btn_floor, btn_type)
 		state.Counter = counter.UpdateOnCompletedOrder(state.Counter, elevatorName, btn_floor, btn_type)
 	}
@@ -92,8 +90,7 @@ func UpdateStateOnCompletedHallOrder(e elev.Elevator, elevatorName string, btn_f
 
 func UpdateStateOnNewOrder(elevatorName string, btnFloor int, btn elevio.Button) {
 	state, _ := LoadState()
-	isOffline := (len(state.HRAInput.States) == 0)
-	if !isOffline {
+	if _, exists := state.HRAInput.States[elevatorName]; exists {
 		state.Counter = counter.UpdateOnNewOrder(state.Counter, state.HRAInput, elevatorName, btnFloor, btn)
 		state.HRAInput = hra.UpdateHRAInputOnNewOrder(state.HRAInput, elevatorName, btnFloor, btn)
 	}
