@@ -146,7 +146,7 @@ func ClearAtCurrentFloor(e elev.Elevator, elevatorName string) elev.Elevator {
 			}
 			e.Requests[e.CurrentFloor][elevio.BHallDown] = false
 		default:
-			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
+			e.Requests[e.CurrentFloor][elevio.BHallUp]   = false
 			e.Requests[e.CurrentFloor][elevio.BHallDown] = false
 
 		}
@@ -154,7 +154,7 @@ func ClearAtCurrentFloor(e elev.Elevator, elevatorName string) elev.Elevator {
 
 	for btn, wasPressed := range beforeClear {
 		if wasPressed && !e.Requests[e.CurrentFloor][btn] {
-			statehandler.UpdateJSONOnCompletedHallOrder(e, elevatorName, e.CurrentFloor, btn)
+			statehandler.UpdateStateOnCompletedHallOrder(e, elevatorName, e.CurrentFloor, btn)
 		}
 	}
 	return e

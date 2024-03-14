@@ -6,7 +6,6 @@ import (
 	"elevator/statehandler"
 	"elevator/timer"
 	"time"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -23,11 +22,11 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 		fsm.ResumeAtLatestCheckpoint(floor)
 	}
 
-	drv_buttons := make(chan elevio.ButtonEvent)
-	drv_floors := make(chan int)
-	drv_obstr := make(chan bool)
-	drv_stop := make(chan bool)
-	drv_motorActivity := make(chan bool)
+	drv_buttons 		:= make(chan elevio.ButtonEvent)
+	drv_floors 			:= make(chan int)
+	drv_obstr 			:= make(chan bool)
+	drv_stop 			:= make(chan bool)
+	drv_motorActivity 	:= make(chan bool)
 
 	go elevio.PollButtons(drv_buttons)
 	go elevio.PollFloorSensor(drv_floors)
@@ -61,7 +60,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			logrus.Debug("Button press detected: ", btnEvent)
 			fsm.UpdateElevatorState(elevatorName)
 			fsm.HandleButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName)
-			if fsm.IsOnlyNodeOnline(elevatorName) {
+			if statehandler.IsOnlyNodeOnline(elevatorName) {
 				fsm.AssignOrders(elevatorName)
 			}
 			fsm.MoveOnActiveOrders(elevatorName)
@@ -71,7 +70,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			logrus.Debug("Floor sensor triggered: ", floor)
 			fsm.FloorArrival(floor, elevatorName)
 			fsm.UpdateElevatorState(elevatorName)
-			if fsm.IsOnlyNodeOnline(elevatorName) {
+			if statehandler.IsOnlyNodeOnline(elevatorName) {
 				fsm.AssignOrders(elevatorName)
 			}
 			if obst {

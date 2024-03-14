@@ -18,10 +18,10 @@ const interval = 10 * time.Millisecond
 const timeout = 3000 * time.Millisecond
 
 func Sender(port int, id string, enableTransmit <-chan bool) {
-	conn := conn.DialBroadcastUDP(port)
+	conn 	:= conn.DialBroadcastUDP(port)
 	addr, _ := net.ResolveUDPAddr("udp", fmt.Sprintf("255.255.255.255:%d", port))
+	enable 	:= true
 
-	enable := true
 	for {
 		select {
 		case enable = <-enableTransmit:

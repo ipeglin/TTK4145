@@ -38,7 +38,7 @@ func SetAllLights() {
 
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		outputDevice.RequestButtonLight(floor, elevio.BCab, elevator.Requests[floor][elevio.BCab])
-		if isOffline || IsOnlyNodeOnline(nodeIP) {
+		if isOffline || statehandler.IsOnlyNodeOnline(nodeIP) {
 			for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
 				outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
 			}
@@ -155,12 +155,12 @@ func CreateLocalStateFile(elevatorName string) {
 }
 
 func UpdateElevatorState(elevatorName string) {
-	statehandler.UpdateJSON(elevator, elevatorName)
+	statehandler.UpdateState(elevator, elevatorName)
 	checkpoint.SetCheckpoint(elevator)
 }
 
 func HandleStateOnReboot(elevatorName string) {
-	statehandler.UpdateJSONOnReboot(elevator, elevatorName)
+	statehandler.UpdateStateOnReboot(elevator, elevatorName)
 	checkpoint.SetCheckpoint(elevator)
 }
 
@@ -218,13 +218,12 @@ func AssignIfWorldViewsAlign(localElevatorName string, externalState statehandle
 	}
 }
 
-
 func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string) {
 	// TODO: Extract the conditions into variables with more informative names
 	if requests.ShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
 		timer.Start(elevator.Config.DoorOpenDurationS)
 	} else {
-		statehandler.UpdateJSONOnNewOrder(elevatorName, btnFloor, btn)
+		statehandler.UpdateStateOnNewOrder(elevatorName, btnFloor, btn)
 
 		if btn == elevio.BCab {
 			elevator.Requests[btnFloor][btn] = true
@@ -250,14 +249,4 @@ func MoveOnActiveOrders(elevatorName string) {
 	SetAllLights()
 }
 
-
 // Todo:: functions below dont need to be in fsm?
-func IsOnlyNodeOnline(localElevatorName string) bool {
-	currentState, _ := statehandler.LoadState()
-	if len(currentState.HRAInput.States) == 1 {
-		if _, exists := currentState.HRAInput.States[localElevatorName]; exists {
-			return true
-		}
-	}
-	return false
-}

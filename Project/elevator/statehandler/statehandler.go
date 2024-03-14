@@ -33,11 +33,10 @@ func init() {
 func InitialiseState(e elev.Elevator, elevatorName string) ElevatorState {
 	return ElevatorState{
 		HRAInput: hra.InitialiseHRAInput(e, elevatorName),
-		Counter:  counter.InitialiseCounter(elevatorName),
+		Counter : counter.InitialiseCounter(elevatorName),
 	}
 }
 
-// SaveState serialiserer state til JSON og lagrer det i en fil.
 func SaveState(state ElevatorState) error {
 	data, err := json.MarshalIndent(state, "", "  ")
 	if err != nil {
@@ -48,7 +47,6 @@ func SaveState(state ElevatorState) error {
 	return nil
 }
 
-// LoadState deserialiserer state fra en JSON-fil.
 func LoadState() (ElevatorState, error) {
 	var state ElevatorState
 
@@ -66,23 +64,23 @@ func LoadState() (ElevatorState, error) {
 	return state, nil
 }
 
-func UpdateJSON(e elev.Elevator, elevatorName string) {
+func UpdateState(e elev.Elevator, elevatorName string) {
 	state, _ := LoadState()
 	if _, exists := state.HRAInput.States[elevatorName]; exists {
-		state.HRAInput = hra.UpdateHRAInput(state.HRAInput, e, elevatorName)
-		state.Counter = counter.IncrementOnInput(state.Counter, elevatorName)
+		state.HRAInput 	= hra.UpdateHRAInput(state.HRAInput, e, elevatorName)
+		state.Counter 	= counter.IncrementOnInput(state.Counter, elevatorName)
 	}
 	SaveState(state)
 }
 
-func UpdateJSONOnReboot(e elev.Elevator, elevatorName string) {
-	state, _ := LoadState()
-	state.HRAInput = hra.RebootHRAInput(state.HRAInput, e, elevatorName)
-	state.Counter = counter.IncrementOnInput(state.Counter, elevatorName)
+func UpdateStateOnReboot(e elev.Elevator, elevatorName string) {
+	state, _ 	   := LoadState()
+	state.HRAInput 	= hra.RebootHRAInput(state.HRAInput, e, elevatorName)
+	state.Counter	= counter.IncrementOnInput(state.Counter, elevatorName)
 	SaveState(state)
 }
 
-func UpdateJSONOnCompletedHallOrder(e elev.Elevator, elevatorName string, btn_floor int, btn_type elevio.Button) {
+func UpdateStateOnCompletedHallOrder(e elev.Elevator, elevatorName string, btn_floor int, btn_type elevio.Button) {
 	state, _ := LoadState()
 	if _, exists := state.HRAInput.States[elevatorName]; exists {
 		state.HRAInput = hra.UpdateHRAInputOnCompletedOrder(state.HRAInput, e, elevatorName, btn_floor, btn_type)
@@ -91,7 +89,7 @@ func UpdateJSONOnCompletedHallOrder(e elev.Elevator, elevatorName string, btn_fl
 	SaveState(state)
 }
 
-func UpdateJSONOnNewOrder(elevatorName string, btnFloor int, btn elevio.Button) {
+func UpdateStateOnNewOrder(elevatorName string, btnFloor int, btn elevio.Button) {
 	state, _ := LoadState()
 	if _, exists := state.HRAInput.States[elevatorName]; exists {
 		state.Counter = counter.UpdateOnNewOrder(state.Counter, state.HRAInput, elevatorName, btnFloor, btn)
@@ -127,12 +125,12 @@ func RemoveElevatorsFromJSON(elevatorIDs []string) error {
 	return nil
 }
 
-func HandleIncomingJSON(localElevatorName string, externalState ElevatorState, incomingElevatorName string) {
+func HandleIncomingSate(localElevatorName string, externalState ElevatorState, incomingElevatorName string) {
 	localState, _ := LoadState()
 	mergeWithIncomingHallRequests(localState, externalState)
 	if _, exists := externalState.HRAInput.States[incomingElevatorName]; exists {
 		mergeWithIncomigStates(localState, localElevatorName, externalState, incomingElevatorName)
-	}else {
+	} else {
 		RemoveElevatorsFromJSON([]string{incomingElevatorName})
 	}
 }
@@ -141,7 +139,7 @@ func mergeWithIncomingHallRequests(localState ElevatorState, externalState Eleva
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
 			if externalState.Counter.HallRequests[f][i] > localState.Counter.HallRequests[f][i] {
-				localState.Counter.HallRequests[f][i] = externalState.Counter.HallRequests[f][i]
+				localState.Counter.HallRequests[f][i]  = externalState.Counter.HallRequests[f][i]
 				localState.HRAInput.HallRequests[f][i] = externalState.HRAInput.HallRequests[f][i]
 			}
 			if externalState.Counter.HallRequests[f][i] == localState.Counter.HallRequests[f][i] {
@@ -151,20 +149,33 @@ func mergeWithIncomingHallRequests(localState ElevatorState, externalState Eleva
 			}
 		}
 	}
-	SaveState(localState) 
+	SaveState(localState)
 }
 
-func mergeWithIncomigStates(localState ElevatorState, localElevatorName string, externalState ElevatorState, incomingElevatorName string){
+func mergeWithIncomigStates(localState ElevatorState, localElevatorName string, externalState ElevatorState, incomingElevatorName string) {
 	localState.HRAInput.States[incomingElevatorName] = externalState.HRAInput.States[incomingElevatorName]
-	localState.Counter.States[incomingElevatorName] = externalState.Counter.States[incomingElevatorName]
+	localState.Counter.States[incomingElevatorName]  = externalState.Counter.States[incomingElevatorName]
 
 	if externalState.Counter.States[localElevatorName] > localState.Counter.States[localElevatorName] {
 		localState.Counter.States[localElevatorName] = externalState.Counter.States[localElevatorName] + 1
 	}
-	SaveState(localState) 
+	SaveState(localState)
+}
+
+func IsOnlyNodeOnline(localElevatorName string) bool {
+	currentState, _ := LoadState()
+	if len(currentState.HRAInput.States) == 1 {
+		if _, exists := currentState.HRAInput.States[localElevatorName]; exists {
+			return true
+		}
+	}
+	return false
 }
 
 // TODO: Gustav shceck if this is neccesary
+//Checked, we dont, but is it harmfull?
+//it makes our code more robust, but if we feel we dont need?
+/*
 func IsStateCorrupted(state ElevatorState) bool {
 	input := state.HRAInput
 
@@ -202,3 +213,4 @@ func isValidDirection(direction string) bool {
 		return false
 	}
 }
+*/

@@ -30,7 +30,6 @@ func initNode(isFirstProcess bool) {
 
 	// await ip from network module
 	localIP := <-ipChannel
-
 	go elevator.Init(localIP, isFirstProcess)
 
 	// broadcast state
@@ -60,7 +59,7 @@ func initNode(isFirstProcess bool) {
 			logrus.Debug("Removing lost IPs: ", lostNodeAddresses)
 
 			statehandler.RemoveElevatorsFromJSON(lostNodeAddresses)
-			if fsm.IsOnlyNodeOnline(localIP) {
+			if statehandler.IsOnlyNodeOnline(localIP) {
 				fsm.AssignOrders(localIP)
 				fsm.SetConfirmedHallLights(localIP)
 				fsm.MoveOnActiveOrders(localIP)
@@ -71,7 +70,7 @@ func initNode(isFirstProcess bool) {
 		case msg := <-messageReceiveChannel:
 			logrus.Debug("Received message from ", msg.SenderId)
 			//if !statehandler.IsStateCorrupted(msg.Payload) {
-			statehandler.HandleIncomingJSON(localIP, msg.Payload, msg.SenderId)
+			statehandler.HandleIncomingSate(localIP, msg.Payload, msg.SenderId)
 			fsm.AssignIfWorldViewsAlign(localIP, msg.Payload)
 			fsm.MoveOnActiveOrders(localIP)
 			fsm.UpdateElevatorState(localIP)
@@ -89,7 +88,7 @@ func initNode(isFirstProcess bool) {
 
 }
 
-//Todo: ! Kan vi omdøpe over yil å bli main og calle diise func i main
+//Todo: ! Kan vi omdøpe over til å bli main og calle diise func i main
 
 func main() {
 	var entryPointFunction func(bool) = initNode

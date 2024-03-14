@@ -17,6 +17,8 @@ type HRAInput struct {
 	States       map[string]HRAElevState `json:"states"`
 }
 
+
+
 func InitialiseHRAInput(e elev.Elevator, elevatorName string) HRAInput {
 	hraInput := HRAInput{
 		HallRequests: make([][2]bool, elevio.NFloors),
