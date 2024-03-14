@@ -23,11 +23,11 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 		fsm.ResumeAtLatestCheckpoint(floor)
 	}
 
-	drv_buttons := make(chan elevio.ButtonEvent)
-	drv_floors := make(chan int)
-	drv_obstr := make(chan bool)
-	drv_stop := make(chan bool)
-	drv_motorActivity := make(chan bool)
+	drv_buttons 		:= make(chan elevio.ButtonEvent)
+	drv_floors 			:= make(chan int)
+	drv_obstr 			:= make(chan bool)
+	drv_stop 			:= make(chan bool)
+	drv_motorActivity 	:= make(chan bool)
 
 	go elevio.PollButtons(drv_buttons)
 	go elevio.PollFloorSensor(drv_floors)
@@ -54,14 +54,9 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			if !motorActive {
 				// BUG: THis occurs very late
 				jsonhandler.RemoveElevatorsFromJSON([]string{elevatorName})
-				//we need to remove the request// clear them if we dont want to comlete orders twice.
-				//it is up to uss and we have functionality to do so
 			} else {
 				fsm.HandleStateOnReboot(elevatorName)
-				//lurer på om vi må ha en movebutton her men idk
-
-				//fsm.MoveOnActiveOrders(elevatorStateFile, elevatorName)
-				//fsm.AssignOrders(elevatorStateFile, elevatorName)
+				fsm.MoveOnActiveOrders(elevatorName)
 			}
 
 		case btnEvent := <-drv_buttons:

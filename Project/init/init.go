@@ -11,19 +11,19 @@ import (
 	"processpair"
 	"strings"
 	"time"
-
 	"github.com/sirupsen/logrus"
 )
 
+//Todo ! : Ikke kall init node kanskje?
 func initNode(isFirstProcess bool) {
 	logger.Setup()
 	logrus.Info("Node initialised with PID:", os.Getpid())
 
-	nodeOverviewChannel := make(chan nodes.NetworkNodeRegistry)
-	messageReceiveChannel := make(chan network.Message)
-	messageTransmitterChannel := make(chan network.Message)
-	onlineStatusChannel := make(chan bool)
-	ipChannel := make(chan string)
+	nodeOverviewChannel 		:= make(chan nodes.NetworkNodeRegistry)
+	messageReceiveChannel 		:= make(chan network.Message)
+	messageTransmitterChannel 	:= make(chan network.Message)
+	onlineStatusChannel 		:= make(chan bool)
+	ipChannel 					:= make(chan string)
 
 	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel, ipChannel)
 
@@ -42,13 +42,9 @@ func initNode(isFirstProcess bool) {
 		}
 	}()
 
-	// handle incoming messages
 	for {
 		select {
 		case reg := <-nodeOverviewChannel:
-			//hvis du går fra å være offline til online legges du ikke til.
-			// må fikses
-
 			logrus.Info("Known nodes:", reg.Nodes)
 			if len(reg.Lost) > 0 {
 				logrus.Warn("Lost nodes:", reg.Lost)
@@ -63,10 +59,6 @@ func initNode(isFirstProcess bool) {
 			logrus.Debug("Removing lost IPs: ", lostNodeAddresses)
 
 			jsonhandler.RemoveElevatorsFromJSON(lostNodeAddresses)
-			//denne iffen er vi sensetive for med pakketap. er det en måte å garatere at noder har vært offline lenge?
-			//tror jeg fiksa feilen vår. Tror feilen oppstod i cas eonline, men er ikke sikker.
-			//kan noen av dere som vet bedre om pakketap fra andre heiser får oss til å tro de er offline ?
-			//vis ikke har jeg fikset feilen tror jeg
 			if fsm.OnlyElevatorOnline(localIP) {
 				fsm.AssignOrders(localIP)
 				fsm.SetConfirmedHallLights(localIP)
@@ -75,34 +67,19 @@ func initNode(isFirstProcess bool) {
 
 			}
 
-			//skal vi reasigne her? nei?
-			//dersom vi ikke og den er enset igjen online så vil den ta alle den har blitt assignet (kan være mer enn en og fuløre dem)
-			//fsm.AssignOrders(, localIP)
-			//fsm.MoveOnActiveOrders(, localIP)
-
 		case msg := <-messageReceiveChannel:
-			// TODO: handle incoming messages
-			logrus.Debug("Received message from ", msg.SenderId)
-
-			incomingState := msg.Payload
-			// TODO: Reassign orders
-
-			// update and remove list nodes
-			if !jsonhandler.IsStateCorrupted(incomingState) {
+			logrus.Debug("Received message from ", msg.SenderId) 
+			if !jsonhandler.IsStateCorrupted(msg.Payload) {
 				fsm.HandleIncomingJSON(localIP, msg.Payload, msg.SenderId)
 				fsm.AssignIfWorldViewsAlign(localIP, msg.Payload)
 				fsm.MoveOnActiveOrders(localIP)
 				fsm.UpdateElevatorState(localIP)
-
-				//fsm.HandleIncomingJSON(, incomingState, msg.SenderId)
-				//checkpoint.SetConfirmedHallLights(, msg.SenderId)
-				//fsm.AssignOrders(, localIP)
 				// ! Only have one version
 			}
 
 		case online := <-onlineStatusChannel:
 			if online {
-				fsm.HandleStateOnReboot(localIP) // Deprecated: fsm.RebootJSON()
+				fsm.HandleStateOnReboot(localIP) 
 			} else {
 				fsm.SetAllLights()
 				fsm.MoveOnActiveOrders(localIP)
@@ -112,6 +89,8 @@ func initNode(isFirstProcess bool) {
 	}
 
 }
+
+//Todo: ! Kan vi omdøpe over yil å bli main og calle diise func i main 
 
 func main() {
 	var entryPointFunction func(bool) = initNode

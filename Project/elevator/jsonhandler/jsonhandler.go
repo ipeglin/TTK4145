@@ -9,7 +9,7 @@ import (
 	"filehandler"
 	"fmt"
 	"network/local"
-	"os/exec"
+	
 
 	"github.com/sirupsen/logrus"
 )
@@ -76,7 +76,6 @@ func UpdateJSON(e elev.Elevator, elevatorName string) {
 	SaveState(state)
 }
 
-// This was RebootJSON
 func UpdateJSONOnReboot(e elev.Elevator, elevatorName string) {
 	state, _ := LoadState()
 	state.HRAInput = hra.RebootHRAInput(state.HRAInput, e, elevatorName)
@@ -95,8 +94,6 @@ func UpdateJSONOnCompletedHallOrder(e elev.Elevator, elevatorName string, btn_fl
 
 func UpdateJSONOnNewOrder(elevatorName string, btnFloor int, btn elevio.Button) {
 	state, _ := LoadState()
-	//ønsker vi ikke legge til nye ordere/ ta ordere mens vi er offline?
-	//hvis vi øssker, fjern denne if setningen.
 	if _, exists := state.HRAInput.States[elevatorName]; exists {
 		state.Counter = counter.UpdateOnNewOrder(state.Counter, state.HRAInput, elevatorName, btnFloor, btn)
 		state.HRAInput = hra.UpdateHRAInputOnNewOrder(state.HRAInput, elevatorName, btnFloor, btn)
@@ -104,15 +101,14 @@ func UpdateJSONOnNewOrder(elevatorName string, btnFloor int, btn elevio.Button) 
 	SaveState(state)
 }
 
-// TODO : mener denne kan bare bli en fsm func
+//flyttet denne til fsm. 
+/*
 func JSONOrderAssigner(e *elev.Elevator, elevatorName string) {
 	state, err := LoadState()
 	if err != nil {
 		fmt.Printf("Failed to load combined input: %v\n", err)
 		return
 	}
-
-	// Check if HRAInput.States is not empty
 	if len(state.HRAInput.States) > 0 {
 		jsonBytes, err := json.Marshal(state.HRAInput)
 		if err != nil {
@@ -126,7 +122,7 @@ func JSONOrderAssigner(e *elev.Elevator, elevatorName string) {
 			return
 		}
 
-		output := make(map[string][][2]bool) // Changed from using new to make for clarity
+		output := make(map[string][][2]bool)
 		if err := json.Unmarshal(ret, &output); err != nil {
 			fmt.Printf("json.Unmarshal error: %v\n", err)
 			return
@@ -134,7 +130,7 @@ func JSONOrderAssigner(e *elev.Elevator, elevatorName string) {
 
 		for floor := 0; floor < elevio.NFloors; floor++ {
 			if orders, ok := output[elevatorName]; ok && floor < len(orders) {
-				e.Requests[floor][elevio.BHallUp] = orders[floor][0]
+				e.Requests[floor][elevio.BHallUp] 	= orders[floor][0]
 				e.Requests[floor][elevio.BHallDown] = orders[floor][1]
 			}
 		}
@@ -142,7 +138,7 @@ func JSONOrderAssigner(e *elev.Elevator, elevatorName string) {
 		logrus.Debug("HRAInput.States is empty, skipping order assignment")
 	}
 }
-
+*/
 func RemoveElevatorsFromJSON(elevatorIDs []string) error {
 	state, err := LoadState()
 	if err != nil {
@@ -155,7 +151,6 @@ func RemoveElevatorsFromJSON(elevatorIDs []string) error {
 		inactiveElevatorsMap[id] = struct{}{}
 	}
 
-	// Iterate through the States in HRAInput and remove inactive elevators
 	for id := range state.HRAInput.States {
 		if _, exists := inactiveElevatorsMap[id]; exists {
 			delete(state.HRAInput.States, id)

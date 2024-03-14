@@ -10,7 +10,8 @@ import (
 	"network/local"
 	"os"
 	"time"
-
+	"os/exec"
+	"encoding/json"
 	"github.com/sirupsen/logrus"
 )
 
@@ -162,8 +163,44 @@ func HandleStateOnReboot(elevatorName string) {
 
 // gir det mening å ha slike oneliners? eller burde vi flytte inn JsonOrderAssignerKoden her?
 func AssignOrders(elevatorName string) {
-	jsonhandler.JSONOrderAssigner(&elevator, elevatorName)
+    // Load state
+    state, err := jsonhandler.LoadState()
+    if err != nil {
+        logrus.Debugf("Failed to load combined input: %v\n", err)
+        return
+    }
+
+    if len(state.HRAInput.States) == 0 {
+        logrus.Debug("HRAInput.States is empty, skipping order assignment")
+        return
+    }
+
+    jsonBytes, err := json.Marshal(state.HRAInput)
+    if err != nil {
+        logrus.Debugf("Failed to marshal HRAInput: %v\n", err)
+        return
+    }
+
+    ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
+    if err != nil {
+        logrus.Debugf("exec.Command error: %v\nOutput: %s\n", err, string(ret))
+        return
+    }
+
+    output := make(map[string][][2]bool)
+    if err := json.Unmarshal(ret, &output); err != nil {
+        logrus.Debugf("json.Unmarshal error: %v\n", err)
+        return
+    }
+
+    for floor := 0; floor < elevio.NFloors; floor++ {
+        if orders, ok := output[elevatorName]; ok && floor < len(orders) {
+            elevator.Requests[floor][elevio.BHallUp]   = orders[floor][0]
+            elevator.Requests[floor][elevio.BHallDown] = orders[floor][1]
+        }
+    }
 }
+
 
 func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string) {
 	// TODO: Extract the conditions into variables with more informative names
@@ -209,9 +246,6 @@ func HandleIncomingJSON(localElevatorName string, externalState jsonhandler.Elev
 			}
 			if externalState.Counter.HallRequests[f][i] == localState.Counter.HallRequests[f][i] {
 				if localState.HRAInput.HallRequests[f][i] != externalState.HRAInput.HallRequests[f][i] {
-					//midliertilig konflikt logikk dersom den ene er true og den andre er false
-					//oppstår ved motostop og bostruksjoner etc dersom den har selv claimet en orde som blir utført ila den har motorstop
-					//Tenk om dette er beste løsning
 					localState.HRAInput.HallRequests[f][i] = false
 				}
 			}
@@ -242,7 +276,9 @@ func HandleIncomingJSON(localElevatorName string, externalState jsonhandler.Elev
 }
 
 // TODO: Should this go somewehre else?
-func worldViewsAlign(localState jsonhandler.ElevatorState, externalState jsonhandler.ElevatorState) bool {
+/*
+func worldViewsAlign(externalState jsonhandler.ElevatorState) bool {
+	localState, _ := jsonhandler.LoadState()
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
 			if externalState.Counter.HallRequests[f][i] != localState.Counter.HallRequests[f][i] {
@@ -252,15 +288,26 @@ func worldViewsAlign(localState jsonhandler.ElevatorState, externalState jsonhan
 	}
 	return true
 }
-
+*/
+//kombinerte med func over 
+//er det greit jeg setter lys her? 
 func AssignIfWorldViewsAlign(localElevatorName string, externalState jsonhandler.ElevatorState) {
 	localState, _ := jsonhandler.LoadState()
-
-	if worldViewsAlign(localState, externalState) {
-		jsonhandler.JSONOrderAssigner(&elevator, localElevatorName)
+	WView := true
+	for f := 0; f < elevio.NFloors; f++ {
+		for i := 0; i < 2; i++ {
+			if externalState.Counter.HallRequests[f][i] != localState.Counter.HallRequests[f][i] {
+				WView = false
+			}
+		}
+	}
+	if WView {
+		AssignOrders(localElevatorName)
 		SetConfirmedHallLights(localElevatorName)
 	}
 }
+
+
 
 // TODO: Maybe IsOnlyNodeOnline() and these functions below dont need to be in fsm?
 func OnlyElevatorOnline(localElevatorName string) bool {
