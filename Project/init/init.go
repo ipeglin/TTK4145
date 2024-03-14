@@ -5,7 +5,7 @@ import (
 	"elevator/fsm"
 	"elevator/statehandler"
 	"logger"
-	"network"
+	"messagehandler"
 	"network/nodes"
 	"os"
 	"processpair"
@@ -21,12 +21,12 @@ func initNode(isFirstProcess bool) {
 	logrus.Info("Node initialised with PID:", os.Getpid())
 
 	nodeOverviewChannel := make(chan nodes.NetworkNodeRegistry)
-	messageReceiveChannel := make(chan network.Message)
-	messageTransmitterChannel := make(chan network.Message)
+	messageReceiveChannel := make(chan messagehandler.Message)
+	messageTransmitterChannel := make(chan messagehandler.Message)
 	onlineStatusChannel := make(chan bool)
 	ipChannel := make(chan string)
 
-	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel, ipChannel)
+	go messagehandler.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel, ipChannel)
 
 	// await ip from network module
 	localIP := <-ipChannel
@@ -37,7 +37,7 @@ func initNode(isFirstProcess bool) {
 		for {
 			// TODO: If invalid json, do not broadcast, so ther nodes will think it is offline
 			elv, _ := statehandler.LoadState()
-			messageTransmitterChannel <- network.Message{Payload: elv}
+			messageTransmitterChannel <- messagehandler.Message{Payload: elv}
 			time.Sleep(500 * time.Millisecond)
 		}
 	}()
