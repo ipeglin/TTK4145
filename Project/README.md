@@ -9,7 +9,7 @@
 
 ### Pre-requisites
 * [Go](https://go.dev/dl/) (v1.21.7 or higher)
-* Installing [Hall Request Assigner (HRA)](https://dlang.org/download.html) by [@klasbo](https://github.com/klasbo)
+* [Hall Request Assigner (HRA)](https://github.com/TTK4145/Project-resources/releases/download/v1.1.1/hall_request_assigner) (v1.1.1) by [@klasbo](https://github.com/klasbo)
 
 ### Installation
 
