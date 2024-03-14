@@ -11,17 +11,19 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const bufferSize = 1024
+const bufferSize = 4 * 1024
 
 // Encodes received values from `chans` into type-tagged JSON, then broadcasts
 // it on `port`
 func Sender(port int, chans ...interface{}) {
 	checkArgs(chans...)
-	typeNames := make([]string, len(chans))
+	typeNames 	:= make([]string, len(chans))
 	selectCases := make([]reflect.SelectCase, len(typeNames))
+
+
 	for i, ch := range chans {
 		selectCases[i] = reflect.SelectCase{
-			Dir:  reflect.SelectRecv,
+			Dir	:  reflect.SelectRecv,
 			Chan: reflect.ValueOf(ch),
 		}
 		typeNames[i] = reflect.TypeOf(ch).Elem().String()
@@ -31,8 +33,8 @@ func Sender(port int, chans ...interface{}) {
 	addr, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("255.255.255.255:%d", port))
 	for {
 		chosen, value, _ := reflect.Select(selectCases)
-		jsonstr, _ := json.Marshal(value.Interface())
-		ttj, _ := json.Marshal(typeTaggedJSON{
+		jsonstr, _ 	:= json.Marshal(value.Interface())
+		ttj, _ 		:= json.Marshal(typeTaggedJSON{
 			TypeId: typeNames[chosen],
 			JSON:   jsonstr,
 		})
@@ -52,6 +54,7 @@ func Sender(port int, chans ...interface{}) {
 func Receiver(ownIp string, port int, chans ...interface{}) {
 	checkArgs(chans...)
 	chansMap := make(map[string]interface{})
+	
 	for _, ch := range chans {
 		chansMap[reflect.TypeOf(ch).Elem().String()] = ch
 	}
@@ -59,7 +62,7 @@ func Receiver(ownIp string, port int, chans ...interface{}) {
 	var buf [bufferSize]byte
 	conn := conn.DialBroadcastUDP(port)
 	for {
-		n, addr, e := conn.ReadFrom(buf[0:])
+		n, addr, e 	:= conn.ReadFrom(buf[0:])
 		if e != nil {
 			fmt.Printf("bcast.Receiver(%d, ...):ReadFrom() failed: \"%+v\"\n", port, e)
 		}

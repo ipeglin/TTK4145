@@ -28,7 +28,6 @@ type ButtonEvent struct {
 	Button Button
 }
 
-// ElevInputDevice defines the interface for elevator input devices.
 type ElevInputDevice struct {
 	FloorSensor   func() int
 	RequestButton func(f int, btn Button) bool
@@ -36,7 +35,6 @@ type ElevInputDevice struct {
 	Obstruction   func() bool
 }
 
-// ElevOutputDevice defines the interface for elevator output devices.
 type ElevOutputDevice struct {
 	FloorIndicator     func(f int)
 	RequestButton      func(f int, btn Button) bool

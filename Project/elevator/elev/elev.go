@@ -1,7 +1,6 @@
 package elev
 
 import (
-	"elevator/driver/hwelevio"
 	"elevator/elevio"
 	"fmt"
 )
@@ -24,16 +23,16 @@ func ElevatorPrint(e Elevator) {
 			"  |dirn  = %-12s|\n"+
 			"  |behav = %-12s|\n",
 		e.CurrentFloor,
-		elevio.ElevDirToString(e.Dirn), // Assuming this function exists
-		ebToString(e.CurrentBehaviour), // You'll need to implement or assume this function
+		elevio.ElevDirToString(e.Dirn),
+		EBToString(e.CurrentBehaviour),
 	)
 	fmt.Println("  +--------------------+")
 	fmt.Println("  |  | up  | dn  | cab |")
 	for f := elevio.NFloors - 1; f >= 0; f-- {
 		fmt.Printf("  | %d", f)
-		for btn := hwelevio.BHallUp; btn <= hwelevio.BCab; btn++ {
-			if (f == elevio.NFloors-1 && btn == hwelevio.BHallUp) ||
-				(f == 0 && btn == hwelevio.BHallDown) {
+		for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
+			if (f == elevio.NFloors-1 && btn == elevio.BHallUp) ||
+				(f == 0 && btn == elevio.BHallDown) {
 				fmt.Print("|     ")
 			} else {
 				if e.Requests[f][btn] {
@@ -48,8 +47,7 @@ func ElevatorPrint(e Elevator) {
 	fmt.Println("  +--------------------+")
 }
 
-// Assuming ebToString function exists or is defined similar to:
-func ebToString(behaviour ElevatorBehaviour) string {
+func EBToString(behaviour ElevatorBehaviour) string {
 	switch behaviour {
 	case EBIdle:
 		return "idle"

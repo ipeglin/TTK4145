@@ -1,7 +1,7 @@
 package network
 
 import (
-	"elevator/checkpoint"
+	"elevator/statehandler"
 	"fmt"
 	"network/broadcast"
 	"network/checksum"
@@ -18,14 +18,14 @@ const messagePort int = lifelinePort + 1
 
 type Message struct {
 	SenderId string // IPv4
-	Payload  checkpoint.CombinedInput
+	Payload  statehandler.ElevatorState
 	Checksum string
 }
 
 func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan Message, responseChannel chan<- Message, onlineStatusChannel chan<- bool, ipChannel chan<- string) {
 	nodeIP, err := local.GetIP()
 	if err != nil {
-		logrus.Warn("ERROR: Unable to get the IP address")
+		logrus.Debug("Unable to get the IP address")
 	}
 
 	ipChannel <- nodeIP // pass the IP address to main process
@@ -69,7 +69,7 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 				logrus.Error("Checksum generation failed:", err)
 				continue
 			}
-			logrus.Warn("Recieved checksum: ", msg.Checksum, "\nComputed checksum: ", sum)
+			logrus.Debug("Checksum match: ", msg.Checksum == sum)
 
 			// drop incorrect payload
 			if msg.Checksum != sum {

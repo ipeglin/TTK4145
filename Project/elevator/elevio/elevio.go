@@ -1,31 +1,31 @@
 package elevio
 
 import (
-	"elevator/driver/hwelevio"
+	"elevator/elevio/driver/hwelevio"
 	"elevator/timer"
-	"fmt"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 var InputDevice ElevInputDevice
 
 func init() {
-	hwelevio.Init(Addr, NFloors)
+	hwelevio.Init(Addr)
 	InputDevice = ElevioGetInputDevice()
 }
 
-// Liker ikke dene løsningen
 func castElevDirToMotorDirection(d ElevDir) hwelevio.HWMotorDirection {
 	switch d {
 	case DirDown:
-		return hwelevio.MD_Down
+		return hwelevio.MDDown
 	case DirUp:
-		return hwelevio.MD_Up
+		return hwelevio.MDUp
 	case DirStop:
-		return hwelevio.MD_Stop
+		return hwelevio.MDStop
 	default:
-		fmt.Printf("Noe har gått feil i CastMotorDirection")
-		return hwelevio.MD_Down //HELT FEIL MÅ FIKSES
+		logrus.Error("Something went wrong!")
+		return hwelevio.MDDown
 	}
 }
 
@@ -38,19 +38,16 @@ func castButtonToHWButtonType(btn Button) hwelevio.HWButtonType {
 	case BCab:
 		return hwelevio.BCab
 	default:
-		fmt.Print("Noe har gptt feil i castButtonToHWButtonType ")
-		return hwelevio.BHallUp //Hvordan løse dette?
+		logrus.Error("Something went wrong!")
+		return hwelevio.BHallUp
 	}
 }
 
-// New name?
 func RequestButton(f int, btn Button) bool {
-	// Implementation using the actual hardware library.
 	return hwelevio.GetButton(castButtonToHWButtonType(btn), f)
 }
 
 func RequestButtonLight(f int, btn Button, v bool) {
-	// Implementation using the actual hardware library.
 	hwelevio.SetButtonLamp(castButtonToHWButtonType(btn), f, v)
 }
 
@@ -79,8 +76,6 @@ func RequestStop() bool {
 }
 
 func MotorDirection(d ElevDir) {
-	// Implementation using the actual hardware library.
-	//fmt.Println("Motordirection to be sat: ", ElevDirToString(d))
 	hwelevio.SetMotorDirection(castElevDirToMotorDirection(d))
 }
 
@@ -103,25 +98,12 @@ func ElevioGetOutputDevice() ElevOutputDevice {
 	}
 }
 
-func ElevDirToString(d ElevDir) string {
-	switch d {
-	case DirDown:
-		return "down"
-	case DirStop:
-		return "stop"
-	case DirUp:
-		return "up"
-	default:
-		return "DirUnknown"
-	}
-}
-
 func PollButtons(receiver chan<- ButtonEvent) {
 	prev := make([][3]bool, NFloors)
 	for {
 		time.Sleep(hwelevio.PollRate)
 		for f := 0; f < NFloors; f++ {
-			for b := Button(0); b < 3; b++ {
+			for b := BHallUp; b <= BCab; b++ {
 				v := hwelevio.GetButton(castButtonToHWButtonType(b), f)
 				if v != prev[f][b] && v {
 					receiver <- ButtonEvent{f, Button(b)}
@@ -170,18 +152,18 @@ func PollObstructionSwitch(receiver chan<- bool) {
 
 func MontitorMotorActivity(receiver chan<- bool, duration float64) {
 	timerActive := true
-	timerEndTimer := timer.GetWallTime() + duration
+	timerEndTimer := timer.GetCurrentTimeAsFloat() + duration
 	for {
 		time.Sleep(hwelevio.PollRate)
 		v := RequestFloor()
 		if v != -1 {
-			timerEndTimer = timer.GetWallTime() + duration
+			timerEndTimer = timer.GetCurrentTimeAsFloat() + duration
 			if !timerActive {
 				timerActive = true
 				receiver <- true
 			}
 		} else {
-			if timer.GetWallTime() > timerEndTimer {
+			if timer.GetCurrentTimeAsFloat() > timerEndTimer {
 				if timerActive {
 					timerActive = false
 					receiver <- false
@@ -201,5 +183,18 @@ func ButtonToString(b Button) string {
 		return "BCab"
 	default:
 		return "Button Unknown"
+	}
+}
+
+func ElevDirToString(d ElevDir) string {
+	switch d {
+	case DirDown:
+		return "down"
+	case DirStop:
+		return "stop"
+	case DirUp:
+		return "up"
+	default:
+		return "DirUnknown"
 	}
 }

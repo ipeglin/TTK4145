@@ -1,50 +1,56 @@
 package fsm
 
+//Burde denne filen hetet elevator.go og nåværende elevator.go omdøpes til fsm elns?
 import (
 	"elevator/checkpoint"
 	"elevator/elev"
 	"elevator/elevio"
 	"elevator/requests"
+	"elevator/statehandler"
 	"elevator/timer"
-	"fmt"
+	"encoding/json"
 	"network/local"
 	"os"
+	"os/exec"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
 var elevator elev.Elevator
 var outputDevice elevio.ElevOutputDevice
-var elevatorName string
-var localStateFile string
+var nodeIP string
 
 func init() {
 	elevator = elev.ElevatorInit()
-	elevatorName, _ = local.GetIP()
+	nodeIP, _ = local.GetIP()
 	outputDevice = elevio.ElevioGetOutputDevice()
 
-	localStateFile = elevatorName + ".json"
-
-	//Burde dette gå et annet sted?
-	setAllLights()
+	// ? Should this be moved
+	SetAllLights()
 	elevio.RequestDoorOpenLamp(false)
 	elevio.RequestStopLamp(false)
 }
 
-// BUG: Init and SetElevator crashes when using process pairs
-func SetElevator(f int, cb elev.ElevatorBehaviour, dirn elevio.ElevDir, r [elevio.NFloors][elevio.NButtons]bool, c elev.ElevatorConfig) {
-	elevator.CurrentFloor = f
-	elevator.CurrentBehaviour = cb
-	elevator.Dirn = dirn
-	elevator.Requests = r
-	elevator.Config = c
+func SetAllLights() {
+	currentState, _ := statehandler.LoadState()
+	isOffline := (len(currentState.HRAInput.States) == 0)
+
+	for floor := 0; floor < elevio.NFloors; floor++ {
+		outputDevice.RequestButtonLight(floor, elevio.BCab, elevator.Requests[floor][elevio.BCab])
+		if isOffline || statehandler.IsOnlyNodeOnline(nodeIP) {
+			for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
+				outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
+			}
+		}
+	}
 }
 
-func setAllLights() {
+func SetConfirmedHallLights(elevatorName string) {
+	currentState, _ := statehandler.LoadState()
 	for floor := 0; floor < elevio.NFloors; floor++ {
-		for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
-			checkpoint.JSONsetAllLights(localStateFile, elevatorName)
-			outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
+		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+			elevio.RequestButtonLight(floor, btn, currentState.HRAInput.HallRequests[floor][btn])
 		}
 	}
 }
@@ -56,200 +62,196 @@ func MoveDownToFloor() {
 	elevator.CurrentBehaviour = elev.EBMoving
 }
 
-//temp testing
-/*
-func FsmRequestButtonPress(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
-
-	//fmt.Printf("\n\n%s(%d, %s)\n", "FsmRequestButtonPress", btnFloor, elevio.ButtonToString(btn))
-	//elev.ElevatorPrint(elevator)
-
-	switch elevator.CurrentBehaviour {
-	case elev.EBDoorOpen:
-		if requests.RequestsShouldClearImmediately(elevator, btnFloor, btn) {
-			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-		} else {
-			//elevator.Requests[btnFloor][btn] = true
-			//trenger å sjekke at alt dette er riktig
-			fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
-			fsmJSONOrderAssigner(filename, elevatorName)
-		}
-
-	case elev.EBMoving:
-		//elevator.Requests[btnFloor][btn] = true
-		//trenger å sjekke at alt dette er riktig
-		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
-		fsmJSONOrderAssigner(filename, elevatorName)
-
-	case elev.EBIdle:
-		//elevator.Requests[btnFloor][btn] = true
-		//trenger å sjekke at alt dette er riktig
-		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
-		fsmJSONOrderAssigner(filename, elevatorName)
-		pair := requests.RequestsChooseDirection(elevator)
-		elevator.Dirn = pair.Dirn
-		elevator.CurrentBehaviour = pair.Behaviour
-		switch pair.Behaviour {
-		case elev.EBDoorOpen:
-			outputDevice.DoorLight(true)
-			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-			elevator = requests.RequestsClearAtCurrentFloor(elevator)
-
-		case elev.EBMoving:
-			//fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevator.Dirn), " in FsmRequestButtonPress")
-			outputDevice.MotorDirection(elevator.Dirn)
-		}
-	}
-	setAllLights()
-	//fmt.Printf("New state: \n")
-	//elev.ElevatorPrint(elevator)
-}
-*/
-func FloorArrival(newFloor int, elevatorName string, filename string) {
+func FloorArrival(newFloor int, elevatorName string) {
 	logrus.Warn("Arrived at new floor: ", newFloor)
-	//elev.ElevatorPrint(elevator)
+
 	elevator.CurrentFloor = newFloor
 	outputDevice.FloorIndicator(elevator.CurrentFloor)
-	//Helt unødvendig med switch her?
+
 	switch elevator.CurrentBehaviour {
 	case elev.EBMoving:
-		if requests.RequestsShouldStop(elevator) {
+		if requests.ShouldStop(elevator) {
 			outputDevice.MotorDirection(elevio.DirStop)
 			outputDevice.DoorLight(true)
-			elevator = requests.RequestsClearAtCurrentFloor(elevator, filename, elevatorName)
-			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-			setAllLights()
+			elevator = requests.ClearAtCurrentFloor(elevator, elevatorName)
+			timer.Start(elevator.Config.DoorOpenDurationS)
+			SetAllLights()
 			elevator.CurrentBehaviour = elev.EBDoorOpen
 		}
 	}
-	//fmt.Println("New state:")
-	//elev.ElevatorPrint(elevator)
+
 }
 
-func FsmDoorTimeout(filename string, elevatorName string) {
-	//fmt.Printf("\n\n%s()\n", "FsmDoorTimeout")
-	//elev.ElevatorPrint(elevator)
-	//Hvorfor switch
+func DoorTimeout(elevatorName string) {
 	switch elevator.CurrentBehaviour {
 	case elev.EBDoorOpen:
-		pair := requests.RequestsChooseDirection(elevator)
+		pair := requests.ChooseDirection(elevator)
 		elevator.Dirn = pair.Dirn
 		elevator.CurrentBehaviour = pair.Behaviour
 
 		switch elevator.CurrentBehaviour {
 		case elev.EBDoorOpen:
-			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-			elevator = requests.RequestsClearAtCurrentFloor(elevator, filename, elevatorName)
-			setAllLights()
+			timer.Start(elevator.Config.DoorOpenDurationS)
+			elevator = requests.ClearAtCurrentFloor(elevator, elevatorName)
+			SetAllLights()
 
 		case elev.EBMoving:
 			outputDevice.DoorLight(false)
-			//fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevio.DirStop), " in FsmDoorTimeout")
+
 			outputDevice.MotorDirection(elevator.Dirn)
 		case elev.EBIdle:
 			outputDevice.DoorLight(false)
 		}
-
-	}
-	//fmt.Println("New State: ")
-	//elev.ElevatorPrint(elevator)
-}
-
-func FsmObstruction() {
-	if !timer.TimerInf {
-		timer.TimerStartInf()
-		if elevator.CurrentBehaviour == elev.EBIdle {
-			outputDevice.DoorLight(true)
-			elevator.CurrentBehaviour = elev.EBDoorOpen
-		}
-	} else {
-		timer.TimerStopInf()
-		timer.TimerStart(elevator.Config.DoorOpenDurationS)
 	}
 }
 
-func FsmMakeCheckpoint() {
-	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
-
+func RequestObstruction() {
+	if elevator.CurrentBehaviour == elev.EBDoorOpen {
+		timer.StartInfiniteTimer()
+		statehandler.RemoveElevatorsFromState([]string{nodeIP})
+	}
 }
 
-func FsmResumeAtLatestCheckpoint(floor int) {
-	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
-	setAllLights()
-	//fmt.Print(elevator.Dirn)
-	outputDevice.MotorDirection(elevator.Dirn)
+func StopObstruction() {
+	timer.StopInfiniteTimer()
+	timer.Start(elevator.Config.DoorOpenDurationS)
+	HandleStateOnReboot(nodeIP)
+}
+
+func CreateCheckpoint() {
+	for {
+		checkpoint.SetCheckpoint(elevator)
+		time.Sleep(50 * time.Millisecond)
+	}
+}
+
+func ResumeAtLatestCheckpoint(floor int) {
+	elevator, _, _ = checkpoint.LoadCheckpoint()
+	SetAllLights()
+
+	if elevator.Dirn != elevio.DirStop && floor == -1 {
+		outputDevice.MotorDirection(elevator.Dirn)
+	}
 
 	if floor != -1 {
-		timer.TimerStart(elev.DoorOpenDurationSConfig)
+		timer.Start(elev.DoorOpenDurationSConfig)
 		outputDevice.DoorLight(true)
 	}
 }
 
-func FsmLoadLatestCheckpoint() {
-	elevator, _, _ = checkpoint.LoadElevCheckpoint(checkpoint.FilenameCheckpoint)
-}
-
-// Json fra her
-func FsmInitJson(filename string, ElevatorName string) {
-	// Gjør endringer på combinedInput her
-	print(filename)
-	err := os.Remove(filename)
+func CreateLocalStateFile(elevatorName string) {
+	// TODO: Gjør endringer på elevState her
+	err := os.Remove(statehandler.StateFile)
 	if err != nil {
-		fmt.Println("Feil ved fjerning:", err)
+		logrus.Error("Failed to remove:", err)
 	}
-	combinedInput := checkpoint.InitializeCombinedInput(elevator, ElevatorName)
 
-	// If the file was successfully deleted, return nil
-	err = checkpoint.SaveCombinedInput(combinedInput, filename)
+	initialElevState := statehandler.InitialiseState(elevator, elevatorName)
+
+	// * If the file was successfully deleted, return nil
+	err = statehandler.SaveState(initialElevState)
 	if err != nil {
-		fmt.Println("Feil ved lagring:", err)
+		logrus.Error("Failed to save checkpoint:", err)
 	}
 }
 
-func FsmUpdateJSON(elevatorName string, filename string) {
-	checkpoint.UpdateJSON(elevator, filename, elevatorName)
-	checkpoint.SaveElevCheckpoint(elevator, checkpoint.FilenameCheckpoint)
+func UpdateElevatorState(elevatorName string) {
+	statehandler.UpdateState(elevator, elevatorName)
+	checkpoint.SetCheckpoint(elevator)
 }
 
-func fsmUpdateJSONWhenNewOrderOccurs(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
-	checkpoint.UpdateJSONWhenNewOrderOccurs(filename, elevatorName, btnFloor, btn, &elevator)
+func HandleStateOnReboot(elevatorName string) {
+	statehandler.UpdateStateOnReboot(elevator, elevatorName)
+	checkpoint.SetCheckpoint(elevator)
 }
 
-func FsmJSONOrderAssigner(filename string, elevatorName string) {
-	checkpoint.JSONOrderAssigner(&elevator, filename, elevatorName)
+func AssignOrders(elevatorName string) {
+	state, err := statehandler.LoadState()
+	if err != nil {
+		logrus.Debugf("Failed to load combined input: %v\n", err)
+		return
+	}
+
+	if len(state.HRAInput.States) == 0 {
+		logrus.Debug("HRAInput.States is empty, skipping order assignment")
+		return
+	}
+
+	jsonBytes, err := json.Marshal(state.HRAInput)
+	if err != nil {
+		logrus.Debugf("Failed to marshal HRAInput: %v\n", err)
+		return
+	}
+
+	ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
+	if err != nil {
+		logrus.Debugf("exec.Command error: %v\nOutput: %s\n", err, string(ret))
+		return
+	}
+
+	output := make(map[string][][2]bool)
+	if err := json.Unmarshal(ret, &output); err != nil {
+		logrus.Debugf("json.Unmarshal error: %v\n", err)
+		return
+	}
+
+	for floor := 0; floor < elevio.NFloors; floor++ {
+		if orders, ok := output[elevatorName]; ok && floor < len(orders) {
+			for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+				elevator.Requests[floor][btn] = orders[floor][btn]
+			}
+		}
+	}
 }
 
-func FsmRequestButtonPressV2(btnFloor int, btn elevio.Button, elevatorName string, filename string) {
-	if requests.RequestsShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
-		timer.TimerStart(elevator.Config.DoorOpenDurationS)
+func AssignIfWorldViewsAlign(localElevatorName string, externalState statehandler.ElevatorState) {
+	localState, _ := statehandler.LoadState()
+
+	if isOrderStatesEqual(localState, externalState) {
+		AssignOrders(localElevatorName)
+		SetConfirmedHallLights(localElevatorName)
+	}
+}
+
+func isOrderStatesEqual(state statehandler.ElevatorState, externalState statehandler.ElevatorState) bool {
+	for f := 0; f < elevio.NFloors; f++ {
+		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+			if externalState.Counter.HallRequests[f][btn] != state.Counter.HallRequests[f][btn] {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string) {
+	// TODO: Extract the conditions into variables with more informative names
+	if requests.ShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
+		timer.Start(elevator.Config.DoorOpenDurationS)
 	} else {
-		//elevator.Requests[btnFloor][btn] = true
-		//trenger å sjekke at alt dette er riktig
-		fsmUpdateJSONWhenNewOrderOccurs(btnFloor, btn, elevatorName, filename)
-		//fsmJSONOrderAssigner(filename, elevatorName)
+		statehandler.UpdateStateOnNewOrder(elevatorName, btnFloor, btn)
+
+		if btn == elevio.BCab {
+			elevator.Requests[btnFloor][btn] = true
+		}
 	}
 }
 
-// etter denne func broadcaster vi.
-// så assigner vi
-// så kaller vi denne
-func FsmRequestButtonPressV3(filename string, elevatorName string) {
+func MoveOnActiveOrders(elevatorName string) {
 	switch elevator.CurrentBehaviour {
 	case elev.EBIdle:
-		pair := requests.RequestsChooseDirection(elevator)
+		pair := requests.ChooseDirection(elevator)
 		elevator.Dirn = pair.Dirn
 		elevator.CurrentBehaviour = pair.Behaviour
 		switch pair.Behaviour {
 		case elev.EBDoorOpen:
 			outputDevice.DoorLight(true)
-			timer.TimerStart(elevator.Config.DoorOpenDurationS)
-			elevator = requests.RequestsClearAtCurrentFloor(elevator, filename, elevatorName)
-
+			timer.Start(elevator.Config.DoorOpenDurationS)
+			elevator = requests.ClearAtCurrentFloor(elevator, elevatorName)
 		case elev.EBMoving:
-			//fmt.Println("Calling MotorDirection: ", elevio.ElevDirToString(elevator.Dirn), " in FsmRequestButtonPress")
 			outputDevice.MotorDirection(elevator.Dirn)
 		}
 	}
-	setAllLights()
-	//fmt.Printf("New state: \n")
-	//elev.ElevatorPrint(elevator)
+	SetAllLights()
 }

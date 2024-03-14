@@ -15,13 +15,13 @@ type NetworkNodeRegistry struct {
 }
 
 const interval = 150 * time.Millisecond
-const timeout = 5000 * time.Millisecond
+const timeout = 3000 * time.Millisecond
 
 func Sender(port int, id string, enableTransmit <-chan bool) {
-	conn := conn.DialBroadcastUDP(port)
+	conn 	:= conn.DialBroadcastUDP(port)
 	addr, _ := net.ResolveUDPAddr("udp", fmt.Sprintf("255.255.255.255:%d", port))
+	enable 	:= true
 
-	enable := true
 	for {
 		select {
 		case enable = <-enableTransmit:
@@ -64,7 +64,6 @@ func Receiver(port int, updateChannel chan<- NetworkNodeRegistry) {
 		for k, v := range lastSeen {
 			if time.Now().Sub(v) > timeout {
 				updated = true
-				//print(k)
 				reg.Lost = append(reg.Lost, k)
 				delete(lastSeen, k)
 			}
