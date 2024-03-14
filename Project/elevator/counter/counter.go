@@ -5,7 +5,6 @@ import (
 	"elevator/hra"
 )
 
-// TODO: Change to just counter
 type Counter struct {
 	HallRequests [][2]int       `json:"hallRequests"`
 	States       map[string]int `json:"states"`
@@ -14,10 +13,9 @@ type Counter struct {
 func InitialiseCounter(elevatorName string) Counter {
 	counter := Counter{
 		HallRequests: make([][2]int, elevio.NFloors),
-		States:       make(map[string]int), // Initialiserer map her
+		States:       make(map[string]int),
 	}
 
-	// Nå som States er initialisert, kan du legge til oppføringer i den
 	counter.States[elevatorName] = 0
 
 	return counter

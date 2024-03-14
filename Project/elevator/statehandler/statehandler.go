@@ -111,11 +111,9 @@ func RemoveElevatorsFromState(elevatorIDs []string) error {
 	for id := range state.HRAInput.States {
 		if _, exists := inactiveElevatorsMap[id]; exists {
 			delete(state.HRAInput.States, id)
-			//ønsker ikke fjerne cylick counter
 			delete(state.Counter.States, id)
 		}
 	}
-	//TODO: Got error check for this saveState but not for anyone else
 	err = SaveState(state)
 	if err != nil {
 		return fmt.Errorf("failed to save updated combined input: %v", err)
@@ -170,46 +168,3 @@ func IsOnlyNodeOnline(localElevatorName string) bool {
 	}
 	return false
 }
-
-// TODO: Gustav shceck if this is neccesary
-//Checked, we dont, but is it harmfull?
-//it makes our code more robust, but if we feel we dont need?
-/*
-func IsStateCorrupted(state ElevatorState) bool {
-	input := state.HRAInput
-
-	if len(input.HallRequests) != elevio.NFloors {
-		return true
-	}
-
-	for _, state := range input.States {
-		if !isValidBehavior(state.Behavior) || !isValidDirection(state.Direction) {
-			return true
-		}
-
-		if len(state.CabRequests) != elevio.NFloors {
-			return true
-		}
-	}
-
-	return false
-}
-
-func isValidBehavior(behavior string) bool {
-	switch behavior {
-	case "idle", "moving", "doorOpen":
-		return true
-	default:
-		return false
-	}
-}
-
-func isValidDirection(direction string) bool {
-	switch direction {
-	case "up", "down", "stop":
-		return true
-	default:
-		return false
-	}
-}
-*/

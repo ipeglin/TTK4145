@@ -94,12 +94,10 @@ func convertElevatorState(e elev.Elevator) (string, string, []bool) {
 	behavior := elev.EBToString(e.CurrentBehaviour)
 	direction := elevio.ElevDirToString(e.Dirn)
 
-	// Convert cab requests
 	cabRequests := make([]bool, elevio.NFloors)
 	for f := 0; f < elevio.NFloors; f++ {
 		cabRequests[f] = e.Requests[f][elevio.BCab]
 	}
-
 	return behavior, direction, cabRequests
 }
 

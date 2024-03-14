@@ -33,13 +33,11 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 	nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP, os.Getpid())
 	logrus.Debug(fmt.Sprintf("Network module initialised with UID=%s on PORT=%d", nodeUid, lifelinePort))
 
-	// setup lifeline for network node registry
 	nodeRegistryChannel := make(chan nodes.NetworkNodeRegistry)
 	TransmissionEnableChannel := make(chan bool)
 	go nodes.Sender(lifelinePort, nodeUid, TransmissionEnableChannel)
 	go nodes.Receiver(lifelinePort, nodeRegistryChannel)
 
-	// setup broadcast for message transmission
 	broadcastTransmissionChannel := make(chan Message)
 	broadcastReceiverChannel := make(chan Message)
 	go broadcast.Sender(messagePort, broadcastTransmissionChannel)
@@ -50,7 +48,6 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 		case reg := <-nodeRegistryChannel:
 			logrus.Debug(fmt.Sprintf("Node registry update:\n  Nodes:    %q\n  New:      %q\n  Lost:     %q", reg.Nodes, reg.New, reg.Lost))
 
-			// on state change, pass to main process
 			if slices.Contains(reg.Lost, nodeUid) {
 				logrus.Warn("Node lost connection:", nodeUid)
 				onlineStatusChannel <- false
@@ -71,7 +68,6 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 			}
 			logrus.Debug("Checksum match: ", msg.Checksum == sum)
 
-			// drop incorrect payload
 			if msg.Checksum != sum {
 				logrus.Error("Checksum mismatch, payload corrupted. Abort forwarding")
 				continue

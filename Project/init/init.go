@@ -35,7 +35,6 @@ func initNode(isFirstProcess bool) {
 	// broadcast state
 	go func() {
 		for {
-			// TODO: If invalid json, do not broadcast, so ther nodes will think it is offline
 			elv, _ := statehandler.LoadState()
 			messageTransmitterChannel <- messagehandler.Message{Payload: elv}
 			time.Sleep(500 * time.Millisecond)
@@ -49,8 +48,6 @@ func initNode(isFirstProcess bool) {
 			if len(reg.Lost) > 0 {
 				logrus.Warn("Lost nodes:", reg.Lost)
 			}
-			// extract ip from node names
-			//TODO: Phillip kan du lage sånn at nodene bare inneholder ip
 			var lostNodeAddresses []string
 			for _, node := range reg.Lost {
 				ip := strings.Split(node, "-")[1]
@@ -68,7 +65,6 @@ func initNode(isFirstProcess bool) {
 
 		case msg := <-messageReceiveChannel:
 			logrus.Debug("Received message from ", msg.SenderId)
-			//if !statehandler.IsStateCorrupted(msg.Payload) {
 			statehandler.HandleIncomingSate(localIP, msg.Payload, msg.SenderId)
 			fsm.AssignIfWorldViewsAlign(localIP, msg.Payload)
 			fsm.MoveOnActiveOrders(localIP)
@@ -86,13 +82,10 @@ func initNode(isFirstProcess bool) {
 	}
 }
 
-//Todo: ! Kan vi omdøpe over til å bli main og calle diise func i main
-
 func main() {
 	var entryPointFunction func(bool) = initNode
 	processpair.CreatePair(entryPointFunction)
 
-	// Block the main goroutine indefinitely
 	done := make(chan struct{})
 	<-done
 }

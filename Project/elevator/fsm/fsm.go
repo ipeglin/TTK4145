@@ -25,8 +25,6 @@ func init() {
 	elevator = elev.ElevatorInit()
 	nodeIP, _ = local.GetIP()
 	outputDevice = elevio.ElevioGetOutputDevice()
-
-	// ? Should this be moved
 	SetAllLights()
 	elevio.RequestDoorOpenLamp(false)
 	elevio.RequestStopLamp(false)
@@ -140,15 +138,12 @@ func ResumeAtLatestCheckpoint(floor int) {
 }
 
 func CreateLocalStateFile(elevatorName string) {
-	// TODO: Gjør endringer på elevState her
 	err := os.Remove(statehandler.StateFile)
 	if err != nil {
 		logrus.Error("Failed to remove:", err)
 	}
 
 	initialElevState := statehandler.InitialiseState(elevator, elevatorName)
-
-	// * If the file was successfully deleted, return nil
 	err = statehandler.SaveState(initialElevState)
 	if err != nil {
 		logrus.Error("Failed to save checkpoint:", err)
@@ -226,7 +221,6 @@ func isOrderStatesEqual(state statehandler.ElevatorState, externalState statehan
 }
 
 func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string) {
-	// TODO: Extract the conditions into variables with more informative names
 	if requests.ShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
 		timer.Start(elevator.Config.DoorOpenDurationS)
 	} else {

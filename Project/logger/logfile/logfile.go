@@ -23,7 +23,7 @@ func getCurrentTimeStamp() string {
 }
 
 func CreateLogFile() string {
-	rootPath, err := filepath.Abs("../") // procject root
+	rootPath, err := filepath.Abs("../")
 	if err != nil {
 		log.Fatal("Failed to find project root", err)
 	}

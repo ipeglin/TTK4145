@@ -17,7 +17,5 @@ func GetIP() (string, error) {
 
 		hostIP = strings.Split(conn.LocalAddr().String(), ":")[0]
 	}
-
-	// return hostIP, nil
 	return hostIP, nil
 }
