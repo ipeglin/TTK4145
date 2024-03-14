@@ -20,7 +20,7 @@ Download the source repository as zip, and extract in desired directory.
 Navigate into the project directory
 
 ```bash
-cd <yourpath>/TTK4145/Project
+cd <yourpath>/TTK4145-main/Project
 ```
 
 Add HRA dependency to the `elevator` module
