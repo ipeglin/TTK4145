@@ -16,7 +16,7 @@ import (
 
 const lifelinePort int = 1337
 const messagePort int = lifelinePort + 1
-const createMessageInterval = 500
+const createMessageInterval = 100
 
 type Message struct {
 	SenderId string // IPv4

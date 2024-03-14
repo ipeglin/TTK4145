@@ -58,8 +58,8 @@ func initNode(isFirstProcess bool) {
 				statehandler.HandleIncomingSate(localIP, msg.Payload, msg.SenderId)
 				elevatorcontroller.AssignIfWorldViewsAlign(localIP, msg.Payload)
 				elevatorcontroller.MoveOnActiveOrders(localIP)
-				elevatorcontroller.UpdateElevatorState(localIP)
 			}
+			elevatorcontroller.UpdateElevatorState(localIP)
 		case online := <-onlineStatusChannel:
 			if online {
 				elevatorcontroller.HandleStateOnReboot(localIP)
