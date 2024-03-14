@@ -64,7 +64,6 @@ func initNode(isFirstProcess bool) {
 				fsm.SetConfirmedHallLights(localIP)
 				fsm.MoveOnActiveOrders(localIP)
 				fsm.UpdateElevatorState(localIP)
-
 			}
 
 		case msg := <-messageReceiveChannel:
@@ -85,7 +84,6 @@ func initNode(isFirstProcess bool) {
 			logrus.Warn("Updated online status:", online)
 		}
 	}
-
 }
 
 //Todo: ! Kan vi omdøpe over til å bli main og calle diise func i main
