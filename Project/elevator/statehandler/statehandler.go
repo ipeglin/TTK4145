@@ -133,21 +133,15 @@ func RemoveElevatorsFromJSON(elevatorIDs []string) error {
 func HandleIncomingJSON(localElevatorName string, externalState ElevatorState, incomingElevatorName string) {
 	localState, _ := LoadState()
 	localState = mergeWithIncomingHallRequests(localState, externalState)
+	SaveState(localState) 
 	if _, exists := externalState.HRAInput.States[incomingElevatorName]; exists {
-		localState.HRAInput.States[incomingElevatorName] = externalState.HRAInput.States[incomingElevatorName]
-		localState.Counter.States[incomingElevatorName] = externalState.Counter.States[incomingElevatorName]
-			if externalState.Counter.States[localElevatorName] > localState.Counter.States[localElevatorName] {
-				localState.Counter.States[localElevatorName] = externalState.Counter.States[localElevatorName] + 1
-			}
-		SaveState(localState) 
+		localState = mergeWithIncomigStates(localState, localElevatorName, externalState, incomingElevatorName)
+		SaveState(localState)
 	}else {
-		//delete(localState.HRAInput.States, incomingElevatorName)
-		//delete(localState.Counter.States, incomingElevatorName)
 		RemoveElevatorsFromJSON([]string{incomingElevatorName})
 	}
-	
 }
-func mergeWithIncomingHallRequests(localState, externalState ElevatorState) ElevatorState {
+func mergeWithIncomingHallRequests(localState ElevatorState, externalState ElevatorState) ElevatorState {
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
 			if externalState.Counter.HallRequests[f][i] > localState.Counter.HallRequests[f][i] {
@@ -163,6 +157,16 @@ func mergeWithIncomingHallRequests(localState, externalState ElevatorState) Elev
 	}
 	return localState
 }
+
+func mergeWithIncomigStates(localState ElevatorState, localElevatorName string, externalState ElevatorState, incomingElevatorName string) ElevatorState{
+	localState.HRAInput.States[incomingElevatorName] = externalState.HRAInput.States[incomingElevatorName]
+	localState.Counter.States[incomingElevatorName] = externalState.Counter.States[incomingElevatorName]
+		if externalState.Counter.States[localElevatorName] > localState.Counter.States[localElevatorName] {
+			localState.Counter.States[localElevatorName] = externalState.Counter.States[localElevatorName] + 1
+		}
+	return localState
+}
+
 // TODO: Gustav shceck if this is neccesary
 func IsStateCorrupted(state ElevatorState) bool {
 	input := state.HRAInput
