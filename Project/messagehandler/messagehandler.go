@@ -1,10 +1,10 @@
-package network
+package messagehandler
 
 import (
 	"elevator/statehandler"
 	"fmt"
+	"messagehandler/checksum"
 	"network/broadcast"
-	"network/checksum"
 	"network/local"
 	"network/nodes"
 	"os"
