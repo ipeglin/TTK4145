@@ -10,9 +10,12 @@ import (
 	"os"
 	"processpair"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
+
+const initWaitTimeMS = 100
 
 func initNode(isFirstProcess bool) {
 	logger.Setup()
@@ -26,6 +29,7 @@ func initNode(isFirstProcess bool) {
 
 	localIP := <-ipChannel
 	go elevator.Init(localIP, isFirstProcess)
+	time.Sleep(initWaitTimeMS * time.Millisecond)
 
 	for {
 		select {
@@ -50,11 +54,12 @@ func initNode(isFirstProcess bool) {
 			}
 
 		case msg := <-messageReceiveChannel:
-			statehandler.HandleIncomingSate(localIP, msg.Payload, msg.SenderId)
-			fsm.AssignIfWorldViewsAlign(localIP, msg.Payload)
-			fsm.MoveOnActiveOrders(localIP)
-			fsm.UpdateElevatorState(localIP)
-
+			if !statehandler.IsStateCorrupted(msg.Payload) {
+				statehandler.HandleIncomingSate(localIP, msg.Payload, msg.SenderId)
+				fsm.AssignIfWorldViewsAlign(localIP, msg.Payload)
+				fsm.MoveOnActiveOrders(localIP)
+				fsm.UpdateElevatorState(localIP)
+			}
 		case online := <-onlineStatusChannel:
 			if online {
 				fsm.HandleStateOnReboot(localIP)

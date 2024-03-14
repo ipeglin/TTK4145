@@ -90,7 +90,7 @@ func UpdateStateOnCompletedHallOrder(e elev.Elevator, elevatorName string, btn_f
 
 func UpdateStateOnNewOrder(elevatorName string, btnFloor int, btn elevio.Button) {
 	state, _ := LoadState()
-	isOnline := (len(state.HRAInput.States) !=0)
+	isOnline := (len(state.HRAInput.States) != 0)
 	if isOnline {
 		state.Counter = counter.UpdateOnNewOrder(state.Counter, state.HRAInput, elevatorName, btnFloor, btn)
 		state.HRAInput = hra.UpdateHRAInputOnNewOrder(state.HRAInput, elevatorName, btnFloor, btn)
@@ -168,4 +168,42 @@ func IsOnlyNodeOnline(localElevatorName string) bool {
 		}
 	}
 	return false
+}
+
+func IsStateCorrupted(state ElevatorState) bool {
+	input := state.HRAInput
+
+	if len(input.HallRequests) != elevio.NFloors {
+		return true
+	}
+
+	for _, state := range input.States {
+		if !isValidBehavior(state.Behavior) || !isValidDirection(state.Direction) {
+			return true
+		}
+
+		if len(state.CabRequests) != elevio.NFloors {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isValidBehavior(behavior string) bool {
+	switch behavior {
+	case "idle", "moving", "doorOpen":
+		return true
+	default:
+		return false
+	}
+}
+
+func isValidDirection(direction string) bool {
+	switch direction {
+	case "up", "down", "stop":
+		return true
+	default:
+		return false
+	}
 }
