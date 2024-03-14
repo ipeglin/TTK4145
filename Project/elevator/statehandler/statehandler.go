@@ -139,12 +139,13 @@ func HandleIncomingJSON(localElevatorName string, externalState ElevatorState, i
 			if externalState.Counter.States[localElevatorName] > localState.Counter.States[localElevatorName] {
 				localState.Counter.States[localElevatorName] = externalState.Counter.States[localElevatorName] + 1
 			}
-	} else {
-		delete(localState.HRAInput.States, incomingElevatorName)
-		delete(localState.Counter.States, incomingElevatorName)
-		//RemoveElevatorsFromJSON([]string{incomingElevatorName})
+		SaveState(localState) 
+	}else {
+		//delete(localState.HRAInput.States, incomingElevatorName)
+		//delete(localState.Counter.States, incomingElevatorName)
+		RemoveElevatorsFromJSON([]string{incomingElevatorName})
 	}
-	SaveState(localState)
+	
 }
 func mergeWithIncomingHallRequests(localState, externalState ElevatorState) ElevatorState {
 	for f := 0; f < elevio.NFloors; f++ {
