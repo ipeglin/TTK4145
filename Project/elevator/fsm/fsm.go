@@ -30,6 +30,10 @@ func init() {
 	elevio.RequestStopLamp(false)
 }
 
+func GetElevator() elev.Elevator {
+	return elevator
+}
+
 func SetAllLights() {
 	currentState, _ := statehandler.LoadState()
 	isOffline := (len(currentState.HRAInput.States) == 0)

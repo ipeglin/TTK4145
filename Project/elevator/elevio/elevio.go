@@ -2,7 +2,6 @@ package elevio
 
 import (
 	"elevator/elevio/driver/hwelevio"
-	"elevator/timer"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -101,7 +100,7 @@ func ElevioGetOutputDevice() ElevOutputDevice {
 func PollButtons(receiver chan<- ButtonEvent) {
 	prev := make([][3]bool, NFloors)
 	for {
-		time.Sleep(hwelevio.PollRate)
+		time.Sleep(PollRateMS * time.Millisecond)
 		for f := 0; f < NFloors; f++ {
 			for b := BHallUp; b <= BCab; b++ {
 				v := hwelevio.GetButton(castButtonToHWButtonType(b), f)
@@ -117,7 +116,7 @@ func PollButtons(receiver chan<- ButtonEvent) {
 func PollFloorSensor(receiver chan<- int) {
 	prev := -1
 	for {
-		time.Sleep(hwelevio.PollRate)
+		time.Sleep(PollRateMS * time.Millisecond)
 		v := hwelevio.GetFloor()
 		if v != prev && v != -1 {
 			receiver <- v
@@ -129,7 +128,7 @@ func PollFloorSensor(receiver chan<- int) {
 func PollStopButton(receiver chan<- bool) {
 	prev := false
 	for {
-		time.Sleep(hwelevio.PollRate)
+		time.Sleep(PollRateMS * time.Millisecond)
 		v := hwelevio.GetStop()
 		if v != prev {
 			receiver <- v
@@ -141,35 +140,12 @@ func PollStopButton(receiver chan<- bool) {
 func PollObstructionSwitch(receiver chan<- bool) {
 	prev := false
 	for {
-		time.Sleep(hwelevio.PollRate)
+		time.Sleep(PollRateMS * time.Millisecond)
 		v := hwelevio.GetObstruction()
 		if v != prev {
 			receiver <- v
 		}
 		prev = v
-	}
-}
-
-func MontitorMotorActivity(receiver chan<- bool) {
-	timerActive := true
-	timerEndTimer := timer.GetCurrentTimeAsFloat() + motorTimeoutS
-	for {
-		time.Sleep(hwelevio.PollRate)
-		v := RequestFloor()
-		if v != -1 {
-			timerEndTimer = timer.GetCurrentTimeAsFloat() + motorTimeoutS
-			if !timerActive {
-				timerActive = true
-				receiver <- true
-			}
-		} else {
-			if timer.GetCurrentTimeAsFloat() > timerEndTimer {
-				if timerActive {
-					timerActive = false
-					receiver <- false
-				}
-			}
-		}
 	}
 }
 

@@ -4,10 +4,7 @@ import (
 	"fmt"
 	"net"
 	"sync"
-	"time"
 )
-
-const PollRate = 20 * time.Millisecond
 
 var initialised bool = false
 var mtx sync.Mutex
