@@ -1,7 +1,7 @@
 package network
 
 import (
-	"elevator/jsonhandler"
+	"elevator/statehandler"
 	"fmt"
 	"network/broadcast"
 	"network/checksum"
@@ -18,7 +18,7 @@ const messagePort int = lifelinePort + 1
 
 type Message struct {
 	SenderId string // IPv4
-	Payload  jsonhandler.ElevatorState
+	Payload  statehandler.ElevatorState
 	Checksum string
 }
 

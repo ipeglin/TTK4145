@@ -3,7 +3,7 @@ package requests
 import (
 	"elevator/elev"
 	"elevator/elevio"
-	"elevator/jsonhandler"
+	"elevator/statehandler"
 )
 
 func requestsAbove(e elev.Elevator) bool {
@@ -154,7 +154,7 @@ func ClearAtCurrentFloor(e elev.Elevator, elevatorName string) elev.Elevator {
 
 	for btn, wasPressed := range beforeClear {
 		if wasPressed && !e.Requests[e.CurrentFloor][btn] {
-			jsonhandler.UpdateJSONOnCompletedHallOrder(e, elevatorName, e.CurrentFloor, btn)
+			statehandler.UpdateJSONOnCompletedHallOrder(e, elevatorName, e.CurrentFloor, btn)
 		}
 	}
 	return e

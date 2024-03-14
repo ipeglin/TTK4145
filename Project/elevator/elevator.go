@@ -3,7 +3,7 @@ package elevator
 import (
 	"elevator/elevio"
 	"elevator/fsm"
-	"elevator/jsonhandler"
+	"elevator/statehandler"
 	"elevator/timer"
 	"time"
 
@@ -51,7 +51,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 		case motorActive := <-drv_motorActivity:
 			logrus.Warn("MotorActive state changed: ", motorActive)
 			if !motorActive {
-				jsonhandler.RemoveElevatorsFromJSON([]string{elevatorName})
+				statehandler.RemoveElevatorsFromJSON([]string{elevatorName})
 			} else {
 				fsm.HandleStateOnReboot(elevatorName)
 				fsm.MoveOnActiveOrders(elevatorName)

@@ -5,8 +5,8 @@ import (
 	"elevator/checkpoint"
 	"elevator/elev"
 	"elevator/elevio"
-	"elevator/jsonhandler"
 	"elevator/requests"
+	"elevator/statehandler"
 	"elevator/timer"
 	"encoding/json"
 	"network/local"
@@ -33,7 +33,7 @@ func init() {
 }
 
 func SetAllLights() {
-	currentState, _ := jsonhandler.LoadState()
+	currentState, _ := statehandler.LoadState()
 	isOffline := (len(currentState.HRAInput.States) == 0)
 
 	for floor := 0; floor < elevio.NFloors; floor++ {
@@ -47,7 +47,7 @@ func SetAllLights() {
 }
 
 func SetConfirmedHallLights(elevatorName string) {
-	currentState, _ := jsonhandler.LoadState()
+	currentState, _ := statehandler.LoadState()
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		elevio.RequestButtonLight(floor, elevio.BHallUp, currentState.HRAInput.HallRequests[floor][0])
 		elevio.RequestButtonLight(floor, elevio.BHallDown, currentState.HRAInput.HallRequests[floor][1])
@@ -107,7 +107,7 @@ func DoorTimeout(elevatorName string) {
 func RequestObstruction() {
 	if elevator.CurrentBehaviour == elev.EBDoorOpen {
 		timer.StartInfiniteTimer()
-		jsonhandler.RemoveElevatorsFromJSON([]string{nodeIP})
+		statehandler.RemoveElevatorsFromJSON([]string{nodeIP})
 	}
 }
 
@@ -140,32 +140,32 @@ func ResumeAtLatestCheckpoint(floor int) {
 
 func CreateLocalStateFile(elevatorName string) {
 	// TODO: Gjør endringer på elevState her
-	err := os.Remove(jsonhandler.StateFile)
+	err := os.Remove(statehandler.StateFile)
 	if err != nil {
 		logrus.Error("Failed to remove:", err)
 	}
 
-	initialElevState := jsonhandler.InitialiseState(elevator, elevatorName)
+	initialElevState := statehandler.InitialiseState(elevator, elevatorName)
 
 	// * If the file was successfully deleted, return nil
-	err = jsonhandler.SaveState(initialElevState)
+	err = statehandler.SaveState(initialElevState)
 	if err != nil {
 		logrus.Error("Failed to save checkpoint:", err)
 	}
 }
 
 func UpdateElevatorState(elevatorName string) {
-	jsonhandler.UpdateJSON(elevator, elevatorName)
+	statehandler.UpdateJSON(elevator, elevatorName)
 	checkpoint.SetCheckpoint(elevator)
 }
 
 func HandleStateOnReboot(elevatorName string) {
-	jsonhandler.UpdateJSONOnReboot(elevator, elevatorName)
+	statehandler.UpdateJSONOnReboot(elevator, elevatorName)
 	checkpoint.SetCheckpoint(elevator)
 }
 
 func AssignOrders(elevatorName string) {
-	state, err := jsonhandler.LoadState()
+	state, err := statehandler.LoadState()
 	if err != nil {
 		logrus.Debugf("Failed to load combined input: %v\n", err)
 		return
@@ -202,12 +202,29 @@ func AssignOrders(elevatorName string) {
 	}
 }
 
+func AssignIfWorldViewsAlign(localElevatorName string, externalState statehandler.ElevatorState) {
+	localState, _ := statehandler.LoadState()
+	WView := true
+	for f := 0; f < elevio.NFloors; f++ {
+		for i := 0; i < 2; i++ {
+			if externalState.Counter.HallRequests[f][i] != localState.Counter.HallRequests[f][i] {
+				WView = false
+			}
+		}
+	}
+	if WView {
+		AssignOrders(localElevatorName)
+		SetConfirmedHallLights(localElevatorName)
+	}
+}
+
+
 func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string) {
 	// TODO: Extract the conditions into variables with more informative names
 	if requests.ShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
 		timer.Start(elevator.Config.DoorOpenDurationS)
 	} else {
-		jsonhandler.UpdateJSONOnNewOrder(elevatorName, btnFloor, btn)
+		statehandler.UpdateJSONOnNewOrder(elevatorName, btnFloor, btn)
 
 		if btn == elevio.BCab {
 			elevator.Requests[btnFloor][btn] = true
@@ -233,25 +250,10 @@ func MoveOnActiveOrders(elevatorName string) {
 	SetAllLights()
 }
 
-func AssignIfWorldViewsAlign(localElevatorName string, externalState jsonhandler.ElevatorState) {
-	localState, _ := jsonhandler.LoadState()
-	WView := true
-	for f := 0; f < elevio.NFloors; f++ {
-		for i := 0; i < 2; i++ {
-			if externalState.Counter.HallRequests[f][i] != localState.Counter.HallRequests[f][i] {
-				WView = false
-			}
-		}
-	}
-	if WView {
-		AssignOrders(localElevatorName)
-		SetConfirmedHallLights(localElevatorName)
-	}
-}
 
-//Todo:: functions below dont need to be in fsm?
+// Todo:: functions below dont need to be in fsm?
 func IsOnlyNodeOnline(localElevatorName string) bool {
-	currentState, _ := jsonhandler.LoadState()
+	currentState, _ := statehandler.LoadState()
 	if len(currentState.HRAInput.States) == 1 {
 		if _, exists := currentState.HRAInput.States[localElevatorName]; exists {
 			return true

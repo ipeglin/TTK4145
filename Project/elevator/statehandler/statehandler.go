@@ -1,4 +1,4 @@
-package jsonhandler
+package statehandler
 
 import (
 	"elevator/counter"
@@ -9,7 +9,6 @@ import (
 	"filehandler"
 	"fmt"
 	"network/local"
-	
 
 	"github.com/sirupsen/logrus"
 )
@@ -133,6 +132,19 @@ func RemoveElevatorsFromJSON(elevatorIDs []string) error {
 
 func HandleIncomingJSON(localElevatorName string, externalState ElevatorState, incomingElevatorName string) {
 	localState, _ := LoadState()
+	localState = mergeWithIncomingHallRequests(localState, externalState)
+	if _, exists := externalState.HRAInput.States[incomingElevatorName]; exists {
+		localState.HRAInput.States[incomingElevatorName] = externalState.HRAInput.States[incomingElevatorName]
+		localState.Counter.States[incomingElevatorName] = externalState.Counter.States[incomingElevatorName]
+			if externalState.Counter.States[localElevatorName] > localState.Counter.States[localElevatorName] {
+				localState.Counter.States[localElevatorName] = externalState.Counter.States[localElevatorName] + 1
+			}
+	} else {
+		RemoveElevatorsFromJSON([]string{incomingElevatorName})
+	}
+	SaveState(localState)
+}
+func mergeWithIncomingHallRequests(localState, externalState ElevatorState) ElevatorState {
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
 			if externalState.Counter.HallRequests[f][i] > localState.Counter.HallRequests[f][i] {
@@ -146,31 +158,8 @@ func HandleIncomingJSON(localElevatorName string, externalState ElevatorState, i
 			}
 		}
 	}
-	if _, exists := externalState.HRAInput.States[incomingElevatorName]; exists {
-		if _, exists := localState.HRAInput.States[incomingElevatorName]; !exists {
-			localState.HRAInput.States[incomingElevatorName] = externalState.HRAInput.States[incomingElevatorName]
-			localState.Counter.States[incomingElevatorName] = externalState.Counter.States[incomingElevatorName]
-		} else {
-			if externalState.Counter.States[incomingElevatorName] > localState.Counter.States[incomingElevatorName] {
-				localState.HRAInput.States[incomingElevatorName] = externalState.HRAInput.States[incomingElevatorName]
-				localState.Counter.States[incomingElevatorName] = externalState.Counter.States[incomingElevatorName]
-			}
-		}
-	} else {
-		if _, exists := localState.HRAInput.States[incomingElevatorName]; exists {
-			delete(localState.HRAInput.States, incomingElevatorName)
-			delete(localState.Counter.States, incomingElevatorName)
-		}
-	}
-	if _, exists := externalState.Counter.States[localElevatorName]; exists {
-		if externalState.Counter.States[localElevatorName] > localState.Counter.States[localElevatorName] {
-			localState.Counter.States[localElevatorName] = externalState.Counter.States[localElevatorName] + 1
-		}
-	}
-	SaveState(localState)
+	return localState
 }
-
-
 // TODO: Gustav shceck if this is neccesary
 func IsStateCorrupted(state ElevatorState) bool {
 	input := state.HRAInput

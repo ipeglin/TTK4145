@@ -3,7 +3,7 @@ package main
 import (
 	"elevator"
 	"elevator/fsm"
-	"elevator/jsonhandler"
+	"elevator/statehandler"
 	"logger"
 	"network"
 	"network/nodes"
@@ -37,7 +37,7 @@ func initNode(isFirstProcess bool) {
 	go func() {
 		for {
 			// TODO: If invalid json, do not broadcast, so ther nodes will think it is offline
-			elv, _ := jsonhandler.LoadState()
+			elv, _ := statehandler.LoadState()
 			messageTransmitterChannel <- network.Message{Payload: elv}
 			time.Sleep(500 * time.Millisecond)
 		}
@@ -59,7 +59,7 @@ func initNode(isFirstProcess bool) {
 			}
 			logrus.Debug("Removing lost IPs: ", lostNodeAddresses)
 
-			jsonhandler.RemoveElevatorsFromJSON(lostNodeAddresses)
+			statehandler.RemoveElevatorsFromJSON(lostNodeAddresses)
 			if fsm.IsOnlyNodeOnline(localIP) {
 				fsm.AssignOrders(localIP)
 				fsm.SetConfirmedHallLights(localIP)
@@ -70,8 +70,8 @@ func initNode(isFirstProcess bool) {
 
 		case msg := <-messageReceiveChannel:
 			logrus.Debug("Received message from ", msg.SenderId)
-			if !jsonhandler.IsStateCorrupted(msg.Payload) {
-				jsonhandler.HandleIncomingJSON(localIP, msg.Payload, msg.SenderId)
+			if !statehandler.IsStateCorrupted(msg.Payload) {
+				statehandler.HandleIncomingJSON(localIP, msg.Payload, msg.SenderId)
 				fsm.AssignIfWorldViewsAlign(localIP, msg.Payload)
 				fsm.MoveOnActiveOrders(localIP)
 				fsm.UpdateElevatorState(localIP)
