@@ -50,8 +50,8 @@ func initNode(isFirstProcess bool) {
 			if len(reg.Lost) > 0 {
 				logrus.Warn("Lost nodes:", reg.Lost)
 			}
-
 			// extract ip from node names
+			//TODO: Phillip kan du lage sånn at nodene bare inneholder ip
 			var lostNodeAddresses []string
 			for _, node := range reg.Lost {
 				ip := strings.Split(node, "-")[1]
@@ -70,13 +70,11 @@ func initNode(isFirstProcess bool) {
 
 		case msg := <-messageReceiveChannel:
 			logrus.Debug("Received message from ", msg.SenderId)
-			if !statehandler.IsStateCorrupted(msg.Payload) {
-				statehandler.HandleIncomingJSON(localIP, msg.Payload, msg.SenderId)
-				fsm.AssignIfWorldViewsAlign(localIP, msg.Payload)
-				fsm.MoveOnActiveOrders(localIP)
-				fsm.UpdateElevatorState(localIP)
-				// ! Only have one version
-			}
+			//if !statehandler.IsStateCorrupted(msg.Payload) {
+			statehandler.HandleIncomingJSON(localIP, msg.Payload, msg.SenderId)
+			fsm.AssignIfWorldViewsAlign(localIP, msg.Payload)
+			fsm.MoveOnActiveOrders(localIP)
+			fsm.UpdateElevatorState(localIP)
 
 		case online := <-onlineStatusChannel:
 			if online {
