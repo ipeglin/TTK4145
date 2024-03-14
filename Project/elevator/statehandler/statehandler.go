@@ -137,14 +137,14 @@ func HandleIncomingSate(localElevatorName string, externalState ElevatorState, i
 
 func mergeWithIncomingHallRequests(localState ElevatorState, externalState ElevatorState) {
 	for f := 0; f < elevio.NFloors; f++ {
-		for i := 0; i < 2; i++ {
-			if externalState.Counter.HallRequests[f][i] > localState.Counter.HallRequests[f][i] {
-				localState.Counter.HallRequests[f][i]  = externalState.Counter.HallRequests[f][i]
-				localState.HRAInput.HallRequests[f][i] = externalState.HRAInput.HallRequests[f][i]
+		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+			if externalState.Counter.HallRequests[f][btn] > localState.Counter.HallRequests[f][btn] {
+				localState.Counter.HallRequests[f][btn]  = externalState.Counter.HallRequests[f][btn]
+				localState.HRAInput.HallRequests[f][btn] = externalState.HRAInput.HallRequests[f][btn]
 			}
-			if externalState.Counter.HallRequests[f][i] == localState.Counter.HallRequests[f][i] {
-				if localState.HRAInput.HallRequests[f][i] != externalState.HRAInput.HallRequests[f][i] {
-					localState.HRAInput.HallRequests[f][i] = false
+			if externalState.Counter.HallRequests[f][btn] == localState.Counter.HallRequests[f][btn] {
+				if localState.HRAInput.HallRequests[f][btn] != externalState.HRAInput.HallRequests[f][btn] {
+					localState.HRAInput.HallRequests[f][btn] = false
 				}
 			}
 		}

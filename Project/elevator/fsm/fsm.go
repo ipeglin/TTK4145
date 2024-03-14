@@ -49,8 +49,9 @@ func SetAllLights() {
 func SetConfirmedHallLights(elevatorName string) {
 	currentState, _ := statehandler.LoadState()
 	for floor := 0; floor < elevio.NFloors; floor++ {
-		elevio.RequestButtonLight(floor, elevio.BHallUp, currentState.HRAInput.HallRequests[floor][0])
-		elevio.RequestButtonLight(floor, elevio.BHallDown, currentState.HRAInput.HallRequests[floor][1])
+		for btn := elevio.BHallUp; btn < elevio.BCab; btn ++{
+			elevio.RequestButtonLight(floor,btn, currentState.HRAInput.HallRequests[floor][btn])
+		}
 	}
 }
 
@@ -196,8 +197,9 @@ func AssignOrders(elevatorName string) {
 
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		if orders, ok := output[elevatorName]; ok && floor < len(orders) {
-			elevator.Requests[floor][elevio.BHallUp] = orders[floor][0]
-			elevator.Requests[floor][elevio.BHallDown] = orders[floor][1]
+			for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+				elevator.Requests[floor][btn] = orders[floor][btn]
+			}
 		}
 	}
 }
@@ -206,8 +208,8 @@ func AssignIfWorldViewsAlign(localElevatorName string, externalState statehandle
 	localState, _ := statehandler.LoadState()
 	WView := true
 	for f := 0; f < elevio.NFloors; f++ {
-		for i := 0; i < 2; i++ {
-			if externalState.Counter.HallRequests[f][i] != localState.Counter.HallRequests[f][i] {
+		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+			if externalState.Counter.HallRequests[f][btn] != localState.Counter.HallRequests[f][btn] {
 				WView = false
 			}
 		}

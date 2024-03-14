@@ -26,9 +26,9 @@ func InitialiseCounter(elevatorName string) Counter {
 func UpdateOnCompletedOrder(counter Counter, elevatorName string, btn_floor int, btn_type elevio.Button) Counter {
 	switch btn_type {
 	case elevio.BHallUp:
-		counter.HallRequests[btn_floor][0] += 1
+		counter.HallRequests[btn_floor][elevio.BHallUp] += 1
 	case elevio.BHallDown:
-		counter.HallRequests[btn_floor][1] += 1
+		counter.HallRequests[btn_floor][elevio.BHallDown] += 1
 	}
 	counter.States[elevatorName] += 1
 	return counter
@@ -42,12 +42,12 @@ func IncrementOnInput(counter Counter, elevatorName string) Counter {
 func UpdateOnNewOrder(counter Counter, hraInput hra.HRAInput, elevatorName string, btnFloor int, btn elevio.Button) Counter {
 	switch btn {
 	case elevio.BHallUp:
-		if !hraInput.HallRequests[btnFloor][0] {
-			counter.HallRequests[btnFloor][0] += 1
+		if !hraInput.HallRequests[btnFloor][elevio.BHallUp] {
+			counter.HallRequests[btnFloor][elevio.BHallUp] += 1
 		}
 	case elevio.BHallDown:
-		if !hraInput.HallRequests[btnFloor][1] {
-			counter.HallRequests[btnFloor][1] += 1
+		if !hraInput.HallRequests[btnFloor][elevio.BHallDown] {
+			counter.HallRequests[btnFloor][elevio.BHallDown] += 1
 		}
 	case elevio.BCab:
 		counter.States[elevatorName] += 1

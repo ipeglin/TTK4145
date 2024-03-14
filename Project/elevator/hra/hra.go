@@ -25,8 +25,9 @@ func InitialiseHRAInput(e elev.Elevator, elevatorName string) HRAInput {
 		States:       make(map[string]HRAElevState),
 	}
 	for f := 0; f < elevio.NFloors; f++ {
-		hraInput.HallRequests[f][0] = e.Requests[f][elevio.BHallUp]
-		hraInput.HallRequests[f][1] = e.Requests[f][elevio.BHallDown]
+		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+		hraInput.HallRequests[f][btn] = e.Requests[f][btn]
+		}
 	}
 
 	behavior, direction, cabRequests := convertElevatorState(e)
@@ -42,8 +43,9 @@ func InitialiseHRAInput(e elev.Elevator, elevatorName string) HRAInput {
 
 func UpdateHRAInput(hraInput HRAInput, e elev.Elevator, elevatorName string) HRAInput {
 	for f := 0; f < elevio.NFloors; f++ {
-		hraInput.HallRequests[f][0] = hraInput.HallRequests[f][0] || e.Requests[f][elevio.BHallUp]
-		hraInput.HallRequests[f][1] = hraInput.HallRequests[f][1] || e.Requests[f][elevio.BHallDown]
+		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+			hraInput.HallRequests[f][btn] = hraInput.HallRequests[f][btn] || e.Requests[f][btn]
+		}
 	}
 
 	behavior, direction, cabRequests := convertElevatorState(e)
@@ -70,9 +72,9 @@ func RebootHRAInput(hraInput HRAInput, e elev.Elevator, elevatorName string) HRA
 func UpdateHRAInputOnCompletedOrder(hraInput HRAInput, e elev.Elevator, elevatorName string, btn_floor int, btn_type elevio.Button) HRAInput {
 	switch btn_type {
 	case elevio.BHallUp:
-		hraInput.HallRequests[btn_floor][0] = false
+		hraInput.HallRequests[btn_floor][elevio.BHallUp] = false
 	case elevio.BHallDown:
-		hraInput.HallRequests[btn_floor][1] = false
+		hraInput.HallRequests[btn_floor][elevio.BHallDown] = false
 	case elevio.BCab:
 		hraInput.States[elevatorName].CabRequests[btn_floor] = false
 	}
@@ -104,9 +106,9 @@ func convertElevatorState(e elev.Elevator) (string, string, []bool) {
 func UpdateHRAInputOnNewOrder(hraInput HRAInput, elevatorName string, btnFloor int, btn elevio.Button) HRAInput {
 	switch btn {
 	case elevio.BHallUp:
-		hraInput.HallRequests[btnFloor][0] = true
+		hraInput.HallRequests[btnFloor][elevio.BHallUp] = true
 	case elevio.BHallDown:
-		hraInput.HallRequests[btnFloor][1] = true
+		hraInput.HallRequests[btnFloor][elevio.BHallDown] = true
 	case elevio.BCab:
 		hraInput.States[elevatorName].CabRequests[btnFloor] = true
 	}
