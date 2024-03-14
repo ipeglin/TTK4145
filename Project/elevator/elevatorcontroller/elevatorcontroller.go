@@ -1,6 +1,6 @@
-package fsm
+package elevatorcontroller
 
-//Burde denne filen hetet elevator.go og nåværende elevator.go omdøpes til fsm elns?
+//Burde denne filen hetet elevator.go og nåværende elevator.go omdøpes til elevatorcontroller elns?
 import (
 	"elevator/checkpoint"
 	"elevator/elev"

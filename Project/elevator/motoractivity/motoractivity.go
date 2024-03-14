@@ -2,8 +2,8 @@ package motoractivity
 
 import (
 	"elevator/elev"
+	"elevator/elevatorcontroller"
 	"elevator/elevio"
-	"elevator/fsm"
 	"elevator/timer"
 	"time"
 )
@@ -16,7 +16,7 @@ func MontitorMotorActivity(receiver chan<- bool) {
 	v := elevio.RequestFloor()
 	for {
 		time.Sleep(elevio.PollRateMS * time.Millisecond)
-		elevator := fsm.GetElevator()
+		elevator := elevatorcontroller.GetElevator()
 		if v != -1 && (elevator.CurrentBehaviour != elev.EBMoving) || v != elevio.RequestFloor() {
 			timerEndTimer = timer.GetCurrentTimeAsFloat() + motorTimeoutS
 			if !timerActive {

@@ -17,7 +17,7 @@
 //mainen er ikke så lett å skjønne seg på. - gjøre main til egen folder. Kan init nodes bli omdøpt til main? 
     Philip: main er et reservert funksjonsnavn, så burde ikke gjøres. Kan ev. endres til mainLogic slik det var, men det er like mye, om ikke mindre beskrivende.
 
-//simen du har bedre peiling enn meg, men fsm står jo for FinalStateMachine, hvorfor heter mappen FSM når det ikke er en FSM. Burde den kanskje omdøpes til noe mer passende som 
+//simen du har bedre peiling enn meg, men elevatorcontroller står jo for FinalStateMachine, hvorfor heter mappen FSM når det ikke er en FSM. Burde den kanskje omdøpes til noe mer passende som 
     Philip: Det står for Finite State Machine, som bare betyr at State Machinen kan ha én mulig state av gangen, fra et gitt, endelig sett av mulige states.
 
 All the source files for your code and a README containing simple instructions for how to compile/execute your code should be handed in as one .zip file named  "code-##.zip", where ## is your group ID. Do not include executables or any names or other identifications in your code.

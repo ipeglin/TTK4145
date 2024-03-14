@@ -1,8 +1,8 @@
 package elevator
 
 import (
+	"elevator/elevatorcontroller"
 	"elevator/elevio"
-	"elevator/fsm"
 	"elevator/motoractivity"
 	"elevator/statehandler"
 	"elevator/timer"
@@ -16,12 +16,12 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 	if isPrimaryProcess {
 		if elevio.InputDevice.FloorSensor() == -1 {
 			logrus.Info("Elevator initialised between floors")
-			fsm.MoveDownToFloor()
+			elevatorcontroller.MoveDownToFloor()
 		}
-		fsm.CreateLocalStateFile(elevatorName)
+		elevatorcontroller.CreateLocalStateFile(elevatorName)
 	} else {
 		floor := elevio.InputDevice.FloorSensor()
-		fsm.ResumeAtLatestCheckpoint(floor)
+		elevatorcontroller.ResumeAtLatestCheckpoint(floor)
 	}
 
 	buttons := make(chan elevio.ButtonEvent)
@@ -33,7 +33,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 	go elevio.PollFloorSensor(floors)
 	go elevio.PollObstructionSwitch(obst)
 	go motoractivity.MontitorMotorActivity(motorActivity)
-	go fsm.CreateCheckpoint()
+	go elevatorcontroller.CreateCheckpoint()
 
 	var obstructed bool = false
 	for {
@@ -42,9 +42,9 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			logrus.Warn("Obstruction state changed: ", obstructed)
 			if obstructed {
 				logrus.Debug("New obstruction detected: ", obstructed)
-				fsm.RequestObstruction()
+				elevatorcontroller.RequestObstruction()
 			} else {
-				fsm.StopObstruction()
+				elevatorcontroller.StopObstruction()
 			}
 
 		case motorActive := <-motorActivity:
@@ -52,39 +52,39 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			if !motorActive {
 				statehandler.RemoveElevatorsFromState([]string{elevatorName})
 			} else {
-				fsm.HandleStateOnReboot(elevatorName)
-				fsm.MoveOnActiveOrders(elevatorName)
+				elevatorcontroller.HandleStateOnReboot(elevatorName)
+				elevatorcontroller.MoveOnActiveOrders(elevatorName)
 			}
 
 		case btnEvent := <-buttons:
 			print("button pressed")
 			logrus.Debug("Button press detected: ", btnEvent)
-			fsm.UpdateElevatorState(elevatorName)
-			fsm.HandleButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName)
+			elevatorcontroller.UpdateElevatorState(elevatorName)
+			elevatorcontroller.HandleButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName)
 			if statehandler.IsOnlyNodeOnline(elevatorName) {
-				fsm.AssignOrders(elevatorName)
+				elevatorcontroller.AssignOrders(elevatorName)
 			}
-			fsm.MoveOnActiveOrders(elevatorName)
-			fsm.UpdateElevatorState(elevatorName)
+			elevatorcontroller.MoveOnActiveOrders(elevatorName)
+			elevatorcontroller.UpdateElevatorState(elevatorName)
 
 		case floor := <-floors:
 			logrus.Debug("Floor sensor triggered: ", floor)
-			fsm.FloorArrival(floor, elevatorName)
-			fsm.UpdateElevatorState(elevatorName)
+			elevatorcontroller.FloorArrival(floor, elevatorName)
+			elevatorcontroller.UpdateElevatorState(elevatorName)
 			if statehandler.IsOnlyNodeOnline(elevatorName) {
-				fsm.AssignOrders(elevatorName)
+				elevatorcontroller.AssignOrders(elevatorName)
 			}
 			if obstructed {
-				fsm.RequestObstruction()
+				elevatorcontroller.RequestObstruction()
 			}
 
 		default:
 			if timer.TimedOut() {
 				logrus.Debug("Elevator timeout")
-				fsm.UpdateElevatorState(elevatorName)
+				elevatorcontroller.UpdateElevatorState(elevatorName)
 				timer.Stop()
-				fsm.DoorTimeout(elevatorName)
-				fsm.UpdateElevatorState(elevatorName)
+				elevatorcontroller.DoorTimeout(elevatorName)
+				elevatorcontroller.UpdateElevatorState(elevatorName)
 			}
 			time.Sleep(50 * time.Millisecond)
 		}

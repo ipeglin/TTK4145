@@ -2,7 +2,7 @@ package main
 
 import (
 	"elevator"
-	"elevator/fsm"
+	"elevator/elevatorcontroller"
 	"elevator/statehandler"
 	"logger"
 	"messagehandler"
@@ -47,25 +47,25 @@ func initNode(isFirstProcess bool) {
 
 			statehandler.RemoveElevatorsFromState(lostNodeAddresses)
 			if statehandler.IsOnlyNodeOnline(localIP) {
-				fsm.AssignOrders(localIP)
-				fsm.SetConfirmedHallLights(localIP)
-				fsm.MoveOnActiveOrders(localIP)
-				fsm.UpdateElevatorState(localIP)
+				elevatorcontroller.AssignOrders(localIP)
+				elevatorcontroller.SetConfirmedHallLights(localIP)
+				elevatorcontroller.MoveOnActiveOrders(localIP)
+				elevatorcontroller.UpdateElevatorState(localIP)
 			}
 
 		case msg := <-messageReceiveChannel:
 			if !statehandler.IsStateCorrupted(msg.Payload) {
 				statehandler.HandleIncomingSate(localIP, msg.Payload, msg.SenderId)
-				fsm.AssignIfWorldViewsAlign(localIP, msg.Payload)
-				fsm.MoveOnActiveOrders(localIP)
-				fsm.UpdateElevatorState(localIP)
+				elevatorcontroller.AssignIfWorldViewsAlign(localIP, msg.Payload)
+				elevatorcontroller.MoveOnActiveOrders(localIP)
+				elevatorcontroller.UpdateElevatorState(localIP)
 			}
 		case online := <-onlineStatusChannel:
 			if online {
-				fsm.HandleStateOnReboot(localIP)
+				elevatorcontroller.HandleStateOnReboot(localIP)
 			} else {
-				fsm.SetAllLights()
-				fsm.MoveOnActiveOrders(localIP)
+				elevatorcontroller.SetAllLights()
+				elevatorcontroller.MoveOnActiveOrders(localIP)
 			}
 		}
 	}
