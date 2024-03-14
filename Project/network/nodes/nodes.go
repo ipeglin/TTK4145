@@ -15,7 +15,7 @@ type NetworkNodeRegistry struct {
 }
 
 const interval = 150 * time.Millisecond
-const timeout = 3000 * time.Millisecond
+const timeout = 3000 * time.Millisecond // ? Is every 3s too slow
 
 func Sender(port int, id string, enableTransmit <-chan bool) {
 	conn 	:= conn.DialBroadcastUDP(port)
