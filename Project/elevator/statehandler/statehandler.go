@@ -33,7 +33,7 @@ func init() {
 func InitialiseState(e elev.Elevator, elevatorName string) ElevatorState {
 	return ElevatorState{
 		HRAInput: hra.InitialiseHRAInput(e, elevatorName),
-		Counter : counter.InitialiseCounter(elevatorName),
+		Counter:  counter.InitialiseCounter(elevatorName),
 	}
 }
 
@@ -67,16 +67,16 @@ func LoadState() (ElevatorState, error) {
 func UpdateState(e elev.Elevator, elevatorName string) {
 	state, _ := LoadState()
 	if _, exists := state.HRAInput.States[elevatorName]; exists {
-		state.HRAInput 	= hra.UpdateHRAInput(state.HRAInput, e, elevatorName)
-		state.Counter 	= counter.IncrementOnInput(state.Counter, elevatorName)
+		state.HRAInput = hra.UpdateHRAInput(state.HRAInput, e, elevatorName)
+		state.Counter = counter.IncrementOnInput(state.Counter, elevatorName)
 	}
 	SaveState(state)
 }
 
 func UpdateStateOnReboot(e elev.Elevator, elevatorName string) {
-	state, _ 	   := LoadState()
-	state.HRAInput 	= hra.RebootHRAInput(state.HRAInput, e, elevatorName)
-	state.Counter	= counter.IncrementOnInput(state.Counter, elevatorName)
+	state, _ := LoadState()
+	state.HRAInput = hra.RebootHRAInput(state.HRAInput, e, elevatorName)
+	state.Counter = counter.IncrementOnInput(state.Counter, elevatorName)
 	SaveState(state)
 }
 
@@ -98,7 +98,7 @@ func UpdateStateOnNewOrder(elevatorName string, btnFloor int, btn elevio.Button)
 	SaveState(state)
 }
 
-func RemoveElevatorsFromJSON(elevatorIDs []string) error {
+func RemoveElevatorsFromState(elevatorIDs []string) error {
 	state, err := LoadState()
 	if err != nil {
 		return fmt.Errorf("failed to load local combined input: %v", err)
@@ -131,7 +131,7 @@ func HandleIncomingSate(localElevatorName string, externalState ElevatorState, i
 	if _, exists := externalState.HRAInput.States[incomingElevatorName]; exists {
 		mergeWithIncomigStates(localState, localElevatorName, externalState, incomingElevatorName)
 	} else {
-		RemoveElevatorsFromJSON([]string{incomingElevatorName})
+		RemoveElevatorsFromState([]string{incomingElevatorName})
 	}
 }
 
@@ -139,7 +139,7 @@ func mergeWithIncomingHallRequests(localState ElevatorState, externalState Eleva
 	for f := 0; f < elevio.NFloors; f++ {
 		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
 			if externalState.Counter.HallRequests[f][btn] > localState.Counter.HallRequests[f][btn] {
-				localState.Counter.HallRequests[f][btn]  = externalState.Counter.HallRequests[f][btn]
+				localState.Counter.HallRequests[f][btn] = externalState.Counter.HallRequests[f][btn]
 				localState.HRAInput.HallRequests[f][btn] = externalState.HRAInput.HallRequests[f][btn]
 			}
 			if externalState.Counter.HallRequests[f][btn] == localState.Counter.HallRequests[f][btn] {
@@ -154,7 +154,7 @@ func mergeWithIncomingHallRequests(localState ElevatorState, externalState Eleva
 
 func mergeWithIncomigStates(localState ElevatorState, localElevatorName string, externalState ElevatorState, incomingElevatorName string) {
 	localState.HRAInput.States[incomingElevatorName] = externalState.HRAInput.States[incomingElevatorName]
-	localState.Counter.States[incomingElevatorName]  = externalState.Counter.States[incomingElevatorName]
+	localState.Counter.States[incomingElevatorName] = externalState.Counter.States[incomingElevatorName]
 
 	if externalState.Counter.States[localElevatorName] > localState.Counter.States[localElevatorName] {
 		localState.Counter.States[localElevatorName] = externalState.Counter.States[localElevatorName] + 1

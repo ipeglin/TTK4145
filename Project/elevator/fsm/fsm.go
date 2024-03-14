@@ -49,8 +49,8 @@ func SetAllLights() {
 func SetConfirmedHallLights(elevatorName string) {
 	currentState, _ := statehandler.LoadState()
 	for floor := 0; floor < elevio.NFloors; floor++ {
-		for btn := elevio.BHallUp; btn < elevio.BCab; btn ++{
-			elevio.RequestButtonLight(floor,btn, currentState.HRAInput.HallRequests[floor][btn])
+		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+			elevio.RequestButtonLight(floor, btn, currentState.HRAInput.HallRequests[floor][btn])
 		}
 	}
 }
@@ -108,7 +108,7 @@ func DoorTimeout(elevatorName string) {
 func RequestObstruction() {
 	if elevator.CurrentBehaviour == elev.EBDoorOpen {
 		timer.StartInfiniteTimer()
-		statehandler.RemoveElevatorsFromJSON([]string{nodeIP})
+		statehandler.RemoveElevatorsFromState([]string{nodeIP})
 	}
 }
 
@@ -206,15 +206,16 @@ func AssignOrders(elevatorName string) {
 
 func AssignIfWorldViewsAlign(localElevatorName string, externalState statehandler.ElevatorState) {
 	localState, _ := statehandler.LoadState()
-	WView := true
+	WorldView := true
+
 	for f := 0; f < elevio.NFloors; f++ {
 		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
 			if externalState.Counter.HallRequests[f][btn] != localState.Counter.HallRequests[f][btn] {
-				WView = false
+				WorldView = false
 			}
 		}
 	}
-	if WView {
+	if WorldView {
 		AssignOrders(localElevatorName)
 		SetConfirmedHallLights(localElevatorName)
 	}
@@ -250,5 +251,3 @@ func MoveOnActiveOrders(elevatorName string) {
 	}
 	SetAllLights()
 }
-
-// Todo:: functions below dont need to be in fsm?

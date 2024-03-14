@@ -58,7 +58,7 @@ func initNode(isFirstProcess bool) {
 			}
 			logrus.Debug("Removing lost IPs: ", lostNodeAddresses)
 
-			statehandler.RemoveElevatorsFromJSON(lostNodeAddresses)
+			statehandler.RemoveElevatorsFromState(lostNodeAddresses)
 			if statehandler.IsOnlyNodeOnline(localIP) {
 				fsm.AssignOrders(localIP)
 				fsm.SetConfirmedHallLights(localIP)

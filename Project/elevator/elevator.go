@@ -6,6 +6,7 @@ import (
 	"elevator/statehandler"
 	"elevator/timer"
 	"time"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -22,11 +23,11 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 		fsm.ResumeAtLatestCheckpoint(floor)
 	}
 
-	drv_buttons 		:= make(chan elevio.ButtonEvent)
-	drv_floors 			:= make(chan int)
-	drv_obstr 			:= make(chan bool)
-	drv_stop 			:= make(chan bool)
-	drv_motorActivity 	:= make(chan bool)
+	drv_buttons := make(chan elevio.ButtonEvent)
+	drv_floors := make(chan int)
+	drv_obstr := make(chan bool)
+	drv_stop := make(chan bool)
+	drv_motorActivity := make(chan bool)
 
 	go elevio.PollButtons(drv_buttons)
 	go elevio.PollFloorSensor(drv_floors)
@@ -50,7 +51,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 		case motorActive := <-drv_motorActivity:
 			logrus.Warn("MotorActive state changed: ", motorActive)
 			if !motorActive {
-				statehandler.RemoveElevatorsFromJSON([]string{elevatorName})
+				statehandler.RemoveElevatorsFromState([]string{elevatorName})
 			} else {
 				fsm.HandleStateOnReboot(elevatorName)
 				fsm.MoveOnActiveOrders(elevatorName)
