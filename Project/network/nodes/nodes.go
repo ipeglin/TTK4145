@@ -14,7 +14,7 @@ type NetworkNodeRegistry struct {
 	Lost  []string
 }
 
-const interval = 10 * time.Millisecond
+const interval = 150 * time.Millisecond
 const timeout = 3000 * time.Millisecond
 
 func Sender(port int, id string, enableTransmit <-chan bool) {

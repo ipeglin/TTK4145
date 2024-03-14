@@ -6,7 +6,6 @@ import (
 	"elevator/statehandler"
 	"elevator/timer"
 	"time"
-
 	"github.com/sirupsen/logrus"
 )
 

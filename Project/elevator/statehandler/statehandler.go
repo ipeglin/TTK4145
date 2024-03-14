@@ -9,7 +9,6 @@ import (
 	"filehandler"
 	"fmt"
 	"network/local"
-
 	"github.com/sirupsen/logrus"
 )
 
