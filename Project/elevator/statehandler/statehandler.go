@@ -9,12 +9,12 @@ import (
 	"filehandler"
 	"fmt"
 	"network/local"
+
 	"github.com/sirupsen/logrus"
 )
 
 var StateFile string
 
-// ElevatorState kombinerer HRAInput og Counter.
 type ElevatorState struct {
 	HRAInput hra.HRAInput
 	Counter  counter.Counter
