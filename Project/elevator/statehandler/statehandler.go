@@ -140,7 +140,9 @@ func HandleIncomingJSON(localElevatorName string, externalState ElevatorState, i
 				localState.Counter.States[localElevatorName] = externalState.Counter.States[localElevatorName] + 1
 			}
 	} else {
-		RemoveElevatorsFromJSON([]string{incomingElevatorName})
+		delete(localState.HRAInput.States, incomingElevatorName)
+		delete(localState.Counter.States, incomingElevatorName)
+		//RemoveElevatorsFromJSON([]string{incomingElevatorName})
 	}
 	SaveState(localState)
 }
