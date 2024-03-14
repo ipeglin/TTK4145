@@ -1,5 +1,6 @@
 package fsm
 
+//Burde denne filen hetet elevator.go og nåværende elevator.go omdøpes til fsm elns?
 import (
 	"elevator/checkpoint"
 	"elevator/elev"
@@ -7,11 +8,12 @@ import (
 	"elevator/jsonhandler"
 	"elevator/requests"
 	"elevator/timer"
+	"encoding/json"
 	"network/local"
 	"os"
-	"time"
 	"os/exec"
-	"encoding/json"
+	"time"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -31,9 +33,12 @@ func init() {
 }
 
 func SetAllLights() {
+	currentState, _ := jsonhandler.LoadState()
+	isOffline := (len(currentState.HRAInput.States) == 0)
+
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		outputDevice.RequestButtonLight(floor, elevio.BCab, elevator.Requests[floor][elevio.BCab])
-		if isOffline() || OnlyElevatorOnline(nodeIP) {
+		if isOffline || IsOnlyNodeOnline(nodeIP) {
 			for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
 				outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
 			}
@@ -149,66 +154,59 @@ func CreateLocalStateFile(elevatorName string) {
 	}
 }
 
-// * This was UpdateJSON()
 func UpdateElevatorState(elevatorName string) {
 	jsonhandler.UpdateJSON(elevator, elevatorName)
 	checkpoint.SetCheckpoint(elevator)
 }
 
-// * This was RebootJSON()
 func HandleStateOnReboot(elevatorName string) {
-	jsonhandler.UpdateJSONOnReboot(elevator, elevatorName) // Deprecated: json.RebootJSON()
+	jsonhandler.UpdateJSONOnReboot(elevator, elevatorName)
 	checkpoint.SetCheckpoint(elevator)
 }
 
-// gir det mening å ha slike oneliners? eller burde vi flytte inn JsonOrderAssignerKoden her?
 func AssignOrders(elevatorName string) {
-    // Load state
-    state, err := jsonhandler.LoadState()
-    if err != nil {
-        logrus.Debugf("Failed to load combined input: %v\n", err)
-        return
-    }
+	state, err := jsonhandler.LoadState()
+	if err != nil {
+		logrus.Debugf("Failed to load combined input: %v\n", err)
+		return
+	}
 
-    if len(state.HRAInput.States) == 0 {
-        logrus.Debug("HRAInput.States is empty, skipping order assignment")
-        return
-    }
+	if len(state.HRAInput.States) == 0 {
+		logrus.Debug("HRAInput.States is empty, skipping order assignment")
+		return
+	}
 
-    jsonBytes, err := json.Marshal(state.HRAInput)
-    if err != nil {
-        logrus.Debugf("Failed to marshal HRAInput: %v\n", err)
-        return
-    }
+	jsonBytes, err := json.Marshal(state.HRAInput)
+	if err != nil {
+		logrus.Debugf("Failed to marshal HRAInput: %v\n", err)
+		return
+	}
 
-    ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
-    if err != nil {
-        logrus.Debugf("exec.Command error: %v\nOutput: %s\n", err, string(ret))
-        return
-    }
+	ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
+	if err != nil {
+		logrus.Debugf("exec.Command error: %v\nOutput: %s\n", err, string(ret))
+		return
+	}
 
-    output := make(map[string][][2]bool)
-    if err := json.Unmarshal(ret, &output); err != nil {
-        logrus.Debugf("json.Unmarshal error: %v\n", err)
-        return
-    }
+	output := make(map[string][][2]bool)
+	if err := json.Unmarshal(ret, &output); err != nil {
+		logrus.Debugf("json.Unmarshal error: %v\n", err)
+		return
+	}
 
-    for floor := 0; floor < elevio.NFloors; floor++ {
-        if orders, ok := output[elevatorName]; ok && floor < len(orders) {
-            elevator.Requests[floor][elevio.BHallUp]   = orders[floor][0]
-            elevator.Requests[floor][elevio.BHallDown] = orders[floor][1]
-        }
-    }
+	for floor := 0; floor < elevio.NFloors; floor++ {
+		if orders, ok := output[elevatorName]; ok && floor < len(orders) {
+			elevator.Requests[floor][elevio.BHallUp] = orders[floor][0]
+			elevator.Requests[floor][elevio.BHallDown] = orders[floor][1]
+		}
+	}
 }
-
 
 func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string) {
 	// TODO: Extract the conditions into variables with more informative names
 	if requests.ShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
 		timer.Start(elevator.Config.DoorOpenDurationS)
 	} else {
-		// TODO: Check if this is correct
-		//updateStateOnNewOrder(btnFloor, btn, elevatorName, filename)
 		jsonhandler.UpdateJSONOnNewOrder(elevatorName, btnFloor, btn)
 
 		if btn == elevio.BCab {
@@ -228,7 +226,6 @@ func MoveOnActiveOrders(elevatorName string) {
 			outputDevice.DoorLight(true)
 			timer.Start(elevator.Config.DoorOpenDurationS)
 			elevator = requests.ClearAtCurrentFloor(elevator, elevatorName)
-
 		case elev.EBMoving:
 			outputDevice.MotorDirection(elevator.Dirn)
 		}
@@ -236,61 +233,6 @@ func MoveOnActiveOrders(elevatorName string) {
 	SetAllLights()
 }
 
-func HandleIncomingJSON(localElevatorName string, externalState jsonhandler.ElevatorState, incomingElevatorName string) {
-	localState, _ := jsonhandler.LoadState()
-	for f := 0; f < elevio.NFloors; f++ {
-		for i := 0; i < 2; i++ {
-			if externalState.Counter.HallRequests[f][i] > localState.Counter.HallRequests[f][i] {
-				localState.Counter.HallRequests[f][i] = externalState.Counter.HallRequests[f][i]
-				localState.HRAInput.HallRequests[f][i] = externalState.HRAInput.HallRequests[f][i]
-			}
-			if externalState.Counter.HallRequests[f][i] == localState.Counter.HallRequests[f][i] {
-				if localState.HRAInput.HallRequests[f][i] != externalState.HRAInput.HallRequests[f][i] {
-					localState.HRAInput.HallRequests[f][i] = false
-				}
-			}
-		}
-	}
-	if _, exists := externalState.HRAInput.States[incomingElevatorName]; exists {
-		if _, exists := localState.HRAInput.States[incomingElevatorName]; !exists {
-			localState.HRAInput.States[incomingElevatorName] = externalState.HRAInput.States[incomingElevatorName]
-			localState.Counter.States[incomingElevatorName] = externalState.Counter.States[incomingElevatorName]
-		} else {
-			if externalState.Counter.States[incomingElevatorName] > localState.Counter.States[incomingElevatorName] {
-				localState.HRAInput.States[incomingElevatorName] = externalState.HRAInput.States[incomingElevatorName]
-				localState.Counter.States[incomingElevatorName] = externalState.Counter.States[incomingElevatorName]
-			}
-		}
-	} else {
-		if _, exists := localState.HRAInput.States[incomingElevatorName]; exists {
-			delete(localState.HRAInput.States, incomingElevatorName)
-			delete(localState.Counter.States, incomingElevatorName)
-		}
-	}
-	if _, exists := externalState.Counter.States[localElevatorName]; exists {
-		if externalState.Counter.States[localElevatorName] > localState.Counter.States[localElevatorName] {
-			localState.Counter.States[localElevatorName] = externalState.Counter.States[localElevatorName] + 1
-		}
-	}
-	jsonhandler.SaveState(localState)
-}
-
-// TODO: Should this go somewehre else?
-/*
-func worldViewsAlign(externalState jsonhandler.ElevatorState) bool {
-	localState, _ := jsonhandler.LoadState()
-	for f := 0; f < elevio.NFloors; f++ {
-		for i := 0; i < 2; i++ {
-			if externalState.Counter.HallRequests[f][i] != localState.Counter.HallRequests[f][i] {
-				return false
-			}
-		}
-	}
-	return true
-}
-*/
-//kombinerte med func over 
-//er det greit jeg setter lys her? 
 func AssignIfWorldViewsAlign(localElevatorName string, externalState jsonhandler.ElevatorState) {
 	localState, _ := jsonhandler.LoadState()
 	WView := true
@@ -307,10 +249,8 @@ func AssignIfWorldViewsAlign(localElevatorName string, externalState jsonhandler
 	}
 }
 
-
-
-// TODO: Maybe IsOnlyNodeOnline() and these functions below dont need to be in fsm?
-func OnlyElevatorOnline(localElevatorName string) bool {
+//Todo:: functions below dont need to be in fsm?
+func IsOnlyNodeOnline(localElevatorName string) bool {
 	currentState, _ := jsonhandler.LoadState()
 	if len(currentState.HRAInput.States) == 1 {
 		if _, exists := currentState.HRAInput.States[localElevatorName]; exists {
@@ -318,9 +258,4 @@ func OnlyElevatorOnline(localElevatorName string) bool {
 		}
 	}
 	return false
-}
-
-func isOffline() bool {
-	currentState, _ := jsonhandler.LoadState()
-	return len(currentState.HRAInput.States) == 0
 }

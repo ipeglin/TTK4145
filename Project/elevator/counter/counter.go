@@ -5,52 +5,52 @@ import (
 	"elevator/hra"
 )
 
-// TODO: Change to just CyclicCounter
+// TODO: Change to just counter
 type Counter struct {
 	HallRequests [][2]int       `json:"hallRequests"`
 	States       map[string]int `json:"states"`
 }
 
 func InitialiseCounter(elevatorName string) Counter {
-	cyclicCounter := Counter{
+	counter := Counter{
 		HallRequests: make([][2]int, elevio.NFloors),
 		States:       make(map[string]int), // Initialiserer map her
 	}
 
 	// Nå som States er initialisert, kan du legge til oppføringer i den
-	cyclicCounter.States[elevatorName] = 0
+	counter.States[elevatorName] = 0
 
-	return cyclicCounter
+	return counter
 }
 
-func UpdateOnCompletedOrder(cyclicCounter Counter, elevatorName string, btn_floor int, btn_type elevio.Button) Counter {
+func UpdateOnCompletedOrder(counter Counter, elevatorName string, btn_floor int, btn_type elevio.Button) Counter {
 	switch btn_type {
 	case elevio.BHallUp:
-		cyclicCounter.HallRequests[btn_floor][0] += 1
+		counter.HallRequests[btn_floor][0] += 1
 	case elevio.BHallDown:
-		cyclicCounter.HallRequests[btn_floor][1] += 1
+		counter.HallRequests[btn_floor][1] += 1
 	}
-	cyclicCounter.States[elevatorName] += 1
-	return cyclicCounter
+	counter.States[elevatorName] += 1
+	return counter
 }
 
-func IncrementOnInput(cyclicCounter Counter, elevatorName string) Counter {
-	cyclicCounter.States[elevatorName] += 1
-	return cyclicCounter
+func IncrementOnInput(counter Counter, elevatorName string) Counter {
+	counter.States[elevatorName] += 1
+	return counter
 }
 
-func UpdateOnNewOrder(cyclicCounter Counter, hraInput hra.HRAInput, elevatorName string, btnFloor int, btn elevio.Button) Counter {
+func UpdateOnNewOrder(counter Counter, hraInput hra.HRAInput, elevatorName string, btnFloor int, btn elevio.Button) Counter {
 	switch btn {
 	case elevio.BHallUp:
 		if !hraInput.HallRequests[btnFloor][0] {
-			cyclicCounter.HallRequests[btnFloor][0] += 1
+			counter.HallRequests[btnFloor][0] += 1
 		}
 	case elevio.BHallDown:
 		if !hraInput.HallRequests[btnFloor][1] {
-			cyclicCounter.HallRequests[btnFloor][1] += 1
+			counter.HallRequests[btnFloor][1] += 1
 		}
 	case elevio.BCab:
-		cyclicCounter.States[elevatorName] += 1
+		counter.States[elevatorName] += 1
 	}
-	return cyclicCounter
+	return counter
 }

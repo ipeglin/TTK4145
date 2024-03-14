@@ -11,19 +11,20 @@ import (
 	"processpair"
 	"strings"
 	"time"
+
 	"github.com/sirupsen/logrus"
 )
 
-//Todo ! : Ikke kall init node kanskje?
+// Todo ! : Ikke kall init node kanskje?
 func initNode(isFirstProcess bool) {
 	logger.Setup()
 	logrus.Info("Node initialised with PID:", os.Getpid())
 
-	nodeOverviewChannel 		:= make(chan nodes.NetworkNodeRegistry)
-	messageReceiveChannel 		:= make(chan network.Message)
-	messageTransmitterChannel 	:= make(chan network.Message)
-	onlineStatusChannel 		:= make(chan bool)
-	ipChannel 					:= make(chan string)
+	nodeOverviewChannel := make(chan nodes.NetworkNodeRegistry)
+	messageReceiveChannel := make(chan network.Message)
+	messageTransmitterChannel := make(chan network.Message)
+	onlineStatusChannel := make(chan bool)
+	ipChannel := make(chan string)
 
 	go network.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel, ipChannel)
 
@@ -59,7 +60,7 @@ func initNode(isFirstProcess bool) {
 			logrus.Debug("Removing lost IPs: ", lostNodeAddresses)
 
 			jsonhandler.RemoveElevatorsFromJSON(lostNodeAddresses)
-			if fsm.OnlyElevatorOnline(localIP) {
+			if fsm.IsOnlyNodeOnline(localIP) {
 				fsm.AssignOrders(localIP)
 				fsm.SetConfirmedHallLights(localIP)
 				fsm.MoveOnActiveOrders(localIP)
@@ -68,9 +69,9 @@ func initNode(isFirstProcess bool) {
 			}
 
 		case msg := <-messageReceiveChannel:
-			logrus.Debug("Received message from ", msg.SenderId) 
+			logrus.Debug("Received message from ", msg.SenderId)
 			if !jsonhandler.IsStateCorrupted(msg.Payload) {
-				fsm.HandleIncomingJSON(localIP, msg.Payload, msg.SenderId)
+				jsonhandler.HandleIncomingJSON(localIP, msg.Payload, msg.SenderId)
 				fsm.AssignIfWorldViewsAlign(localIP, msg.Payload)
 				fsm.MoveOnActiveOrders(localIP)
 				fsm.UpdateElevatorState(localIP)
@@ -79,7 +80,7 @@ func initNode(isFirstProcess bool) {
 
 		case online := <-onlineStatusChannel:
 			if online {
-				fsm.HandleStateOnReboot(localIP) 
+				fsm.HandleStateOnReboot(localIP)
 			} else {
 				fsm.SetAllLights()
 				fsm.MoveOnActiveOrders(localIP)
@@ -90,7 +91,7 @@ func initNode(isFirstProcess bool) {
 
 }
 
-//Todo: ! Kan vi omdøpe over yil å bli main og calle diise func i main 
+//Todo: ! Kan vi omdøpe over yil å bli main og calle diise func i main
 
 func main() {
 	var entryPointFunction func(bool) = initNode

@@ -101,44 +101,6 @@ func UpdateJSONOnNewOrder(elevatorName string, btnFloor int, btn elevio.Button) 
 	SaveState(state)
 }
 
-//flyttet denne til fsm. 
-/*
-func JSONOrderAssigner(e *elev.Elevator, elevatorName string) {
-	state, err := LoadState()
-	if err != nil {
-		fmt.Printf("Failed to load combined input: %v\n", err)
-		return
-	}
-	if len(state.HRAInput.States) > 0 {
-		jsonBytes, err := json.Marshal(state.HRAInput)
-		if err != nil {
-			fmt.Printf("Failed to marshal HRAInput: %v\n", err)
-			return
-		}
-
-		ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
-		if err != nil {
-			fmt.Printf("exec.Command error: %v\nOutput: %s\n", err, string(ret))
-			return
-		}
-
-		output := make(map[string][][2]bool)
-		if err := json.Unmarshal(ret, &output); err != nil {
-			fmt.Printf("json.Unmarshal error: %v\n", err)
-			return
-		}
-
-		for floor := 0; floor < elevio.NFloors; floor++ {
-			if orders, ok := output[elevatorName]; ok && floor < len(orders) {
-				e.Requests[floor][elevio.BHallUp] 	= orders[floor][0]
-				e.Requests[floor][elevio.BHallDown] = orders[floor][1]
-			}
-		}
-	} else {
-		logrus.Debug("HRAInput.States is empty, skipping order assignment")
-	}
-}
-*/
 func RemoveElevatorsFromJSON(elevatorIDs []string) error {
 	state, err := LoadState()
 	if err != nil {
@@ -168,6 +130,46 @@ func RemoveElevatorsFromJSON(elevatorIDs []string) error {
 
 	return nil
 }
+
+func HandleIncomingJSON(localElevatorName string, externalState ElevatorState, incomingElevatorName string) {
+	localState, _ := LoadState()
+	for f := 0; f < elevio.NFloors; f++ {
+		for i := 0; i < 2; i++ {
+			if externalState.Counter.HallRequests[f][i] > localState.Counter.HallRequests[f][i] {
+				localState.Counter.HallRequests[f][i] = externalState.Counter.HallRequests[f][i]
+				localState.HRAInput.HallRequests[f][i] = externalState.HRAInput.HallRequests[f][i]
+			}
+			if externalState.Counter.HallRequests[f][i] == localState.Counter.HallRequests[f][i] {
+				if localState.HRAInput.HallRequests[f][i] != externalState.HRAInput.HallRequests[f][i] {
+					localState.HRAInput.HallRequests[f][i] = false
+				}
+			}
+		}
+	}
+	if _, exists := externalState.HRAInput.States[incomingElevatorName]; exists {
+		if _, exists := localState.HRAInput.States[incomingElevatorName]; !exists {
+			localState.HRAInput.States[incomingElevatorName] = externalState.HRAInput.States[incomingElevatorName]
+			localState.Counter.States[incomingElevatorName] = externalState.Counter.States[incomingElevatorName]
+		} else {
+			if externalState.Counter.States[incomingElevatorName] > localState.Counter.States[incomingElevatorName] {
+				localState.HRAInput.States[incomingElevatorName] = externalState.HRAInput.States[incomingElevatorName]
+				localState.Counter.States[incomingElevatorName] = externalState.Counter.States[incomingElevatorName]
+			}
+		}
+	} else {
+		if _, exists := localState.HRAInput.States[incomingElevatorName]; exists {
+			delete(localState.HRAInput.States, incomingElevatorName)
+			delete(localState.Counter.States, incomingElevatorName)
+		}
+	}
+	if _, exists := externalState.Counter.States[localElevatorName]; exists {
+		if externalState.Counter.States[localElevatorName] > localState.Counter.States[localElevatorName] {
+			localState.Counter.States[localElevatorName] = externalState.Counter.States[localElevatorName] + 1
+		}
+	}
+	SaveState(localState)
+}
+
 
 // TODO: Gustav shceck if this is neccesary
 func IsStateCorrupted(state ElevatorState) bool {
