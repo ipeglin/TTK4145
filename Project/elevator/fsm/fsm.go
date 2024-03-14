@@ -206,19 +206,23 @@ func AssignOrders(elevatorName string) {
 
 func AssignIfWorldViewsAlign(localElevatorName string, externalState statehandler.ElevatorState) {
 	localState, _ := statehandler.LoadState()
-	WorldView := true
 
-	for f := 0; f < elevio.NFloors; f++ {
-		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
-			if externalState.Counter.HallRequests[f][btn] != localState.Counter.HallRequests[f][btn] {
-				WorldView = false
-			}
-		}
-	}
-	if WorldView {
+	if isOrderStatesEqual(localState, externalState) {
 		AssignOrders(localElevatorName)
 		SetConfirmedHallLights(localElevatorName)
 	}
+}
+
+func isOrderStatesEqual(state statehandler.ElevatorState, externalState statehandler.ElevatorState) bool {
+	for f := 0; f < elevio.NFloors; f++ {
+		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
+			if externalState.Counter.HallRequests[f][btn] != state.Counter.HallRequests[f][btn] {
+				return false
+			}
+		}
+	}
+
+	return true
 }
 
 func HandleButtonPress(btnFloor int, btn elevio.Button, elevatorName string) {
