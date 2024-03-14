@@ -106,7 +106,6 @@ func RemoveElevatorsFromJSON(elevatorIDs []string) error {
 		return fmt.Errorf("failed to load local combined input: %v", err)
 	}
 
-	// Convert slice of inactive elevator IDs to a map for efficient lookups
 	inactiveElevatorsMap := make(map[string]struct{})
 	for _, id := range elevatorIDs {
 		inactiveElevatorsMap[id] = struct{}{}
@@ -119,8 +118,6 @@ func RemoveElevatorsFromJSON(elevatorIDs []string) error {
 			delete(state.Counter.States, id)
 		}
 	}
-
-	// Save the updated state back to the file
 	//TODO: Got error check for this saveState but not for anyone else
 	err = SaveState(state)
 	if err != nil {
@@ -132,16 +129,15 @@ func RemoveElevatorsFromJSON(elevatorIDs []string) error {
 
 func HandleIncomingJSON(localElevatorName string, externalState ElevatorState, incomingElevatorName string) {
 	localState, _ := LoadState()
-	localState = mergeWithIncomingHallRequests(localState, externalState)
-	SaveState(localState) 
+	mergeWithIncomingHallRequests(localState, externalState)
 	if _, exists := externalState.HRAInput.States[incomingElevatorName]; exists {
-		localState = mergeWithIncomigStates(localState, localElevatorName, externalState, incomingElevatorName)
-		SaveState(localState)
+		mergeWithIncomigStates(localState, localElevatorName, externalState, incomingElevatorName)
 	}else {
 		RemoveElevatorsFromJSON([]string{incomingElevatorName})
 	}
 }
-func mergeWithIncomingHallRequests(localState ElevatorState, externalState ElevatorState) ElevatorState {
+
+func mergeWithIncomingHallRequests(localState ElevatorState, externalState ElevatorState) {
 	for f := 0; f < elevio.NFloors; f++ {
 		for i := 0; i < 2; i++ {
 			if externalState.Counter.HallRequests[f][i] > localState.Counter.HallRequests[f][i] {
@@ -155,16 +151,17 @@ func mergeWithIncomingHallRequests(localState ElevatorState, externalState Eleva
 			}
 		}
 	}
-	return localState
+	SaveState(localState) 
 }
 
-func mergeWithIncomigStates(localState ElevatorState, localElevatorName string, externalState ElevatorState, incomingElevatorName string) ElevatorState{
+func mergeWithIncomigStates(localState ElevatorState, localElevatorName string, externalState ElevatorState, incomingElevatorName string){
 	localState.HRAInput.States[incomingElevatorName] = externalState.HRAInput.States[incomingElevatorName]
 	localState.Counter.States[incomingElevatorName] = externalState.Counter.States[incomingElevatorName]
-		if externalState.Counter.States[localElevatorName] > localState.Counter.States[localElevatorName] {
-			localState.Counter.States[localElevatorName] = externalState.Counter.States[localElevatorName] + 1
-		}
-	return localState
+
+	if externalState.Counter.States[localElevatorName] > localState.Counter.States[localElevatorName] {
+		localState.Counter.States[localElevatorName] = externalState.Counter.States[localElevatorName] + 1
+	}
+	SaveState(localState) 
 }
 
 // TODO: Gustav shceck if this is neccesary
