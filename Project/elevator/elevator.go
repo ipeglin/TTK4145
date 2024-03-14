@@ -25,22 +25,22 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 
 	buttons := make(chan elevio.ButtonEvent)
 	floors := make(chan int)
-	obstr := make(chan bool)
+	obst := make(chan bool)
 	motorActivity := make(chan bool)
 
 	go elevio.PollButtons(buttons)
 	go elevio.PollFloorSensor(floors)
-	go elevio.PollObstructionSwitch(obstr)
+	go elevio.PollObstructionSwitch(obst)
 	go elevio.MontitorMotorActivity(motorActivity, 3.0)
 	go fsm.CreateCheckpoint()
 
-	var obst bool = false
+	var obstructed bool = false
 	for {
 		select {
-		case obst = <-obstr:
-			logrus.Warn("Obstruction state changed: ", obst)
-			if obst {
-				logrus.Debug("New obstruction detected: ", obst)
+		case obstructed = <-obst:
+			logrus.Warn("Obstruction state changed: ", obstructed)
+			if obstructed {
+				logrus.Debug("New obstruction detected: ", obstructed)
 				fsm.RequestObstruction()
 			} else {
 				fsm.StopObstruction()
@@ -72,7 +72,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			if statehandler.IsOnlyNodeOnline(elevatorName) {
 				fsm.AssignOrders(elevatorName)
 			}
-			if obst {
+			if obstructed {
 				fsm.RequestObstruction()
 			}
 
