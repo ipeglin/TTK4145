@@ -23,21 +23,21 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 		fsm.ResumeAtLatestCheckpoint(floor)
 	}
 
-	drv_buttons := make(chan elevio.ButtonEvent)
-	drv_floors := make(chan int)
-	drv_obstr := make(chan bool)
-	drv_motorActivity := make(chan bool)
+	buttons := make(chan elevio.ButtonEvent)
+	floors := make(chan int)
+	obstr := make(chan bool)
+	motorActivity := make(chan bool)
 
-	go elevio.PollButtons(drv_buttons)
-	go elevio.PollFloorSensor(drv_floors)
-	go elevio.PollObstructionSwitch(drv_obstr)
-	go elevio.MontitorMotorActivity(drv_motorActivity, 3.0)
+	go elevio.PollButtons(buttons)
+	go elevio.PollFloorSensor(floors)
+	go elevio.PollObstructionSwitch(obstr)
+	go elevio.MontitorMotorActivity(motorActivity, 3.0)
 	go fsm.CreateCheckpoint()
 
 	var obst bool = false
 	for {
 		select {
-		case obst = <-drv_obstr:
+		case obst = <-obstr:
 			logrus.Warn("Obstruction state changed: ", obst)
 			if obst {
 				logrus.Debug("New obstruction detected: ", obst)
@@ -46,7 +46,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 				fsm.StopObstruction()
 			}
 
-		case motorActive := <-drv_motorActivity:
+		case motorActive := <-motorActivity:
 			logrus.Warn("MotorActive state changed: ", motorActive)
 			if !motorActive {
 				statehandler.RemoveElevatorsFromState([]string{elevatorName})
@@ -55,7 +55,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 				fsm.MoveOnActiveOrders(elevatorName)
 			}
 
-		case btnEvent := <-drv_buttons:
+		case btnEvent := <-buttons:
 			logrus.Debug("Button press detected: ", btnEvent)
 			fsm.UpdateElevatorState(elevatorName)
 			fsm.HandleButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName)
@@ -65,7 +65,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			fsm.MoveOnActiveOrders(elevatorName)
 			fsm.UpdateElevatorState(elevatorName)
 
-		case floor := <-drv_floors:
+		case floor := <-floors:
 			logrus.Debug("Floor sensor triggered: ", floor)
 			fsm.FloorArrival(floor, elevatorName)
 			fsm.UpdateElevatorState(elevatorName)
