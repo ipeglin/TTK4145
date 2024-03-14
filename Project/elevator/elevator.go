@@ -31,7 +31,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 	go elevio.PollButtons(buttons)
 	go elevio.PollFloorSensor(floors)
 	go elevio.PollObstructionSwitch(obst)
-	go elevio.MontitorMotorActivity(motorActivity, 3.0)
+	go elevio.MontitorMotorActivity(motorActivity)
 	go fsm.CreateCheckpoint()
 
 	var obstructed bool = false

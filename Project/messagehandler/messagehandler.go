@@ -8,6 +8,7 @@ import (
 	"network/local"
 	"network/nodes"
 	"os"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
@@ -15,6 +16,7 @@ import (
 
 const lifelinePort int = 1337
 const messagePort int = lifelinePort + 1
+const createMessageInterval = 500
 
 type Message struct {
 	SenderId string // IPv4
@@ -22,13 +24,13 @@ type Message struct {
 	Checksum string
 }
 
-func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan Message, responseChannel chan<- Message, onlineStatusChannel chan<- bool, ipChannel chan<- string) {
+func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, responseChannel chan<- Message, onlineStatusChannel chan<- bool, ipChannel chan<- string) {
 	nodeIP, err := local.GetIP()
 	if err != nil {
 		logrus.Debug("Unable to get the IP address")
 	}
 
-	ipChannel <- nodeIP // pass the IP address to main process
+	ipChannel <- nodeIP
 
 	nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP, os.Getpid())
 	logrus.Debug(fmt.Sprintf("Network module initialised with UID=%s on PORT=%d", nodeUid, lifelinePort))
@@ -42,6 +44,9 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 	broadcastReceiverChannel := make(chan Message)
 	go broadcast.Sender(messagePort, broadcastTransmissionChannel)
 	go broadcast.Receiver(nodeIP, messagePort, broadcastReceiverChannel)
+
+	messageChannel := make(chan Message)
+	go createStateMessage(messageChannel)
 
 	for {
 		select {
@@ -87,5 +92,13 @@ func Init(nodesChannel chan<- nodes.NetworkNodeRegistry, messageChannel <-chan M
 
 			broadcastTransmissionChannel <- msg
 		}
+	}
+}
+
+func createStateMessage(messageChannel chan Message) {
+	for {
+		elevState, _ := statehandler.LoadState()
+		messageChannel <- Message{Payload: elevState}
+		time.Sleep(createMessageInterval * time.Millisecond)
 	}
 }

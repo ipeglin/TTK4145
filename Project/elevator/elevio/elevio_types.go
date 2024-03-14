@@ -1,8 +1,9 @@
 package elevio
 
 const (
-	NFloors  int = 4
-	NButtons int = 3
+	NFloors       int = 4
+	NButtons      int = 3
+	motorTimeoutS     = 3.0
 )
 
 const Addr string = "localhost:15657"

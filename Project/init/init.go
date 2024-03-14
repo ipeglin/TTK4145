@@ -10,7 +10,6 @@ import (
 	"os"
 	"processpair"
 	"strings"
-	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -21,24 +20,12 @@ func initNode(isFirstProcess bool) {
 
 	nodeOverviewChannel := make(chan nodes.NetworkNodeRegistry)
 	messageReceiveChannel := make(chan messagehandler.Message)
-	messageTransmitterChannel := make(chan messagehandler.Message)
 	onlineStatusChannel := make(chan bool)
 	ipChannel := make(chan string)
+	go messagehandler.Init(nodeOverviewChannel, messageReceiveChannel, onlineStatusChannel, ipChannel)
 
-	go messagehandler.Init(nodeOverviewChannel, messageTransmitterChannel, messageReceiveChannel, onlineStatusChannel, ipChannel)
-
-	// await ip from network module
 	localIP := <-ipChannel
 	go elevator.Init(localIP, isFirstProcess)
-
-	// broadcast state
-	go func() {
-		for {
-			elv, _ := statehandler.LoadState()
-			messageTransmitterChannel <- messagehandler.Message{Payload: elv}
-			time.Sleep(500 * time.Millisecond)
-		}
-	}()
 
 	for {
 		select {
