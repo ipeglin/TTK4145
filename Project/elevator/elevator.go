@@ -56,6 +56,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			}
 
 		case btnEvent := <-buttons:
+			print("button pressed")
 			logrus.Debug("Button press detected: ", btnEvent)
 			fsm.UpdateElevatorState(elevatorName)
 			fsm.HandleButtonPress(btnEvent.Floor, btnEvent.Button, elevatorName)
