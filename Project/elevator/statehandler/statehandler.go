@@ -90,7 +90,8 @@ func UpdateStateOnCompletedHallOrder(e elev.Elevator, elevatorName string, btn_f
 
 func UpdateStateOnNewOrder(elevatorName string, btnFloor int, btn elevio.Button) {
 	state, _ := LoadState()
-	if _, exists := state.HRAInput.States[elevatorName]; exists {
+	isOnline := (len(state.HRAInput.States) !=0)
+	if isOnline {
 		state.Counter = counter.UpdateOnNewOrder(state.Counter, state.HRAInput, elevatorName, btnFloor, btn)
 		state.HRAInput = hra.UpdateHRAInputOnNewOrder(state.HRAInput, elevatorName, btnFloor, btn)
 	}

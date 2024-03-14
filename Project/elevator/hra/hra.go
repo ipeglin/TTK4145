@@ -108,7 +108,9 @@ func UpdateHRAInputOnNewOrder(hraInput HRAInput, elevatorName string, btnFloor i
 	case elevio.BHallDown:
 		hraInput.HallRequests[btnFloor][elevio.BHallDown] = true
 	case elevio.BCab:
-		hraInput.States[elevatorName].CabRequests[btnFloor] = true
+		if _, exists := hraInput.States[elevatorName]; exists {
+			hraInput.States[elevatorName].CabRequests[btnFloor] = true
+		}
 	}
 	return hraInput
 }
