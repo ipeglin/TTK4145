@@ -1,10 +1,5 @@
 # TTK4145 Project
 
-## Authors
-* **Gustav Lokna** - [@gustavlokna](https://github.com/gustavlokna)
-* **Ian Philip Eglin** - [@ipeglin](https://github.com/ipeglin)
-* **Simen Fritzner** - [@simenfritzner](https://github.com/simenfritzner)
-
 ## Getting Started
 
 ### Pre-requisites
