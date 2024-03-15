@@ -12,7 +12,6 @@ func GenerateJSONChecksum(object interface{}) (string, error) {
 		return "", err
 	}
 
-	// Calculate SHA256 checksum
 	hash := sha256.New()
 	hash.Write(bytes)
 	checksum := fmt.Sprintf("%x", hash.Sum(nil))

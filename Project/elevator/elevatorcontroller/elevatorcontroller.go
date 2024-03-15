@@ -1,6 +1,5 @@
 package elevatorcontroller
 
-//Burde denne filen hetet elevator.go og nåværende elevator.go omdøpes til elevatorcontroller elns?
 import (
 	"elevator/checkpoint"
 	"elevator/elev"
