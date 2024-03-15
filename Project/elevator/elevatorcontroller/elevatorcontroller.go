@@ -17,13 +17,11 @@ import (
 )
 
 var elevator elev.Elevator
-var outputDevice elevio.ElevOutputDevice
 var nodeIP string
 
 func init() {
 	elevator = elev.ElevatorInit()
 	nodeIP, _ = local.GetIP()
-	outputDevice = elevio.ElevioGetOutputDevice()
 	SetAllLights()
 	elevio.RequestDoorOpenLamp(false)
 	elevio.RequestStopLamp(false)
@@ -38,10 +36,10 @@ func SetAllLights() {
 	isOffline := (len(currentState.HRAInput.States) == 0)
 
 	for floor := 0; floor < elevio.NFloors; floor++ {
-		outputDevice.RequestButtonLight(floor, elevio.BCab, elevator.Requests[floor][elevio.BCab])
+		elevio.OutputDevice.RequestButtonLight(floor, elevio.BCab, elevator.Requests[floor][elevio.BCab])
 		if isOffline || statehandler.IsOnlyNodeOnline(nodeIP) {
 			for btn := elevio.BHallUp; btn <= elevio.BCab; btn++ {
-				outputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
+				elevio.OutputDevice.RequestButtonLight(floor, btn, elevator.Requests[floor][btn])
 			}
 		}
 	}
@@ -58,7 +56,7 @@ func SetConfirmedHallLights(elevatorName string) {
 
 func MoveDownToFloor() {
 	dirn := elevio.DirDown
-	outputDevice.MotorDirection(dirn)
+	elevio.OutputDevice.MotorDirection(dirn)
 	elevator.Dirn = dirn
 	elevator.CurrentBehaviour = elev.EBMoving
 }
@@ -67,13 +65,13 @@ func FloorArrival(newFloor int, elevatorName string) {
 	logrus.Warn("Arrived at new floor: ", newFloor)
 
 	elevator.CurrentFloor = newFloor
-	outputDevice.FloorIndicator(elevator.CurrentFloor)
+	elevio.OutputDevice.FloorIndicator(elevator.CurrentFloor)
 
 	switch elevator.CurrentBehaviour {
 	case elev.EBMoving:
 		if requests.ShouldStop(elevator) {
-			outputDevice.MotorDirection(elevio.DirStop)
-			outputDevice.DoorLight(true)
+			elevio.OutputDevice.MotorDirection(elevio.DirStop)
+			elevio.OutputDevice.DoorLight(true)
 			elevator = requests.ClearAtCurrentFloor(elevator, elevatorName)
 			timer.Start(elevator.Config.DoorOpenDurationS)
 			SetAllLights()
@@ -97,11 +95,11 @@ func DoorTimeout(elevatorName string) {
 			SetAllLights()
 
 		case elev.EBMoving:
-			outputDevice.DoorLight(false)
+			elevio.OutputDevice.DoorLight(false)
 
-			outputDevice.MotorDirection(elevator.Dirn)
+			elevio.OutputDevice.MotorDirection(elevator.Dirn)
 		case elev.EBIdle:
-			outputDevice.DoorLight(false)
+			elevio.OutputDevice.DoorLight(false)
 		}
 	}
 }
@@ -131,12 +129,12 @@ func ResumeAtLatestCheckpoint(floor int) {
 	SetAllLights()
 
 	if elevator.Dirn != elevio.DirStop && floor == -1 {
-		outputDevice.MotorDirection(elevator.Dirn)
+		elevio.OutputDevice.MotorDirection(elevator.Dirn)
 	}
 
 	if floor != -1 {
 		timer.Start(elev.DoorOpenDurationSConfig)
-		outputDevice.DoorLight(true)
+		elevio.OutputDevice.DoorLight(true)
 		elevator.CurrentBehaviour = elev.EBDoorOpen
 	}
 }
@@ -244,11 +242,11 @@ func MoveOnActiveOrders(elevatorName string) {
 		elevator.CurrentBehaviour = pair.Behaviour
 		switch pair.Behaviour {
 		case elev.EBDoorOpen:
-			outputDevice.DoorLight(true)
+			elevio.OutputDevice.DoorLight(true)
 			timer.Start(elevator.Config.DoorOpenDurationS)
 			elevator = requests.ClearAtCurrentFloor(elevator, elevatorName)
 		case elev.EBMoving:
-			outputDevice.MotorDirection(elevator.Dirn)
+			elevio.OutputDevice.MotorDirection(elevator.Dirn)
 		}
 	}
 	SetAllLights()

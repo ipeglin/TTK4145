@@ -7,7 +7,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var InputDevice ElevInputDevice
+var InputDevice inputDevice
+var OutputDevice outputDevice
 
 func init() {
 	hwelevio.Init(Addr)
@@ -74,12 +75,12 @@ func RequestStop() bool {
 	return hwelevio.GetStop()
 }
 
-func MotorDirection(d ElevDir) {
+func RequestMotorDirection(d ElevDir) {
 	hwelevio.SetMotorDirection(castElevDirToMotorDirection(d))
 }
 
-func ElevioGetInputDevice() ElevInputDevice {
-	return ElevInputDevice{
+func ElevioGetInputDevice() inputDevice {
+	return inputDevice{
 		FloorSensor:   RequestFloor,
 		RequestButton: RequestButton,
 		StopButton:    RequestStop,
@@ -87,13 +88,13 @@ func ElevioGetInputDevice() ElevInputDevice {
 	}
 }
 
-func ElevioGetOutputDevice() ElevOutputDevice {
-	return ElevOutputDevice{
+func ElevioGetOutputDevice() outputDevice {
+	return outputDevice{
 		FloorIndicator:     RequestFloorIndicator,
 		RequestButtonLight: RequestButtonLight,
 		DoorLight:          RequestDoorOpenLamp,
 		StopButtonLight:    RequestStopLamp,
-		MotorDirection:     MotorDirection,
+		MotorDirection:     RequestMotorDirection,
 	}
 }
 
