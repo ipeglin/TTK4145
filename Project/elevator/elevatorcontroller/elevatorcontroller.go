@@ -23,8 +23,8 @@ func init() {
 	elevator = elev.ElevatorInit()
 	nodeIP, _ = local.GetIP()
 	SetAllLights()
-	elevio.RequestDoorOpenLamp(false)
-	elevio.RequestStopLamp(false)
+	elevio.OutputDevice.DoorLight(false)
+	elevio.OutputDevice.StopButtonLight(false)
 }
 
 func GetElevator() elev.Elevator {
@@ -49,7 +49,7 @@ func SetConfirmedHallLights(elevatorName string) {
 	currentState, _ := statehandler.LoadState()
 	for floor := 0; floor < elevio.NFloors; floor++ {
 		for btn := elevio.BHallUp; btn < elevio.BCab; btn++ {
-			elevio.RequestButtonLight(floor, btn, currentState.HRAInput.HallRequests[floor][btn])
+			elevio.OutputDevice.RequestButtonLight(floor, btn, currentState.HRAInput.HallRequests[floor][btn])
 		}
 	}
 }
@@ -258,7 +258,7 @@ func MontitorMotorActivity(receiver chan<- bool) {
 	v := elevio.RequestFloor()
 	for {
 		time.Sleep(elevio.PollRateMS * time.Millisecond)
-		if v != -1 && (elevator.CurrentBehaviour != elev.EBMoving) || v != elevio.RequestFloor() {
+		if v != -1 && (elevator.CurrentBehaviour != elev.EBMoving) || v != elevio.InputDevice.FloorSensor() {
 			timerEndTimer = timer.GetCurrentTimeAsFloat() + elev.MotorTimeoutS
 			if !timerActive {
 				timerActive = true
@@ -272,6 +272,6 @@ func MontitorMotorActivity(receiver chan<- bool) {
 				}
 			}
 		}
-		v = elevio.RequestFloor()
+		v = elevio.InputDevice.FloorSensor()
 	}
 }
