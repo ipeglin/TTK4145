@@ -104,19 +104,6 @@ func DoorTimeout(elevatorName string) {
 	}
 }
 
-func RequestObstruction() {
-	if elevator.CurrentBehaviour == elev.EBDoorOpen {
-		timer.StartInfiniteTimer()
-		statehandler.RemoveElevatorsFromState([]string{nodeIP})
-	}
-}
-
-func StopObstruction() {
-	timer.StopInfiniteTimer()
-	timer.Start(elevator.Config.DoorOpenDurationS)
-	HandleStateOnReboot(nodeIP)
-}
-
 func CreateCheckpoint() {
 	for {
 		checkpoint.SetCheckpoint(elevator)
@@ -250,28 +237,4 @@ func MoveOnActiveOrders(elevatorName string) {
 		}
 	}
 	SetAllLights()
-}
-
-func MontitorMotorActivity(receiver chan<- bool) {
-	timerActive := true
-	timerEndTimer := timer.GetCurrentTimeAsFloat() + elev.MotorTimeoutS
-	v := elevio.RequestFloor()
-	for {
-		time.Sleep(elevio.PollRateMS * time.Millisecond)
-		if v != -1 && (elevator.CurrentBehaviour != elev.EBMoving) || v != elevio.InputDevice.FloorSensor() {
-			timerEndTimer = timer.GetCurrentTimeAsFloat() + elev.MotorTimeoutS
-			if !timerActive {
-				timerActive = true
-				receiver <- true
-			}
-		} else {
-			if timer.GetCurrentTimeAsFloat() > timerEndTimer {
-				if timerActive {
-					timerActive = false
-					receiver <- false
-				}
-			}
-		}
-		v = elevio.InputDevice.FloorSensor()
-	}
 }

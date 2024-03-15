@@ -146,7 +146,7 @@ func ClearAtCurrentFloor(e elev.Elevator, elevatorName string) elev.Elevator {
 			}
 			e.Requests[e.CurrentFloor][elevio.BHallDown] = false
 		default:
-			e.Requests[e.CurrentFloor][elevio.BHallUp]   = false
+			e.Requests[e.CurrentFloor][elevio.BHallUp] = false
 			e.Requests[e.CurrentFloor][elevio.BHallDown] = false
 
 		}

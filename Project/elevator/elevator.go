@@ -3,6 +3,7 @@ package elevator
 import (
 	"elevator/elevatorcontroller"
 	"elevator/elevio"
+	"elevator/immobility"
 	"elevator/statehandler"
 	"elevator/timer"
 	"time"
@@ -31,7 +32,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 	go elevio.PollButtons(buttons)
 	go elevio.PollFloorSensor(floors)
 	go elevio.PollObstructionSwitch(obst)
-	go elevatorcontroller.MontitorMotorActivity(motorActivity)
+	go immobility.MontitorMotorActivity(motorActivity)
 	go elevatorcontroller.CreateCheckpoint()
 
 	var obstructed bool = false
@@ -41,9 +42,10 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			logrus.Warn("Obstruction state changed: ", obstructed)
 			if obstructed {
 				logrus.Debug("New obstruction detected: ", obstructed)
-				elevatorcontroller.RequestObstruction()
+				immobility.RequestObstruction(elevatorName)
 			} else {
-				elevatorcontroller.StopObstruction()
+				immobility.StopObstruction()
+				elevatorcontroller.HandleStateOnReboot(elevatorName)
 			}
 
 		case motorActive := <-motorActivity:
@@ -73,7 +75,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 				elevatorcontroller.AssignOrders(elevatorName)
 			}
 			if obstructed {
-				elevatorcontroller.RequestObstruction()
+				immobility.RequestObstruction(elevatorName)
 			}
 
 		default:
