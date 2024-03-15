@@ -138,6 +138,7 @@ func ResumeAtLatestCheckpoint(floor int) {
 	if floor != -1 {
 		timer.Start(elev.DoorOpenDurationSConfig)
 		outputDevice.DoorLight(true)
+		elevator.CurrentBehaviour = elev.EBDoorOpen
 	}
 }
 
