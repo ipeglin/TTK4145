@@ -3,7 +3,6 @@ package elevator
 import (
 	"elevator/elevatorcontroller"
 	"elevator/elevio"
-	"elevator/motoractivity"
 	"elevator/statehandler"
 	"elevator/timer"
 	"time"
@@ -32,7 +31,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 	go elevio.PollButtons(buttons)
 	go elevio.PollFloorSensor(floors)
 	go elevio.PollObstructionSwitch(obst)
-	go motoractivity.MontitorMotorActivity(motorActivity)
+	go elevatorcontroller.MontitorMotorActivity(motorActivity)
 	go elevatorcontroller.CreateCheckpoint()
 
 	var obstructed bool = false

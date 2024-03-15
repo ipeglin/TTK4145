@@ -2,6 +2,7 @@ package elev
 
 const (
 	ClearRequestVariantConfig = CRVInDirn
-	DoorOpenDurationSConfig   = 3.0 // Seconds
-	InputPollRateMsConfig     = 25  // Milliseconds
+	DoorOpenDurationSConfig   = 3
+	InputPollRateMsConfig     = 25
+	MotorTimeoutS             = 3
 )

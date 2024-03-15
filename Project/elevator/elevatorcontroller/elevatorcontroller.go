@@ -254,3 +254,27 @@ func MoveOnActiveOrders(elevatorName string) {
 	}
 	SetAllLights()
 }
+
+func MontitorMotorActivity(receiver chan<- bool) {
+	timerActive := true
+	timerEndTimer := timer.GetCurrentTimeAsFloat() + elev.MotorTimeoutS
+	v := elevio.RequestFloor()
+	for {
+		time.Sleep(elevio.PollRateMS * time.Millisecond)
+		if v != -1 && (elevator.CurrentBehaviour != elev.EBMoving) || v != elevio.RequestFloor() {
+			timerEndTimer = timer.GetCurrentTimeAsFloat() + elev.MotorTimeoutS
+			if !timerActive {
+				timerActive = true
+				receiver <- true
+			}
+		} else {
+			if timer.GetCurrentTimeAsFloat() > timerEndTimer {
+				if timerActive {
+					timerActive = false
+					receiver <- false
+				}
+			}
+		}
+		v = elevio.RequestFloor()
+	}
+}
