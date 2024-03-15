@@ -42,7 +42,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 			logrus.Warn("Obstruction state changed: ", obstructed)
 			if obstructed {
 				logrus.Debug("New obstruction detected: ", obstructed)
-				immobility.RequestObstruction(elevatorName)
+				immobility.RequestStartObstruction(elevatorName)
 			} else {
 				immobility.StopObstruction()
 				elevatorcontroller.HandleStateOnReboot(elevatorName)
@@ -75,7 +75,7 @@ func Init(elevatorName string, isPrimaryProcess bool) {
 				elevatorcontroller.AssignOrders(elevatorName)
 			}
 			if obstructed {
-				immobility.RequestObstruction(elevatorName)
+				immobility.RequestStartObstruction(elevatorName)
 			}
 
 		default:

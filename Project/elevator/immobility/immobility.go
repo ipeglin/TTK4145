@@ -34,7 +34,7 @@ func MontitorMotorActivity(receiver chan<- bool) {
 	}
 }
 
-func RequestObstruction(elevatorName string) {
+func RequestStartObstruction(elevatorName string) {
 	elevator := elevatorcontroller.GetElevator()
 	if elevator.CurrentBehaviour == elev.EBDoorOpen {
 		timer.StartInfiniteTimer()
