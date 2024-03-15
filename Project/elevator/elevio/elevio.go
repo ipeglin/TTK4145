@@ -12,7 +12,8 @@ var OutputDevice outputDevice
 
 func init() {
 	hwelevio.Init(Addr)
-	InputDevice = ElevioGetInputDevice()
+	InputDevice = GetInputDevice()
+	OutputDevice = GetOutputDevice()
 }
 
 func castElevDirToMotorDirection(d ElevDir) hwelevio.HWMotorDirection {
@@ -79,7 +80,7 @@ func RequestMotorDirection(d ElevDir) {
 	hwelevio.SetMotorDirection(castElevDirToMotorDirection(d))
 }
 
-func ElevioGetInputDevice() inputDevice {
+func GetInputDevice() inputDevice {
 	return inputDevice{
 		FloorSensor:   RequestFloor,
 		RequestButton: RequestButton,
@@ -88,7 +89,7 @@ func ElevioGetInputDevice() inputDevice {
 	}
 }
 
-func ElevioGetOutputDevice() outputDevice {
+func GetOutputDevice() outputDevice {
 	return outputDevice{
 		FloorIndicator:     RequestFloorIndicator,
 		RequestButtonLight: RequestButtonLight,
