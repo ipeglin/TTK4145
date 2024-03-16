@@ -96,10 +96,11 @@ func DoorTimeout(elevatorName string) {
 
 		case elev.EBMoving:
 			elevio.OutputDevice.DoorLight(false)
-
+			SetAllLights()
 			elevio.OutputDevice.MotorDirection(elevator.Dirn)
 		case elev.EBIdle:
 			elevio.OutputDevice.DoorLight(false)
+			SetAllLights()
 		}
 	}
 }
