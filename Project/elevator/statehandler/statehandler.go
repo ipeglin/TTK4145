@@ -23,7 +23,7 @@ type ElevatorState struct {
 func init() {
 	ip, err := local.GetIP()
 	if err != nil {
-		logrus.Fatal("Could not resolve IP address")
+		logrus.Warn("Could not resolve IP address")
 	}
 
 	StateFile = ip + ".json"

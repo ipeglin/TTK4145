@@ -29,14 +29,14 @@ type ButtonEvent struct {
 	Button Button
 }
 
-type ElevInputDevice struct {
+type inputDevice struct {
 	FloorSensor   func() int
 	RequestButton func(f int, btn Button) bool
 	StopButton    func() bool
 	Obstruction   func() bool
 }
 
-type ElevOutputDevice struct {
+type outputDevice struct {
 	FloorIndicator     func(f int)
 	RequestButton      func(f int, btn Button) bool
 	RequestButtonLight func(f int, btn Button, v bool)
